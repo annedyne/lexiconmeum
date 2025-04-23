@@ -24,23 +24,33 @@ Scale
 
 
 ## Core Entities
-- lemma
+- lemmaDetail
 - definition
-- inflection
-- tense
-- gender
-- voice
-- aspect
+- word
+    - lemma (idx)
+    - tense
+    - gender
+    - voice
+    - aspect
 
 ## APIS
-- GET /lemma/:id -> Detail
+get all matching words with input text
+- GET /lemmas/words?text={text} -> Word[]
 
+- get lemmas associated with inflected words
+- GET /lemmas?term={inflectedForm} -> Partial<Lemma>
+
+- Get all inflected forms associated with a given lemma
+- GET /lemmas/:id -> LemmaDetail
+
+
+add lemmas associated with matching words
 
 ## Stack
 ### Backend:
 - REST APIs: Java SpringBoot Server
 - DB: Postgres
-- CACHE: Caffiene
+- CACHE: Caffeine
 
 ### Front-End:
 - React
