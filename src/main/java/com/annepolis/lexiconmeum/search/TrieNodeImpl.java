@@ -1,8 +1,11 @@
 package com.annepolis.lexiconmeum.search;
 
+import org.springframework.stereotype.Component;
+
 import java.util.HashMap;
 import java.util.Map;
 
+@Component
 public class TrieNodeImpl implements TrieNode {
 
     protected TrieNode parent;
