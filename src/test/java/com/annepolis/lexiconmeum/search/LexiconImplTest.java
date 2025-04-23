@@ -5,23 +5,22 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.context.annotation.Primary;
 
 import java.time.Duration;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest()
-@ContextConfiguration(classes = LexiconImplTest.TestCacheConfig.class)
+@SpringBootTest
 public class LexiconImplTest {
 
     @Autowired
     Lexicon testLexicon;
 
-    @Configuration
+    @TestConfiguration
     static class TestCacheConfig {
 
         @Bean
@@ -30,6 +29,7 @@ public class LexiconImplTest {
         }
 
         @Bean
+        @Primary
         public Cache<String, List<String>> testCaffeineCache() {
             return Caffeine.newBuilder()
                     .maximumSize(10_000)
@@ -72,7 +72,6 @@ public class LexiconImplTest {
 
     @Test
     void getWordsEndingWithReturnsCachedResults(){
-
         List<String> result = testLexicon.getWordsEndingWith("us", 10);
 
         assertEquals(1, result.size());
