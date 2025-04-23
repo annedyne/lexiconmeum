@@ -2,10 +2,12 @@ package com.annepolis.lexiconmeum.search;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class TrieImpl implements Trie {
 
     static final Logger logger = LogManager.getLogger(TrieImpl.class);
@@ -38,6 +40,13 @@ public class TrieImpl implements Trie {
         }
         //mark end of word
         node.setEndOfWord(true);
+    }
+
+    @Override
+    public void insert(List<String> words){
+        for(String word: words){
+            insert(word);
+        }
     }
 
     /**

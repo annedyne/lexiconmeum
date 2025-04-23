@@ -12,6 +12,12 @@ import java.util.List;
 public class CacheConfig {
 
     @Bean
+    public Lexicon lexicon(){
+
+        return new LexiconImpl(prefixTrie(), suffixTrie(), caffeineCache());
+    }
+
+    @Bean
     public Cache<String, List<String>> caffeineCache() {
         return Caffeine.newBuilder()
                 .maximumSize(10_000)
@@ -19,4 +25,16 @@ public class CacheConfig {
                 .build();
     }
 
+
+    @Bean
+    public Trie prefixTrie(){
+        TrieNode root = new TrieNodeImpl();
+        return new TrieImpl(root);
+    }
+
+    @Bean
+    public Trie suffixTrie(){
+        TrieNode root = new TrieNodeImpl();
+        return new TrieImpl(root);
+    }
 }
