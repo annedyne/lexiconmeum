@@ -1,11 +1,10 @@
 package com.annepolis.lexiconmeum.search;
 
 import com.github.benmanes.caffeine.cache.Cache;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
+
 public class LexiconImpl implements Lexicon {
 
     private final Trie prefixTrie;
