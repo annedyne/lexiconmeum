@@ -1,6 +1,6 @@
-package com.annepolis.lexiconmeum.extract;
+package com.annepolis.lexiconmeum.data;
 
-import com.annepolis.lexiconmeum.model.Word;
+import com.annepolis.lexiconmeum.domain.model.Word;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @ContextConfiguration(classes = WiktionaryParser.class)
-public class JsonLinesProcessorTest {
+public class WiktionaryParserTest {
 
     @Autowired
     private ResourceLoader resourceLoader;

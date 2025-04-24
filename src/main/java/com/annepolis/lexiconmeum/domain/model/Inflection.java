@@ -1,4 +1,4 @@
-package com.annepolis.lexiconmeum.model;
+package com.annepolis.lexiconmeum.domain.model;
 
 import java.util.List;
 

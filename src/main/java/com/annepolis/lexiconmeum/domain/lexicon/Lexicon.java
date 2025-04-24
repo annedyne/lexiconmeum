@@ -1,4 +1,4 @@
-package com.annepolis.lexiconmeum.search;
+package com.annepolis.lexiconmeum.domain.lexicon;
 
 import java.util.List;
 
