@@ -1,9 +1,10 @@
-package com.annepolis.lexiconmeum.extract;
+package com.annepolis.lexiconmeum.data;
 
-import com.annepolis.lexiconmeum.model.Inflection;
-import com.annepolis.lexiconmeum.model.Word;
+import com.annepolis.lexiconmeum.domain.model.Inflection;
+import com.annepolis.lexiconmeum.domain.model.Word;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,7 +14,7 @@ import java.util.List;
 
 import static com.annepolis.lexiconmeum.util.JsonKey.*;
 
-
+@Component
 public class WiktionaryParser {
 
     private final ObjectMapper mapper = new ObjectMapper();

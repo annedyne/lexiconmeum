@@ -1,5 +1,6 @@
-package com.annepolis.lexiconmeum.search;
+package com.annepolis.lexiconmeum.domain.lexicon;
 
+import com.annepolis.lexiconmeum.domain.trie.Trie;
 import com.github.benmanes.caffeine.cache.Cache;
 
 import java.util.List;
@@ -29,4 +30,6 @@ public class LexiconImpl implements Lexicon {
                 .map(s -> new StringBuilder(s).reverse().toString())
                 .toList();
     }
+
+
 }

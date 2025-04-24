@@ -1,5 +1,11 @@
-package com.annepolis.lexiconmeum.search;
+package com.annepolis.lexiconmeum.config;
 
+import com.annepolis.lexiconmeum.domain.lexicon.Lexicon;
+import com.annepolis.lexiconmeum.domain.lexicon.LexiconImpl;
+import com.annepolis.lexiconmeum.domain.trie.Trie;
+import com.annepolis.lexiconmeum.domain.trie.TrieImpl;
+import com.annepolis.lexiconmeum.domain.trie.TrieNode;
+import com.annepolis.lexiconmeum.domain.trie.TrieNodeImpl;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.context.annotation.Bean;

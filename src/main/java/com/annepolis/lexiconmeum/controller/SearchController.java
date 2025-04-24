@@ -1,6 +1,6 @@
 package com.annepolis.lexiconmeum.controller;
 
-import com.annepolis.lexiconmeum.search.Lexicon;
+import com.annepolis.lexiconmeum.domain.lexicon.Lexicon;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
