@@ -5,11 +5,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TrieNodeImplTest {
+public class BasicTrieNodeTest {
 
     @Test
     void constructorTest(){
-        TrieNodeImpl trieNode = new TrieNodeImpl();
+        BasicTrieNode trieNode = new BasicTrieNode();
         Assertions.assertFalse(trieNode.isEndOfWord);
 
         assertNotNull(trieNode.children);
@@ -17,7 +17,7 @@ public class TrieNodeImplTest {
 
     @Test
     void setIsEndOfWord(){
-        TrieNodeImpl trieNode = new TrieNodeImpl();
+        BasicTrieNode trieNode = new BasicTrieNode();
         trieNode.setEndOfWord(true);
         assertTrue(trieNode.isEndOfWord);
         trieNode.setEndOfWord(false);
@@ -26,9 +26,8 @@ public class TrieNodeImplTest {
 
     @Test
     void getChildren(){
-        TrieNodeImpl trieNode = new TrieNodeImpl();
+        BasicTrieNode trieNode = new BasicTrieNode();
         assertEquals(trieNode.children, trieNode.getChildren());
     }
-
 
 }

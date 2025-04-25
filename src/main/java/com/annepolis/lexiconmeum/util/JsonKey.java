@@ -2,6 +2,7 @@ package com.annepolis.lexiconmeum.util;
 
 public enum JsonKey {
 
+    WORD("word"),
     POSITION("pos"),
     SENSES("senses"),
     GLOSSES("glosses"),

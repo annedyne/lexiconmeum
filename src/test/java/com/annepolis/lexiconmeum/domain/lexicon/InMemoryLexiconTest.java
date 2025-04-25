@@ -1,9 +1,9 @@
 package com.annepolis.lexiconmeum.domain.lexicon;
 
+import com.annepolis.lexiconmeum.domain.trie.BasicTrieNode;
+import com.annepolis.lexiconmeum.domain.trie.ReversibleTrie;
 import com.annepolis.lexiconmeum.domain.trie.Trie;
-import com.annepolis.lexiconmeum.domain.trie.TrieImpl;
 import com.annepolis.lexiconmeum.domain.trie.TrieNode;
-import com.annepolis.lexiconmeum.domain.trie.TrieNodeImpl;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-public class LexiconImplTest {
+public class InMemoryLexiconTest {
 
     @Autowired
     Lexicon testLexicon;
@@ -29,7 +29,7 @@ public class LexiconImplTest {
 
         @Bean
         public Lexicon testLexicon(){
-            return new LexiconImpl(testPrefixTrie(), testSuffixTrie(), testCaffeineCache());
+            return new InMemoryLexicon(testPrefixTrie(), testSuffixTrie(), testCaffeineCache());
         }
 
         @Bean
@@ -43,8 +43,8 @@ public class LexiconImplTest {
 
         @Bean
         public Trie testPrefixTrie(){
-            TrieNode root = new TrieNodeImpl();
-            Trie trie = new TrieImpl(root);
+            TrieNode root = new BasicTrieNode();
+            Trie trie = new ReversibleTrie(root);
             List<String> inputs = List.of("amicus", "amare", "amabilis", "amandare", "amandatio", "amor");
 
             trie.insert(inputs);
@@ -53,8 +53,8 @@ public class LexiconImplTest {
 
         @Bean
         public Trie testSuffixTrie(){
-            TrieNode root = new TrieNodeImpl();
-            Trie trie = new TrieImpl(root);
+            TrieNode root = new BasicTrieNode();
+            Trie trie = new ReversibleTrie(root);
             List<String> inputs = List.of("amicus", "amare", "amabilis", "amandare", "amandatio", "amor");
             trie.insert(inputs.stream().map( word -> new StringBuilder(word).reverse().toString()).toList());
             return trie;

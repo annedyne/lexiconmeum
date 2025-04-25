@@ -11,7 +11,14 @@ public class Inflection {
         this.inflection = inflection;
     }
 
+    public String getInflection() { return inflection; }
+
     public void setTags(List<String> tags) {
         this.tags = tags;
+    }
+
+    @Override
+    public String toString(){
+        return inflection;
     }
 }

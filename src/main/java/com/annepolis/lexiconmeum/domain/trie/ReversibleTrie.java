@@ -4,20 +4,47 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
-public class TrieImpl implements Trie {
+/**
+ * A basic in-memory Trie implementation for efficient prefix-based string lookup.
+ *
+ * <p>This implementation can also be used for suffix-based lookup by reversing
+ * the input words before insertion, and reversing the results after retrieval.
+ * This allows a single Trie structure to support both prefix and suffix queries
+ * without changing the core logic.
+ *
+ * <p>Example usage for suffix search:
+ * <pre>
+ * // Insert reversed words into the trie
+ * for (String word : words) {
+ *     trie.insert(new StringBuilder(word).reverse().toString());
+ * }
+ *
+ * // Search using reversed suffix, then reverse the results
+ * List<String> reversedResults = trie.search(new StringBuilder("ing").reverse().toString(), 10);
+ * List<String> results = reversedResults.stream()
+ *     .map(w -> new StringBuilder(w).reverse().toString())
+ *     .collect(Collectors.toList());
+ * </pre>
+ *
+ * <p>This approach avoids the need for a separate Suffix Trie structure and keeps
+ * the implementation simple and reusable.
+ */
 
-    static final Logger logger = LogManager.getLogger(TrieImpl.class);
+@Component
+public class ReversibleTrie implements Trie {
+
+    static final Logger logger = LogManager.getLogger(ReversibleTrie.class);
 
     private final TrieNode root;// Root node of the Trie
     TrieNode getRoot() {
         return root;
     }
 
-    public TrieImpl (TrieNode root){
+    public ReversibleTrie(TrieNode root){
         this.root = root;
     }
 
@@ -29,10 +56,19 @@ public class TrieImpl implements Trie {
     public void insert(String word) {
         TrieNode node = getRoot();
         for (char ch : word.toCharArray()) {
-            //if key doesn't exist yet, add it with associated node
-            node.getChildren().putIfAbsent(ch, new TrieNodeImpl());
-            TrieNode child = node.getChildren().get(ch);
+
+            //Normalize key so we can search without adding macrons
+            String normalized = Normalizer.normalize(Character.toString(ch), Normalizer.Form.NFD);
+            Character normalizedKey = normalized.charAt(0);
+
+            //if key doesn't exist in child-map yet, add it with new associated node
+            node.getChildren().putIfAbsent(normalizedKey, new BasicTrieNode());
+
+            //populate the node associated with the current char
+            TrieNode child = node.getChildren().get(normalizedKey);
             child.setParent(node);
+
+            //set content with non-normalized character
             child.setContent(ch);
 
             //traverse to next level
@@ -97,8 +133,8 @@ public class TrieImpl implements Trie {
 
         // Continue to pick up and append all characters under this prefix
         for (var nodeEntry : node.getChildren().entrySet()) {
-            prefix.append(nodeEntry.getKey()); // Append character
-            logger.info("appending " + nodeEntry.getKey());
+            prefix.append(nodeEntry.getValue().getContent()); // Append character
+            logger.info("appending " + nodeEntry.getValue().getContent());
 
             // traverse to next node
             dfs(nodeEntry.getValue(), prefix, prefixMatchResults, wordLimit);
