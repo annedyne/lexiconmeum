@@ -1,11 +1,11 @@
 package com.annepolis.lexiconmeum.config;
 
+import com.annepolis.lexiconmeum.domain.lexicon.InMemoryLexicon;
 import com.annepolis.lexiconmeum.domain.lexicon.Lexicon;
-import com.annepolis.lexiconmeum.domain.lexicon.LexiconImpl;
+import com.annepolis.lexiconmeum.domain.trie.BasicTrieNode;
+import com.annepolis.lexiconmeum.domain.trie.ReversibleTrie;
 import com.annepolis.lexiconmeum.domain.trie.Trie;
-import com.annepolis.lexiconmeum.domain.trie.TrieImpl;
 import com.annepolis.lexiconmeum.domain.trie.TrieNode;
-import com.annepolis.lexiconmeum.domain.trie.TrieNodeImpl;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.context.annotation.Bean;
@@ -15,12 +15,11 @@ import java.time.Duration;
 import java.util.List;
 
 @Configuration
-public class CacheConfig {
+public class LexiconConfig {
 
     @Bean
     public Lexicon lexicon(){
-
-        return new LexiconImpl(prefixTrie(), suffixTrie(), caffeineCache());
+        return new InMemoryLexicon(prefixTrie(), suffixTrie(), caffeineCache());
     }
 
     @Bean
@@ -31,16 +30,16 @@ public class CacheConfig {
                 .build();
     }
 
-
     @Bean
     public Trie prefixTrie(){
-        TrieNode root = new TrieNodeImpl();
-        return new TrieImpl(root);
+        TrieNode root = new BasicTrieNode();
+        return new ReversibleTrie(root);
     }
 
     @Bean
     public Trie suffixTrie(){
-        TrieNode root = new TrieNodeImpl();
-        return new TrieImpl(root);
+        TrieNode root = new BasicTrieNode();
+        return new ReversibleTrie(root);
     }
+
 }

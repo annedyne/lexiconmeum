@@ -6,13 +6,13 @@ import com.github.benmanes.caffeine.cache.Cache;
 import java.util.List;
 
 
-public class LexiconImpl implements Lexicon {
+public class InMemoryLexicon implements Lexicon {
 
     private final Trie prefixTrie;
     private final Trie suffixTrie;
     private final Cache<String, List<String>> cache;
 
-    public LexiconImpl(Trie prefixTrie, Trie suffixTrie, Cache<String, List<String>> cache){
+    public InMemoryLexicon(Trie prefixTrie, Trie suffixTrie, Cache<String, List<String>> cache){
         this.prefixTrie = prefixTrie;
         this.suffixTrie = suffixTrie;
         this.cache = cache;
@@ -29,6 +29,12 @@ public class LexiconImpl implements Lexicon {
         return results.stream()
                 .map(s -> new StringBuilder(s).reverse().toString())
                 .toList();
+    }
+
+    @Override
+    public void acceptWord(String word) {
+        prefixTrie.insert(word);
+        suffixTrie.insert(new StringBuilder(word).reverse().toString());
     }
 
 

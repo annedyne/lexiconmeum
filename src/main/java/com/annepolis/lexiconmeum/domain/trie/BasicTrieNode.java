@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class TrieNodeImpl implements TrieNode {
+public class BasicTrieNode implements TrieNode {
 
     protected TrieNode parent;
     private Character content;

@@ -2,8 +2,11 @@ package com.annepolis.lexiconmeum.data;
 
 import com.annepolis.lexiconmeum.domain.model.Inflection;
 import com.annepolis.lexiconmeum.domain.model.Word;
+import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -17,6 +20,9 @@ import static com.annepolis.lexiconmeum.util.JsonKey.*;
 @Component
 public class WiktionaryParser {
 
+    static final Logger LOGGER = LogManager.getLogger(WiktionaryParser.class);
+
+
     private final ObjectMapper mapper = new ObjectMapper();
 
     public List<Word> parseJsonl(Reader reader) throws IOException {
@@ -24,17 +30,29 @@ public class WiktionaryParser {
 
         BufferedReader br = new BufferedReader(reader);
         String line;
-        while ((line = br.readLine()) != null) {
-            JsonNode root = mapper.readTree(line);
-            Word word = parseWord(root);
-            words.add(word);
+        while ((line = readJsonLine(br)) != null) {
+            try {
+                JsonNode root = mapper.readTree(line);
+                Word word = parseWord(root);
+                words.add(word);
+            } catch(JsonEOFException eofException) {
+                LOGGER.error("Check that JSONL is correctly formatted and not 'prettified'", eofException);
+                throw eofException;
+            }
         }
 
         return words;
     }
 
+
+
+    String readJsonLine(BufferedReader br) throws IOException {
+        return br.readLine();
+    }
+
     private Word parseWord(JsonNode root) {
         Word word = new Word();
+        word.setWord(root.path(WORD.get()).asText());
         word.setPosition(root.path(POSITION.get()).asText());
 
         JsonNode senses = root.path(SENSES.get());
