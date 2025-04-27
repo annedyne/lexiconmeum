@@ -1,39 +1,52 @@
-package com.annepolis.lexiconmeum.extract;
+package com.annepolis.lexiconmeum.textsearch;
 
-import com.annepolis.lexiconmeum.model.Inflection;
-import com.annepolis.lexiconmeum.model.Word;
+import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
-import static com.annepolis.lexiconmeum.util.JsonKey.*;
+import static com.annepolis.lexiconmeum.textsearch.WiktiionaryLexicalDataJsonKey.*;
 
+@Component
+class WiktionaryLexicalDataParser {
 
-public class WiktionaryParser {
+    static final Logger LOGGER = LogManager.getLogger(WiktionaryLexicalDataParser.class);
+
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    public List<Word> parseJsonl(Reader reader) throws IOException {
-        List<Word> words = new ArrayList<>();
-
+    public void parseJsonl(Reader reader, Consumer<Word> consumer) throws IOException {
         BufferedReader br = new BufferedReader(reader);
         String line;
-        while ((line = br.readLine()) != null) {
-            JsonNode root = mapper.readTree(line);
-            Word word = parseWord(root);
-            words.add(word);
+        while ((line = readJsonLine(br)) != null) {
+            try {
+                JsonNode root = mapper.readTree(line);
+                consumer.accept(parseWord(root));
+            } catch(JsonEOFException eofException) {
+                LOGGER.error("Check that JSONL is correctly formatted and not 'prettified'", eofException);
+                throw eofException;
+            }
         }
+    }
 
-        return words;
+
+
+    String readJsonLine(BufferedReader br) throws IOException {
+        return br.readLine();
     }
 
     private Word parseWord(JsonNode root) {
         Word word = new Word();
+        word.setWord(root.path(WORD.get()).asText());
         word.setPosition(root.path(POSITION.get()).asText());
 
         JsonNode senses = root.path(SENSES.get());

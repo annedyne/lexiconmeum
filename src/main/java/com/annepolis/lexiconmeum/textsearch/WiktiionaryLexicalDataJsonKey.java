@@ -1,7 +1,8 @@
-package com.annepolis.lexiconmeum.util;
+package com.annepolis.lexiconmeum.textsearch;
 
-public enum JsonKey {
+public enum WiktiionaryLexicalDataJsonKey {
 
+    WORD("word"),
     POSITION("pos"),
     SENSES("senses"),
     GLOSSES("glosses"),
@@ -11,7 +12,7 @@ public enum JsonKey {
 
     private final String key;
 
-    JsonKey(String key) {
+    WiktiionaryLexicalDataJsonKey(String key) {
         this.key = key;
     }
 
