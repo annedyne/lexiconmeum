@@ -1,4 +1,4 @@
-package com.annepolis.lexiconmeum.domain.trie;
+package com.annepolis.lexiconmeum.textsearch;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -6,14 +6,16 @@ import org.springframework.stereotype.Component;
 
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * A basic in-memory Trie implementation for efficient prefix-based string lookup.
+ * A basic in-memory TextSearchIndex implementation for efficient prefix-based string lookup.
  *
  * <p>This implementation can also be used for suffix-based lookup by reversing
  * the input words before insertion, and reversing the results after retrieval.
- * This allows a single Trie structure to support both prefix and suffix queries
+ * This allows a single TextSearchIndex structure to support both prefix and suffix queries
  * without changing the core logic.
  *
  * <p>Example usage for suffix search:
@@ -30,29 +32,28 @@ import java.util.List;
  *     .collect(Collectors.toList());
  * </pre>
  *
- * <p>This approach avoids the need for a separate Suffix Trie structure and keeps
+ * <p>This approach avoids the need for a separate Suffix TextSearchIndex structure and keeps
  * the implementation simple and reusable.
  */
 
 @Component
-public class ReversibleTrie implements Trie {
+class TextSearchIndex {
 
-    static final Logger logger = LogManager.getLogger(ReversibleTrie.class);
+    static final Logger logger = LogManager.getLogger(TextSearchIndex.class);
 
-    private final TrieNode root;// Root node of the Trie
+    private final TrieNode root;// Root node of the TextSearchIndex
     TrieNode getRoot() {
         return root;
     }
 
-    public ReversibleTrie(TrieNode root){
-        this.root = root;
+    public TextSearchIndex(){
+        root = new TrieNode();
     }
 
     /**
-     * Inserts a word into the Trie.
+     * Inserts a word into the TextSearchIndex.
      * Each character of the word is stored in a linked structure.
      */
-    @Override
     public void insert(String word) {
         TrieNode node = getRoot();
         for (char ch : word.toCharArray()) {
@@ -62,7 +63,7 @@ public class ReversibleTrie implements Trie {
             Character normalizedKey = normalized.charAt(0);
 
             //if key doesn't exist in child-map yet, add it with new associated node
-            node.getChildren().putIfAbsent(normalizedKey, new BasicTrieNode());
+            node.getChildren().putIfAbsent(normalizedKey, new TrieNode());
 
             //populate the node associated with the current char
             TrieNode child = node.getChildren().get(normalizedKey);
@@ -78,7 +79,7 @@ public class ReversibleTrie implements Trie {
         node.setEndOfWord(true);
     }
 
-    @Override
+
     public void insert(List<String> words){
         for(String word: words){
             insert(word);
@@ -91,12 +92,12 @@ public class ReversibleTrie implements Trie {
      * @param limit The maximum number of results to return.
      * @return A list of words that start with the given prefix.
      */
-    @Override
+
     public List<String> search(String prefix, int limit) {
         List<String> results = new ArrayList<>();
         TrieNode node = getRoot();
 
-        // Navigate through the Trie to the last character of the prefix
+        // Navigate through the TextSearchIndex to the last character of the prefix
         for (char ch : prefix.toCharArray()) { //word
             if (!node.getChildren().containsKey(ch)) {
                 // If the prefix is not found, return an empty list
@@ -114,7 +115,7 @@ public class ReversibleTrie implements Trie {
     }
 
     /**
-     * Depth-First Search (DFS) helper function to collect words from the Trie.
+     * Depth-First Search (DFS) helper function to collect words from the TextSearchIndex.
      * @param node The current TrieNode being explored.
      * @param prefix The string built so far (represents the word in progress).
      * @param prefixMatchResults The list of found words.
@@ -140,6 +141,37 @@ public class ReversibleTrie implements Trie {
             dfs(nodeEntry.getValue(), prefix, prefixMatchResults, wordLimit);
             prefix.deleteCharAt(prefix.length() - 1); // Backtrack to parent  (remove last character)
             logger.info("backtracking to parent prefix: " + prefix );
+        }
+    }
+
+    private static class TrieNode {
+        private final Map<Character, TrieNode> children = new HashMap<>();
+        private TrieNode parent;
+        private char content;
+        private boolean isEndOfWord;
+
+        public Map<Character, TrieNode> getChildren() {
+            return children;
+        }
+
+        public void setParent(TrieNode parent) {
+            this.parent = parent;
+        }
+
+        public char getContent() {
+            return content;
+        }
+
+        public void setContent(char content) {
+            this.content = content;
+        }
+
+        public boolean isEndOfWord() {
+            return isEndOfWord;
+        }
+
+        public void setEndOfWord(boolean isEndOfWord) {
+            this.isEndOfWord = isEndOfWord;
         }
     }
 }
