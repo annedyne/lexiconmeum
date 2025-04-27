@@ -1,4 +1,4 @@
-package com.annepolis.lexiconmeum.model;
+package com.annepolis.lexiconmeum.textsearch;
 
 import java.util.List;
 
@@ -13,5 +13,10 @@ public class Inflection {
 
     public void setTags(List<String> tags) {
         this.tags = tags;
+    }
+
+    @Override
+    public String toString(){
+        return inflection;
     }
 }

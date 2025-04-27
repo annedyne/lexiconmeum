@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: lexiconmeum
+latin:
+  data-file: classpath:lexicalData.jsonl
