@@ -1,7 +1,5 @@
-package com.annepolis.lexiconmeum.data;
+package com.annepolis.lexiconmeum.textsearch;
 
-import com.annepolis.lexiconmeum.domain.model.Inflection;
-import com.annepolis.lexiconmeum.domain.model.Word;
 import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,34 +12,30 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
-import static com.annepolis.lexiconmeum.util.JsonKey.*;
+import static com.annepolis.lexiconmeum.textsearch.WiktiionaryLexicalDataJsonKey.*;
 
 @Component
-public class WiktionaryParser {
+class WiktionaryLexicalDataParser {
 
-    static final Logger LOGGER = LogManager.getLogger(WiktionaryParser.class);
+    static final Logger LOGGER = LogManager.getLogger(WiktionaryLexicalDataParser.class);
 
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    public List<Word> parseJsonl(Reader reader) throws IOException {
-        List<Word> words = new ArrayList<>();
-
+    public void parseJsonl(Reader reader, Consumer<Word> consumer) throws IOException {
         BufferedReader br = new BufferedReader(reader);
         String line;
         while ((line = readJsonLine(br)) != null) {
             try {
                 JsonNode root = mapper.readTree(line);
-                Word word = parseWord(root);
-                words.add(word);
+                consumer.accept(parseWord(root));
             } catch(JsonEOFException eofException) {
                 LOGGER.error("Check that JSONL is correctly formatted and not 'prettified'", eofException);
                 throw eofException;
             }
         }
-
-        return words;
     }
 
 

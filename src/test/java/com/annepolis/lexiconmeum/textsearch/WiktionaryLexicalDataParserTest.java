@@ -1,6 +1,5 @@
-package com.annepolis.lexiconmeum.data;
+package com.annepolis.lexiconmeum.textsearch;
 
-import com.annepolis.lexiconmeum.domain.model.Word;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,19 +10,20 @@ import org.springframework.test.context.ContextConfiguration;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@ContextConfiguration(classes = WiktionaryParser.class)
-public class WiktionaryParserTest {
+@ContextConfiguration(classes = WiktionaryLexicalDataParser.class)
+public class WiktionaryLexicalDataParserTest {
 
     @Autowired
     private ResourceLoader resourceLoader;
 
     @Autowired
-    private WiktionaryParser parser;
+    private WiktionaryLexicalDataParser parser;
 
     @Test
     void resourceExists() {
@@ -50,7 +50,8 @@ public class WiktionaryParserTest {
     void testLoadJsonFile() throws Exception {
         Resource resource = resourceLoader.getResource("classpath:testDataRaw.jsonl");
         try (Reader reader = new InputStreamReader(resource.getInputStream())) {
-            List<Word> words = parser.parseJsonl(reader);
+            List<Word> words = new ArrayList<>();
+            parser.parseJsonl(reader, word -> words.add(word));
 
             assertEquals(2, words.size());
             assertEquals("verb", words.get(0).getPosition());
@@ -61,7 +62,8 @@ public class WiktionaryParserTest {
     void testLoadWord() throws Exception {
         Resource resource = resourceLoader.getResource("classpath:testDataRaw.jsonl");
         try (Reader reader = new InputStreamReader(resource.getInputStream())) {
-            List<Word> words = parser.parseJsonl(reader);
+            List<Word> words = new ArrayList<>();
+            parser.parseJsonl(reader, word -> words.add(word));
             assertEquals("amo", words.get(0).getWord());
 
         }

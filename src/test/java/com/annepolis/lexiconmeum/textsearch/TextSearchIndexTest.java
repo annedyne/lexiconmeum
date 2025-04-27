@@ -1,38 +1,29 @@
-package com.annepolis.lexiconmeum.domain.trie;
+package com.annepolis.lexiconmeum.textsearch;
 
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
-public class ReversibleTrieTest {
+class TextSearchIndexTest {
 
     @Test
     void constructorAssignsRoot(){
-        TrieNode node = new BasicTrieNode();
-        ReversibleTrie underTest = new ReversibleTrie(node);
-        assertEquals(node, underTest.getRoot());
+
+        TextSearchIndex underTest = new TextSearchIndex();
+        assertNotNull(underTest.getRoot());
     }
 
-    @Test
-    void insertProducesExpectedNodeKey(){
-        String testWord = "testword";
-        TrieNode root = new BasicTrieNode();
-        ReversibleTrie underTest = new ReversibleTrie(root);
-        underTest.insert(testWord);
-        Character value = underTest.getRoot().getChildren().get('t').getContent();
-        assertEquals('t', value);
-    }
 
     @Test
     void trieReturnsWordGivenPrefix(){
         String prefix = "test";
         String word = "word";
         String wholeWord = prefix + word;
-        TrieNode root = new BasicTrieNode();
-        ReversibleTrie underTest = new ReversibleTrie(root);
+        TextSearchIndex underTest = new TextSearchIndex();
         underTest.insert(wholeWord);
 
         List<String> results = underTest.search(prefix, 20);
@@ -41,8 +32,7 @@ public class ReversibleTrieTest {
 
     @Test
     void givenPrefixReturnsAllMatches(){
-        TrieNode root = new BasicTrieNode();
-        ReversibleTrie underTest = new ReversibleTrie(root);
+        TextSearchIndex underTest = new TextSearchIndex();
         List<String> inputs = List.of("amicus", "amare", "amabilis", "amandare", "amandatio", "amor");
         underTest.insert(inputs);
         List<String> results = underTest.search("ama", 20);
@@ -51,8 +41,7 @@ public class ReversibleTrieTest {
 
     @Test
     void givenSuffixReturnsAllMatches(){
-        TrieNode root = new BasicTrieNode();
-        ReversibleTrie underTest = new ReversibleTrie(root);
+        TextSearchIndex underTest = new TextSearchIndex();
         List<String> inputs = List.of("amicus", "amare", "amabilis", "amandare", "amandatio", "amor");
         underTest.insert(inputs.stream().map( word -> new StringBuilder(word).reverse().toString()).toList());
         List<String> results = underTest.search("er", 20);

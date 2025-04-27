@@ -1,11 +1,9 @@
-package com.annepolis.lexiconmeum.domain.lexicon;
+package com.annepolis.lexiconmeum.textsearch;
 
 import java.util.List;
 
-public interface Lexicon {
+public interface TextSearchComponent {
 
     List<String> getWordsStartingWith(String prefix, int limit);
     List<String> getWordsEndingWith(String suffix, int limit);
-
-    void acceptWord(String word);
 }

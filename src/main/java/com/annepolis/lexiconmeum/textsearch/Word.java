@@ -1,8 +1,8 @@
-package com.annepolis.lexiconmeum.domain.model;
+package com.annepolis.lexiconmeum.textsearch;
 
 import java.util.List;
 
-public class Word {
+class Word {
 
     String word;
     String definition;

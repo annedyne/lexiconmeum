@@ -1,4 +1,4 @@
-package com.annepolis.lexiconmeum.domain.lexicon;
+package com.annepolis.lexiconmeum.textsearch;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,15 +13,15 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 public class InMemoryLexiconSpringTest {
 
-    private final Lexicon underTest;
+    private final TextSearchComponent underTest;
 
-    InMemoryLexiconSpringTest(Lexicon lexicon) {
-        this.underTest = lexicon;
+    InMemoryLexiconSpringTest(TextSearchComponent textSearchComponent) {
+        this.underTest = textSearchComponent;
     }
 
     @Test
     void testWiring(){
-        assertInstanceOf(InMemoryLexicon.class, underTest);
+        assertInstanceOf(TextSearchTrieCacheComponent.class, underTest);
     }
 
     @Test
