@@ -145,7 +145,7 @@ class TextSearchIndex {
             // so delete each char of this branch from prefix as we backtrack,
             // in readiness for adding the next branch/word to the common prefix
             prefix.deleteCharAt(prefix.length() - 1);
-            logger.info("backtracking to parent prefix: " + prefix );
+            logger.debug("backtracking to parent prefix: " + prefix );
         }
     }
 

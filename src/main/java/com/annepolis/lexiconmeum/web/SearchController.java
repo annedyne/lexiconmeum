@@ -22,18 +22,18 @@ public class SearchController {
     }
 
     @GetMapping("/prefix")
-    public List<String> searchByPrefix(@RequestParam String prefix, @RequestParam int limit) {
+    public List<String> searchByPrefix(@RequestParam String prefix, @RequestParam(required = false) Integer limit) {
 
         return textSearchComponent.getWordsStartingWith(prefix, getEffectiveLimit(limit));
     }
 
     @GetMapping("/suffix")
-    public List<String> searchBySuffix(@RequestParam String suffix, @RequestParam int limit) {
+    public List<String> searchBySuffix(@RequestParam String suffix, @RequestParam(required = false) Integer limit) {
         return textSearchComponent.getWordsEndingWith(suffix, getEffectiveLimit(limit));
     }
 
-    private int getEffectiveLimit(int limit){
-        return (limit == 0 || limit > searchProperties.getDefaultLimit())
+    private int getEffectiveLimit(Integer limit){
+        return (limit == null || limit > searchProperties.getDefaultLimit())
                 ? searchProperties.getDefaultLimit()
                 : limit;
     }
