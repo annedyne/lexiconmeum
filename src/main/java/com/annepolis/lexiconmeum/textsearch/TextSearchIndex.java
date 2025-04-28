@@ -97,19 +97,18 @@ class TextSearchIndex {
         List<String> results = new ArrayList<>();
         TrieNode node = getRoot();
 
-        // Navigate through the TextSearchIndex to the last character of the prefix
+        // Navigate down the trie searching for each character of the prefix array
         for (char ch : prefix.toCharArray()) { //word
             if (!node.getChildren().containsKey(ch)) {
                 // If the prefix is not found, return an empty list
                 return results;
             }
-            //traverse to child containing this prefix character
+            //traverse to down the tree to the next node/char in the prefix
             node = node.getChildren().get(ch);
-
         }
 
-        // Perform a depth-first search (DFS) to collect all words
-        // starting with this prefix
+        // Once we've reached the end of the prefix,
+        // recursively collect all the chars/words branching off from it
         dfs(node, new StringBuilder(prefix), results, limit);
         return results;
     }
@@ -132,14 +131,20 @@ class TextSearchIndex {
             logger.info("adding word: " + prefix);
         }
 
-        // Continue to pick up and append all characters under this prefix
+        // navigate recursively down each word/branch of this prefix,
+        // collecting its letters and appending them to our prefix
         for (var nodeEntry : node.getChildren().entrySet()) {
-            prefix.append(nodeEntry.getValue().getContent()); // Append character
-            logger.info("appending " + nodeEntry.getValue().getContent());
+            prefix.append(nodeEntry.getValue().getContent());
+            logger.debug("appending " + nodeEntry.getValue().getContent());
 
             // traverse to next node
             dfs(nodeEntry.getValue(), prefix, prefixMatchResults, wordLimit);
-            prefix.deleteCharAt(prefix.length() - 1); // Backtrack to parent  (remove last character)
+
+            // We've reached our word limit or last node in this branch
+            // and appended the current word to our results (above)
+            // so delete each char of this branch from prefix as we backtrack,
+            // in readiness for adding the next branch/word to the common prefix
+            prefix.deleteCharAt(prefix.length() - 1);
             logger.info("backtracking to parent prefix: " + prefix );
         }
     }
