@@ -11,11 +11,11 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 @SpringBootTest
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
-public class InMemoryLexiconSpringTest {
+public class TextSearchComponentSpringTest {
 
     private final TextSearchComponent underTest;
 
-    InMemoryLexiconSpringTest(TextSearchComponent textSearchComponent) {
+    TextSearchComponentSpringTest(TextSearchComponent textSearchComponent) {
         this.underTest = textSearchComponent;
     }
 
