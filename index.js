@@ -1,4 +1,5 @@
-const searchURI = "http://localhost:8080/api/search/";
+import { config } from './config.js';
+const searchURI = `${config.apiBaseUrl}/search/`;
 const prefixURI = "prefix?prefix=";
 const suffixURI = "suffix?suffix=";
 const queryCharMin = 2
