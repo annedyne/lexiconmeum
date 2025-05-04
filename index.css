@@ -1,16 +1,53 @@
-#suggestions {
+body {
+    margin: 0 auto;
+    padding: 10px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+}
+
+label {
+    font-size: 14px;
+}
+.input-container {
+    position: relative;
+    display: inline-block;
+}
+.input-with-checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.input-with-checkbox input[type="text"] {
+    padding: 3px;
+    width: 193px;
+}
+
+#word-suggestions {
     border: 1px solid #ccc;
     max-height: 150px;
-    overflow-y: auto;
+    overflow-y: hidden;
     position: absolute;
     background: white;
     width: 200px;
     z-index: 1000;
+    font-size: 14px;
 }
-#suggestions div {
-    padding: 8px;
+#word-suggestions div {
+    padding: 1px;
     cursor: pointer;
 }
-#suggestions div:hover {
+#word-suggestions div:hover {
     background-color: #f0f0f0;
 }
+
+#status-bar {
+    margin: 10px;
+    height: 24px;
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+    color: #333;
+    font-size: 14px;
+}
+

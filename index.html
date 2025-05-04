@@ -3,13 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <title>LexiconMeum</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/images/android-chrome-192x192.png">
+    <link rel="icon" type="image/x-icon" href="/images/android-chrome-512x512.png">
+    <link rel="icon" type="image/x-icon" href="/images/apple-touch-icon.png">
+    <link rel="icon" type="image/x-icon" href="/images/favicon-32x32.png">
+    <link rel="icon" type="image/x-icon" href="/images/favicon-16x16.png">
 </head>
 <body>
 
 <script type=module src="index.js"></script>
-<ul id="ul-el"></ul>
 
-<input type="text" id="autocomplete-input" placeholder="Type a word..." autocomplete="off">
-<div id="suggestions"></div>
+<div id="status-bar"></div>
+
+<div class="input-container">
+    <div class="input-with-checkbox">
+        <input type="text" id="word-lookup-input" placeholder="Type a word..." autocomplete="off">
+        <label>
+        <input type="checkbox" id="suffix-search"> Suffix Search
+        </label>
+    </div>
+    <div id="word-suggestions"></div>
+</div>
+
+
 </body>
 </html>
