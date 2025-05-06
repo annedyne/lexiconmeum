@@ -2,10 +2,7 @@ package com.annepolis.lexiconmeum.web;
 
 import com.annepolis.lexiconmeum.textsearch.TextSearchComponent;
 import com.annepolis.lexiconmeum.textsearch.TextSearchProperties;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -23,7 +20,6 @@ public class SearchController {
 
     @GetMapping("/prefix")
     public List<String> searchByPrefix(@RequestParam String prefix, @RequestParam(required = false) Integer limit) {
-
         return textSearchComponent.getWordsStartingWith(prefix, getEffectiveLimit(limit));
     }
 
