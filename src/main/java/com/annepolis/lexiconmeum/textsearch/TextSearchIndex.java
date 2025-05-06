@@ -120,7 +120,7 @@ class TextSearchIndex {
      * @param prefixMatchResults The list of found words.
      * @param wordLimit The maximum number of words to collect.
      */
-    private void dfs(TrieNode node, StringBuilder prefix, List<String> prefixMatchResults, int wordLimit) {
+        private void dfs(TrieNode node, StringBuilder prefix, List<String> prefixMatchResults, int wordLimit) {
         if (prefixMatchResults.size() >= wordLimit) {
             return;
         }
