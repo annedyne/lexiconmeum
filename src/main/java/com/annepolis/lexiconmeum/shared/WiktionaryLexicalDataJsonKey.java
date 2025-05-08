@@ -1,9 +1,14 @@
-package com.annepolis.lexiconmeum.textsearch;
+package com.annepolis.lexiconmeum.shared;
 
-public enum WiktiionaryLexicalDataJsonKey {
+public enum WiktionaryLexicalDataJsonKey {
 
     WORD("word"),
     POSITION("pos"),
+    NOUN("noun"),
+    VERB("verb"),
+    DECLENSION("declension"),
+    CONJUGATION("conjugation"),
+    SOURCE("source"),
     SENSES("senses"),
     GLOSSES("glosses"),
     FORMS("forms"),
@@ -12,7 +17,7 @@ public enum WiktiionaryLexicalDataJsonKey {
 
     private final String key;
 
-    WiktiionaryLexicalDataJsonKey(String key) {
+    WiktionaryLexicalDataJsonKey(String key) {
         this.key = key;
     }
 

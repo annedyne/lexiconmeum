@@ -1,20 +1,22 @@
-package com.annepolis.lexiconmeum.textsearch;
+package com.annepolis.lexiconmeum.shared;
+
+import com.annepolis.lexiconmeum.textsearch.Inflection;
 
 import java.util.List;
 
-class Word {
+public class Lexeme {
 
-    String word;
+    String lemma;
     String definition;
     String position;
     List<Inflection> inflections;
 
-    public String getWord() {
-        return word;
+    public String getLemma() {
+        return lemma;
     }
 
-    public void setWord(String word) {
-        this.word = word;
+    public void setLemma(String lemma) {
+        this.lemma = lemma;
     }
 
     public void setDefinition(String definition) {
