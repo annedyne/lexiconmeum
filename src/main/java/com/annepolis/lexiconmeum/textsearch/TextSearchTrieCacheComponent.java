@@ -1,12 +1,13 @@
 package com.annepolis.lexiconmeum.textsearch;
 
+import com.annepolis.lexiconmeum.shared.Lexeme;
+import com.annepolis.lexiconmeum.shared.LexemeSink;
 import com.github.benmanes.caffeine.cache.Cache;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 
-class TextSearchTrieCacheComponent implements TextSearchComponent, Consumer<Word> {
+class TextSearchTrieCacheComponent implements TextSearchComponent, LexemeSink {
 
     private final TextSearchIndex prefixTextSearchIndex;
     private final TextSearchIndex suffixTextSearchIndex;
@@ -31,16 +32,18 @@ class TextSearchTrieCacheComponent implements TextSearchComponent, Consumer<Word
                 .toList();
     }
 
-    public void populateCache(Word word) {
-        for(Inflection inflection: word.getInflections()){
-            prefixTextSearchIndex.insert(inflection.toString());
-            suffixTextSearchIndex.insert(new StringBuilder(inflection.toString()).reverse().toString());
+    public void populateIndex(List<String> inflections) {
+        for(String inflection: inflections){
+            prefixTextSearchIndex.insert(inflection);
+            suffixTextSearchIndex.insert(new StringBuilder(inflection).reverse().toString());
         }
     }
 
     @Override
-    public void accept(Word word) {
-        populateCache(word);
+    public void accept(Lexeme lexeme) {
+        populateIndex(lexeme.getInflections().stream().map(
+                inflection -> inflection.toString()
+        ).toList());
     }
 
 }

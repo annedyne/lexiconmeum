@@ -1,4 +1,4 @@
-package com.annepolis.lexiconmeum.textsearch;
+package com.annepolis.lexiconmeum.shared;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +32,13 @@ public class WiktionaryLexicalDataParserTest {
         assertTrue(resource.exists(), "Expected testDataRaw.jsonl to be present on the classpath");
     }
 
+    @Test
+    void nounResourceExists() {
+        Resource resource = resourceLoader.getResource("classpath:testDataNoun.jsonl");
+
+        assertTrue(resource.exists(), "Expected testDataNoun.jsonl to be present on the classpath");
+    }
+
     /**
      * Using the parser to test the json file
      */
@@ -50,11 +57,12 @@ public class WiktionaryLexicalDataParserTest {
     void testLoadJsonFile() throws Exception {
         Resource resource = resourceLoader.getResource("classpath:testDataRaw.jsonl");
         try (Reader reader = new InputStreamReader(resource.getInputStream())) {
-            List<Word> words = new ArrayList<>();
-            parser.parseJsonl(reader, word -> words.add(word));
+            List<Lexeme> lexemes = new ArrayList<>();
+            parser.parseJsonl(reader, word -> lexemes.add(word));
 
-            assertEquals(2, words.size());
-            assertEquals("verb", words.get(0).getPosition());
+            assertEquals(2, lexemes.size());
+            assertEquals("verb", lexemes.get(0).getPosition());
+            assertEquals("noun", lexemes.get(1).getPosition());
         }
     }
 
@@ -62,9 +70,20 @@ public class WiktionaryLexicalDataParserTest {
     void testLoadWord() throws Exception {
         Resource resource = resourceLoader.getResource("classpath:testDataRaw.jsonl");
         try (Reader reader = new InputStreamReader(resource.getInputStream())) {
-            List<Word> words = new ArrayList<>();
-            parser.parseJsonl(reader, word -> words.add(word));
-            assertEquals("amo", words.get(0).getWord());
+            List<Lexeme> lexemes = new ArrayList<>();
+            parser.parseJsonl(reader, word -> lexemes.add(word));
+            assertEquals("amo", lexemes.get(0).getLemma());
+
+        }
+    }
+
+    @Test
+    void testLoadNoun() throws Exception {
+        Resource resource = resourceLoader.getResource("classpath:testDataNoun.jsonl");
+        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
+            List<Lexeme> lexemes = new ArrayList<>();
+            parser.parseJsonl(reader, word -> lexemes.add(word));
+            assertEquals("poculum", lexemes.get(0).getLemma());
 
         }
     }
