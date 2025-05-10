@@ -38,7 +38,7 @@ class WiktionaryLexicalDataParser {
         while ((line = readJsonLine(br)) != null) {
             try {
                 JsonNode root = mapper.readTree(line);
-                consumer.accept(parseWord(root));
+                consumer.accept(buildLexeme(root));
             } catch(JsonEOFException eofException) {
                 LOGGER.error("Check that JSONL is correctly formatted and not 'prettified'", eofException);
                 throw eofException;
@@ -50,79 +50,78 @@ class WiktionaryLexicalDataParser {
         return br.readLine();
     }
 
-    private Lexeme parseWord(JsonNode root) {
+    private Lexeme buildLexeme(JsonNode root) {
         Lexeme lexeme = new Lexeme();
         lexeme.setLemma(root.path(WORD.get()).asText());
         lexeme.setPosition(root.path(POSITION.get()).asText());
 
-        JsonNode senses = root.path(SENSES.get());
-        if (senses.isArray() && senses.isEmpty()) {
-            JsonNode firstSense = senses.get(0);
-            JsonNode glosses = firstSense.path(GLOSSES.get());
-            if (glosses.isArray() && glosses.isEmpty()) {
-                lexeme.setDefinition(glosses.get(0).asText());
+
+        JsonNode sensesNode = root.path(SENSES.get());
+        if (sensesNode.isArray() && !sensesNode.isEmpty()) {
+            for(JsonNode senseNode : sensesNode){
+                lexeme.addSense(buildSense(senseNode));
             }
         }
 
-        List<Inflection> inflections = new ArrayList<>();
         JsonNode formsNode = root.path(FORMS.get());
-
         if (NOUN.get().equalsIgnoreCase(lexeme.getPosition()) && formsNode.isArray()){
-            inflections = parseDeclensions(formsNode);
+            lexeme.setInflections(buildDeclensionsList(formsNode));
         } else if (VERB.get().equalsIgnoreCase(lexeme.getPosition()) && formsNode.isArray()){
-            inflections = parseConjugations(root);
+            lexeme.setInflections(buildConjugationsList(formsNode));
         }
 
-        lexeme.setInflections(inflections);
         return lexeme;
     }
 
-    private List<Inflection> parseConjugations(JsonNode root){
-        List<Inflection> inflections = new ArrayList<>();
-        for (JsonNode formNode : root.path(FORMS.get())) {
-            String formValue = formNode.path(FORM.get()).asText();
-            if(!FORM_BLACKLIST.contains(formValue)) {
-                Inflection inf = new Inflection();
-                inf.setInflection(formNode.path(FORM.get()).asText());
+    private Sense buildSense(JsonNode senseNode) {
+        Sense sense = new Sense();
+        JsonNode glosses = senseNode.path(GLOSSES.get());
+        if (glosses.isArray() && !glosses.isEmpty()) {
 
-                List<String> tags = new ArrayList<>();
-                for (JsonNode tag : formNode.path(TAGS.get())) {
-                    tags.add(tag.asText());
-                }
-                inf.setTags(tags);
-
-                inflections.add(inf);
+            for(JsonNode gloss: glosses){
+                sense.addGloss(gloss.asText());
             }
         }
+        return sense;
+    }
 
+    private List<Inflection> buildConjugationsList(JsonNode formsNode){
+        List<Inflection> inflections = new ArrayList<>();
+        for (JsonNode formNode : formsNode) {
+            String formValue = formNode.path(FORM.get()).asText();
+            if (!FORM_BLACKLIST.contains(formValue)) {
+                inflections.add(buildInflection(formNode));
+            }
+        }
         return inflections;
     }
 
-    private List<Inflection> parseDeclensions(JsonNode formsNode){
+    private List<Inflection> buildDeclensionsList(JsonNode formsNode){
         List<Inflection> inflections = new ArrayList<>();
             for (JsonNode formNode : formsNode) {
                 String formValue = formNode.path(FORM.get()).asText();
-
                 boolean isDeclension = DECLENSION.get().equalsIgnoreCase(formNode.path(SOURCE.get()).asText())
                         && !FORM_BLACKLIST.contains(formValue);
-
                 if (isDeclension) {
-                    Inflection inf = new Inflection();
-                    inf.setInflection(formValue);
-
-                    List<String> tags = new ArrayList<>();
-                    for (JsonNode tag : formNode.path(TAGS.get())) {
-                        tags.add(tag.asText());
-                    }
-                    inf.setTags(tags);
-
-                    inflections.add(inf);
+                    inflections.add(buildInflection(formNode));
                 }
             }
 
-
         return inflections;
     }
+
+    Inflection buildInflection(JsonNode formNode){
+        Inflection inflection = new Inflection();
+        inflection.setInflection(formNode.path(FORM.get()).asText());
+
+        List<String> tags = new ArrayList<>();
+        for (JsonNode tag : formNode.path(TAGS.get())) {
+            tags.add(tag.asText());
+        }
+        inflection.setTags(tags);
+        return inflection;
+    }
+
 
 }
 

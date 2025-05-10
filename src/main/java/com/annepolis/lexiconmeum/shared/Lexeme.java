@@ -2,14 +2,15 @@ package com.annepolis.lexiconmeum.shared;
 
 import com.annepolis.lexiconmeum.textsearch.Inflection;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Lexeme {
 
-    String lemma;
-    String definition;
-    String position;
-    List<Inflection> inflections;
+    private String lemma;
+    private String position;
+    private List<Sense> senses;
+    private List<Inflection> inflections;
 
     public String getLemma() {
         return lemma;
@@ -19,9 +20,6 @@ public class Lexeme {
         this.lemma = lemma;
     }
 
-    public void setDefinition(String definition) {
-        this.definition = definition;
-    }
 
     public String getPosition() {
         return position;
@@ -31,11 +29,23 @@ public class Lexeme {
         this.position = position;
     }
 
+    public void addSense(Sense sense){
+        if(senses == null){
+            senses = new ArrayList<>();
+        }
+        senses.add(sense);
+    }
+
     public void setInflections(List<Inflection> inflections) {
         this.inflections = inflections;
     }
 
-    public List<Inflection> getInflections(){ return inflections; }
+    public List<Inflection> getInflections(){
+        if(inflections == null){
+            inflections = new ArrayList<>();
+        }
+        return inflections;
+    }
 
 
 }
