@@ -9,28 +9,27 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.List;
-import java.util.function.Consumer;
 
 @Component
 class WiktionaryLexicalDataLoader implements LexemeLoader {
 
     private final WiktionaryLexicalDataParser parser;
     private final Resource lexicalData;
-    private final List<LexemeSink> lexemeConsumers;
+    private final List<LexemeSink> lexemeSinks;
 
-    public WiktionaryLexicalDataLoader(List<LexemeSink> lexemeConsumers, WiktionaryLexicalDataParser parser, @Value("${latin.data-file}")
+    public WiktionaryLexicalDataLoader(List<LexemeSink> lexemeSinks, WiktionaryLexicalDataParser parser, @Value("${latin.data-file}")
     Resource dataFile) {
         this.parser = parser;
         this.lexicalData = dataFile;
-        this.lexemeConsumers = lexemeConsumers;
+        this.lexemeSinks = lexemeSinks;
     }
 
     @PostConstruct
     private void loadLexicalData() throws IOException {
         try (Reader reader = new InputStreamReader(lexicalData.getInputStream())) {
             parser.parseJsonl(reader, lexeme -> {
-               for(Consumer<Lexeme> consumer : getConsumers()){
-                   consumer.accept(lexeme);
+               for(LexemeSink sink : getLexemeSinks()){
+                   sink.accept(lexeme);
                 }
             });
         }
@@ -38,7 +37,7 @@ class WiktionaryLexicalDataLoader implements LexemeLoader {
 
 
     @Override
-    public List<LexemeSink> getConsumers() {
-        return lexemeConsumers;
+    public List<LexemeSink> getLexemeSinks() {
+        return lexemeSinks;
     }
 }

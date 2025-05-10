@@ -4,6 +4,6 @@ import java.util.List;
 
 public interface LexemeLoader {
 
-    List<LexemeSink> getConsumers();
+    List<LexemeSink> getLexemeSinks();
 
 }

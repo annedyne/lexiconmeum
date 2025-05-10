@@ -88,5 +88,16 @@ public class WiktionaryLexicalDataParserTest {
         }
     }
 
+    @Test
+    void inflectionsAreLoaded() throws Exception {
+        Resource resource = resourceLoader.getResource("classpath:testDataNoun.jsonl");
+        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
+            List<Lexeme> lexemes = new ArrayList<>();
+            parser.parseJsonl(reader, word -> lexemes.add(word));
+            assertEquals("pōculum", lexemes.get(0).getInflections().get(0).toString());
+
+        }
+    }
+
 
 }
