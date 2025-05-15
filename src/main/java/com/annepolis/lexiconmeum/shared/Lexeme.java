@@ -9,8 +9,8 @@ public class Lexeme {
 
     private String lemma;
     private String position;
-    private List<Sense> senses;
-    private List<Inflection> inflections;
+    private List<Sense> senses = new ArrayList<>();
+    private List<Inflection> inflections = new ArrayList<>();
 
     public String getLemma() {
         return lemma;
@@ -30,9 +30,6 @@ public class Lexeme {
     }
 
     public void addSense(Sense sense){
-        if(senses == null){
-            senses = new ArrayList<>();
-        }
         senses.add(sense);
     }
 
@@ -41,9 +38,6 @@ public class Lexeme {
     }
 
     public List<Inflection> getInflections(){
-        if(inflections == null){
-            inflections = new ArrayList<>();
-        }
         return inflections;
     }
 

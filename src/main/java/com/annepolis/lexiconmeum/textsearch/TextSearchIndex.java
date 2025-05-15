@@ -128,14 +128,14 @@ class TextSearchIndex {
         if (node.isEndOfWord()) {
             // If we reach a valid word, add it to the prefixMatchResults
             prefixMatchResults.add(prefix.toString());
-            logger.info("adding word: " + prefix);
+            logger.info("adding word: {}", prefix);
         }
 
         // navigate recursively down each word/branch of this prefix,
         // collecting its letters and appending them to our prefix
         for (var nodeEntry : node.getChildren().entrySet()) {
             prefix.append(nodeEntry.getValue().getContent());
-            logger.debug("appending " + nodeEntry.getValue().getContent());
+            logger.debug("appending {}", nodeEntry.getValue().getContent());
 
             // traverse to next node
             dfs(nodeEntry.getValue(), prefix, prefixMatchResults, wordLimit);
@@ -145,7 +145,7 @@ class TextSearchIndex {
             // so delete each char of this branch from prefix as we backtrack,
             // in readiness for adding the next branch/word to the common prefix
             prefix.deleteCharAt(prefix.length() - 1);
-            logger.debug("backtracking to parent prefix: " + prefix );
+            logger.debug("backtracking to parent prefix: {}", prefix );
         }
     }
 

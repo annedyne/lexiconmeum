@@ -42,7 +42,7 @@ class TextSearchTrieCacheComponent implements TextSearchComponent, LexemeSink {
     @Override
     public void accept(Lexeme lexeme) {
         populateIndex(lexeme.getInflections().stream().map(
-                inflection -> inflection.toString()
+                Object::toString
         ).toList());
     }
 
