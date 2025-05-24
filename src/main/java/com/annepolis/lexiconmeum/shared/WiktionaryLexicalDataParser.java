@@ -1,6 +1,9 @@
 package com.annepolis.lexiconmeum.shared;
 
-import com.annepolis.lexiconmeum.textsearch.Inflection;
+import com.annepolis.lexiconmeum.lexeme.detail.Conjugation;
+import com.annepolis.lexiconmeum.lexeme.detail.Declension;
+import com.annepolis.lexiconmeum.lexeme.detail.GrammaticalFeature;
+import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
 import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -90,7 +93,7 @@ class WiktionaryLexicalDataParser {
         for (JsonNode formNode : formsNode) {
             String formValue = formNode.path(FORM.get()).asText();
             if (!FORM_BLACKLIST.contains(formValue)) {
-                inflections.add(buildInflection(formNode));
+                inflections.add(buildConjugation(formNode));
             }
         }
         return inflections;
@@ -103,16 +106,26 @@ class WiktionaryLexicalDataParser {
                 boolean isDeclension = DECLENSION.get().equalsIgnoreCase(formNode.path(SOURCE.get()).asText())
                         && !FORM_BLACKLIST.contains(formValue);
                 if (isDeclension) {
-                    inflections.add(buildInflection(formNode));
+                    inflections.add(buildDeclension(formNode));
                 }
             }
 
         return inflections;
     }
 
-    Inflection buildInflection(JsonNode formNode){
-        Inflection inflection = new Inflection();
-        inflection.setInflection(formNode.path(FORM.get()).asText());
+    Inflection buildDeclension(JsonNode formNode){
+        Declension inflection = new Declension();
+        inflection.setForm(formNode.path(FORM.get()).asText());
+
+        for (JsonNode tag : formNode.path(TAGS.get())) {
+            GrammaticalFeature.fromTag(tag.asText()).ifPresent(fc -> fc.applyTo(inflection));
+        }
+        return inflection;
+    }
+
+    Inflection buildConjugation(JsonNode formNode){
+        Conjugation inflection = new Conjugation();
+        inflection.setForm(formNode.path(FORM.get()).asText());
 
         List<String> tags = new ArrayList<>();
         for (JsonNode tag : formNode.path(TAGS.get())) {

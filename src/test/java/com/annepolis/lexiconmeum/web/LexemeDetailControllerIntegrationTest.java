@@ -1,5 +1,7 @@
 package com.annepolis.lexiconmeum.web;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
@@ -12,15 +14,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
-import static com.annepolis.lexiconmeum.web.ApiRoutes.PREFIX;
-import static com.annepolis.lexiconmeum.web.ApiRoutes.SUFFIX;
+import static com.annepolis.lexiconmeum.web.ApiRoutes.DECLENSION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-class TextSearchControllerIntegrationTest {
+class LexemeDetailControllerIntegrationTest {
 
-    static final Logger LOGGER = LogManager.getLogger(TextSearchControllerIntegrationTest.class);
+    static final Logger LOGGER = LogManager.getLogger(LexemeDetailControllerIntegrationTest.class);
 
     @Value("${test.base-url}")
     private String baseUrl;
@@ -38,21 +39,16 @@ class TextSearchControllerIntegrationTest {
         return baseUrl + ":" + port + path;
     }
 
-    @Test
-    void testPrefixSearchEndpoint() {
-        String url = getFullBaseUrl() + PREFIX + "?prefix=ama";
-
-        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-        LOGGER.info(response.getBody());
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-    }
 
     @Test
-    void testSuffixSearchEndpoint() {
-        String url = getFullBaseUrl() + SUFFIX + "?suffix=re";
+    void testPrefixSearchEndpoint() throws JsonProcessingException {
+        String url = getFullBaseUrl() + DECLENSION + "?lemma=poculum";
 
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-        LOGGER.info(response.getBody());
+        ObjectMapper objectMapper = new ObjectMapper();
+        Object jsonObject = objectMapper.readValue(response.getBody(), Object.class);
+        String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
+        LOGGER.info("Pretty printed DTO:\n{}", prettyJson);
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 }

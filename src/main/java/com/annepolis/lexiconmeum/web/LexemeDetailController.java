@@ -9,8 +9,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import static com.annepolis.lexiconmeum.web.ApiRoutes.DECLENSION;
+
 @RestController
-@RequestMapping("/api/lexeme")
+@RequestMapping("${api.base-path}")
 public class LexemeDetailController {
 
     private LexemeDeclensionDetailComponent declensionDetailProvider;
@@ -21,7 +23,7 @@ public class LexemeDetailController {
         this.lexemeProvider = lexemeProvider;
     }
 
-    @GetMapping("/detail/declension")
+    @GetMapping(DECLENSION)
     public DeclensionTableDTO getDeclensions(@RequestParam String lemma){
         Lexeme lexeme = lexemeProvider.getLexeme(lemma);
         return declensionDetailProvider.getLexemeDetail(lexeme);
