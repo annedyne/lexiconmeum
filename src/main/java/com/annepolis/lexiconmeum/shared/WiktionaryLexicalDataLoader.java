@@ -11,7 +11,7 @@ import java.io.Reader;
 import java.util.List;
 
 @Component
-class WiktionaryLexicalDataLoader implements LexemeLoader {
+class WiktionaryLexicalDataLoader implements LexemeSinkLoader {
 
     private final WiktionaryLexicalDataParser parser;
     private final Resource lexicalData;

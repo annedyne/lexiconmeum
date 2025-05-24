@@ -1,6 +1,6 @@
 package com.annepolis.lexiconmeum.shared;
 
-import com.annepolis.lexiconmeum.textsearch.Inflection;
+import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
 
 import java.util.ArrayList;
 import java.util.List;

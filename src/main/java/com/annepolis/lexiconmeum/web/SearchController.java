@@ -9,24 +9,28 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import static com.annepolis.lexiconmeum.web.ApiRoutes.PREFIX;
+import static com.annepolis.lexiconmeum.web.ApiRoutes.SUFFIX;
+
 @RestController
-@RequestMapping("/api/search")
+@RequestMapping("${api.base-path}")
 public class SearchController {
 
     private final TextSearchComponent textSearchComponent;
     private final TextSearchProperties searchProperties;
+
 
     public SearchController(TextSearchComponent textSearchComponent, TextSearchProperties searchProperties ){
         this.textSearchComponent = textSearchComponent;
         this.searchProperties = searchProperties;
     }
 
-    @GetMapping("/prefix")
+    @GetMapping(PREFIX)
     public List<String> searchByPrefix(@RequestParam String prefix, @RequestParam(required = false) Integer limit) {
         return textSearchComponent.getWordsStartingWith(prefix, getEffectiveLimit(limit));
     }
 
-    @GetMapping("/suffix")
+    @GetMapping(SUFFIX)
     public List<String> searchBySuffix(@RequestParam String suffix, @RequestParam(required = false) Integer limit) {
         return textSearchComponent.getWordsEndingWith(suffix, getEffectiveLimit(limit));
     }

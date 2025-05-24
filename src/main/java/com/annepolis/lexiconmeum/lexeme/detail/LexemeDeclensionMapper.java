@@ -1,7 +1,6 @@
 package com.annepolis.lexiconmeum.lexeme.detail;
 
 import com.annepolis.lexiconmeum.shared.Lexeme;
-import com.annepolis.lexiconmeum.textsearch.Inflection;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -12,18 +11,19 @@ public class LexemeDeclensionMapper {
 
     public DeclensionTableDTO toDeclensionTableDTO(Lexeme lexeme) {
 
-
         Map<String, Map<String, String>> table = new HashMap<>();
+        if(lexeme != null) {
+            for (Inflection inflection : lexeme.getInflections()) {
+                if(inflection instanceof Declension declension){
+                    String number = declension.getNumber().name();
+                    String grammaticalCase = declension.getGrammaticalCase().name();
+                    String form = declension.getForm();
 
-        for (Inflection inflection : lexeme.getInflections()) {
-            String number = inflection.getNumber();
-            String gramCase = inflection.getCase();
-            String form = inflection.getForm();
-
-            table.computeIfAbsent(number, n -> new HashMap<>())
-                    .put(gramCase, form);
+                    table.computeIfAbsent(number, n -> new HashMap<>())
+                            .put(grammaticalCase, form);
+                }
+            }
         }
-
         DeclensionTableDTO dto = new DeclensionTableDTO();
         dto.setTable(table);
 
