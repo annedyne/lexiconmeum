@@ -49,4 +49,9 @@ public class Declension implements Inflection {
     public void setForm(String form) {
         this.form = form;
     }
+
+    @Override
+    public String toString(){
+        return getForm();
+    }
 }

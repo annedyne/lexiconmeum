@@ -7,9 +7,12 @@ public class Conjugation implements Inflection {
     String form;
     List<String> tags;
 
+    public Conjugation(String lemma){
+        this.form = lemma;
+    }
     @Override
     public String getForm() {
-        return null;
+        return form;
     }
 
     @Override

@@ -9,8 +9,8 @@ class LexemeDeclensionMapperTest {
     @Test
     void toDeclensionTableDTOCorrectlyFormed(){
         LexemeDeclensionMapper mapper = new LexemeDeclensionMapper();
-        DeclensionTableDTO tableDTO = mapper.toDeclensionTableDTO(TestUtil.getNewTestLexeme());
-        Assertions.assertEquals("amīcus", tableDTO.table.get("singular").get("nominative"));
+        DeclensionTableDTO tableDTO = mapper.toDeclensionTableDTO(TestUtil.getNewTestNounLexeme());
+        Assertions.assertEquals("amīcus", tableDTO.table.get(GrammaticalNumber.SINGULAR.name()).get(GrammaticalCase.NOMINATIVE.name()));
     }
 
 

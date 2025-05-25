@@ -1,15 +1,15 @@
 package com.annepolis.lexiconmeum;
 
-import com.annepolis.lexiconmeum.lexeme.detail.Declension;
-import com.annepolis.lexiconmeum.lexeme.detail.GrammaticalCase;
-import com.annepolis.lexiconmeum.lexeme.detail.GrammaticalGender;
-import com.annepolis.lexiconmeum.lexeme.detail.GrammaticalNumber;
+import com.annepolis.lexiconmeum.lexeme.detail.*;
 import com.annepolis.lexiconmeum.shared.Lexeme;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TestUtil {
 
-    public static Lexeme getNewTestLexeme(){
-        Lexeme lexeme = new Lexeme();
+    public static Lexeme getNewTestNounLexeme(){
+        Lexeme lexeme = new Lexeme("amīcus", "noun");
 
         lexeme.getInflections().add(new Declension(GrammaticalGender.MASCULINE, GrammaticalNumber.SINGULAR, GrammaticalCase.NOMINATIVE , "amīcus"));
         lexeme.getInflections().add(new Declension(GrammaticalGender.MASCULINE, GrammaticalNumber.SINGULAR, GrammaticalCase.ACCUSATIVE, "amīcum"));
@@ -28,6 +28,27 @@ public class TestUtil {
         return lexeme;
 
     }
+
+    public static Lexeme getNewTestVerbLexeme(){
+        Lexeme lexeme = new Lexeme("amare", "verb");
+        lexeme.getInflections().add(new Conjugation("amabilis"));
+        lexeme.getInflections().add(new Conjugation("amandare"));
+        lexeme.getInflections().add(new Conjugation("amandatio"));
+        lexeme.getInflections().add(new Conjugation("amor"));
+
+        return lexeme;
+
+    }
+
+    public static List<Lexeme> getMixedPositionTestLexemes(){
+        List<Lexeme> lexemes = new ArrayList<>();
+
+        lexemes.add(getNewTestVerbLexeme());
+        lexemes.add(getNewTestNounLexeme());
+        return lexemes;
+    }
+
+
 
 
 

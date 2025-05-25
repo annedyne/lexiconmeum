@@ -42,12 +42,13 @@ class LexemeDetailControllerIntegrationTest {
 
     @Test
     void testPrefixSearchEndpoint() throws JsonProcessingException {
-        String url = getFullBaseUrl() + DECLENSION + "?lemma=poculum";
+        String url = getFullBaseUrl() + DECLENSION + "?lexemeId=poculumnoun";
 
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
         ObjectMapper objectMapper = new ObjectMapper();
         Object jsonObject = objectMapper.readValue(response.getBody(), Object.class);
         String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
+
         LOGGER.info("Pretty printed DTO:\n{}", prettyJson);
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }

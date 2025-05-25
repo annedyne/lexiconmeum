@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 @SpringBootTest
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
-public class TextSearchComponentSpringTest {
+class TextSearchComponentSpringTest {
 
     private final TextSearchComponent underTest;
 
@@ -38,8 +38,7 @@ public class TextSearchComponentSpringTest {
     @Test
     void getWordsEndingWithReturnsCachedResults(){
         List<String> result = underTest.getWordsEndingWith("eris", 10);
-
-        assertEquals(4, result.size());
+        assertEquals(5, result.size());
 
     }
 }

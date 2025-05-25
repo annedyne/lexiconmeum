@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ContextConfiguration(classes = WiktionaryLexicalDataParser.class)
-public class WiktionaryLexicalDataParserTest {
+class WiktionaryLexicalDataParserTest {
 
     @Autowired
     private ResourceLoader resourceLoader;
@@ -58,9 +58,9 @@ public class WiktionaryLexicalDataParserTest {
         Resource resource = resourceLoader.getResource("classpath:testDataRaw.jsonl");
         try (Reader reader = new InputStreamReader(resource.getInputStream())) {
             List<Lexeme> lexemes = new ArrayList<>();
-            parser.parseJsonl(reader, word -> lexemes.add(word));
+            parser.parseJsonl(reader, lexemes::add);
 
-            assertEquals(2, lexemes.size());
+            assertEquals(3, lexemes.size());
             assertEquals("verb", lexemes.get(0).getPosition());
             assertEquals("noun", lexemes.get(1).getPosition());
         }
@@ -71,7 +71,7 @@ public class WiktionaryLexicalDataParserTest {
         Resource resource = resourceLoader.getResource("classpath:testDataRaw.jsonl");
         try (Reader reader = new InputStreamReader(resource.getInputStream())) {
             List<Lexeme> lexemes = new ArrayList<>();
-            parser.parseJsonl(reader, word -> lexemes.add(word));
+            parser.parseJsonl(reader, lexemes::add);
             assertEquals("amo", lexemes.get(0).getLemma());
 
         }
@@ -82,7 +82,7 @@ public class WiktionaryLexicalDataParserTest {
         Resource resource = resourceLoader.getResource("classpath:testDataNoun.jsonl");
         try (Reader reader = new InputStreamReader(resource.getInputStream())) {
             List<Lexeme> lexemes = new ArrayList<>();
-            parser.parseJsonl(reader, word -> lexemes.add(word));
+            parser.parseJsonl(reader, lexemes::add);
             assertEquals("poculum", lexemes.get(0).getLemma());
 
         }
@@ -93,7 +93,7 @@ public class WiktionaryLexicalDataParserTest {
         Resource resource = resourceLoader.getResource("classpath:testDataNoun.jsonl");
         try (Reader reader = new InputStreamReader(resource.getInputStream())) {
             List<Lexeme> lexemes = new ArrayList<>();
-            parser.parseJsonl(reader, word -> lexemes.add(word));
+            parser.parseJsonl(reader, lexemes::add);
             assertEquals("pōculum", lexemes.get(0).getInflections().get(0).toString());
 
         }
