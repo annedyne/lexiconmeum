@@ -10,7 +10,7 @@ class LexemeDeclensionDetailServiceTest {
     void getLexemeDetailGivenLexemeReturnsDeclensionMap(){
         LexemeDeclensionDetailService service = new LexemeDeclensionDetailService(new LexemeDeclensionMapper());
 
-        DeclensionTableDTO dto = service.getLexemeDetail(TestUtil.getNewTestLexeme());
+        DeclensionTableDTO dto = service.getLexemeDetail(TestUtil.getNewTestNounLexeme());
         Assertions.assertNotNull(dto.getTable());
     }
 }

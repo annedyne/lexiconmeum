@@ -54,10 +54,9 @@ class WiktionaryLexicalDataParser {
     }
 
     private Lexeme buildLexeme(JsonNode root) {
-        Lexeme lexeme = new Lexeme();
-        lexeme.setLemma(root.path(WORD.get()).asText());
-        lexeme.setPosition(root.path(POSITION.get()).asText());
-
+        String lemma = root.path(WORD.get()).asText();
+        String position = root.path(POSITION.get()).asText();
+        Lexeme lexeme = new Lexeme(lemma, position);
 
         JsonNode sensesNode = root.path(SENSES.get());
         if (sensesNode.isArray() && !sensesNode.isEmpty()) {
@@ -124,8 +123,7 @@ class WiktionaryLexicalDataParser {
     }
 
     Inflection buildConjugation(JsonNode formNode){
-        Conjugation inflection = new Conjugation();
-        inflection.setForm(formNode.path(FORM.get()).asText());
+        Conjugation inflection = new Conjugation(formNode.path(FORM.get()).asText());
 
         List<String> tags = new ArrayList<>();
         for (JsonNode tag : formNode.path(TAGS.get())) {

@@ -1,6 +1,8 @@
 package com.annepolis.lexiconmeum.shared;
 
+import java.util.UUID;
+
 public interface LexemeProvider {
 
-    Lexeme getLexeme(String lemma);
+    Lexeme getLexeme(UUID lemma);
 }
