@@ -1,5 +1,6 @@
-package com.annepolis.lexiconmeum.shared;
+package com.annepolis.lexiconmeum.shared.data.load;
 
+import com.annepolis.lexiconmeum.shared.LexemeSink;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;

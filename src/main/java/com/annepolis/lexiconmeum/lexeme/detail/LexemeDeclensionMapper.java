@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class LexemeDeclensionMapper {
+class LexemeDeclensionMapper {
 
     public DeclensionTableDTO toDeclensionTableDTO(Lexeme lexeme) {
 

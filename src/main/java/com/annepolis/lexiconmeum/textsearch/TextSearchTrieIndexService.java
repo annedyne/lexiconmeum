@@ -4,19 +4,16 @@ import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
 import com.annepolis.lexiconmeum.shared.Lexeme;
 import com.annepolis.lexiconmeum.shared.LexemeSink;
 import com.github.benmanes.caffeine.cache.Cache;
-import java.text.Normalizer;
+
 import java.util.List;
-import java.util.regex.Pattern;
 
-
-class TextSearchTrieCacheComponent implements TextSearchComponent, LexemeSink {
-    private static final Pattern DIACRITICS = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+class TextSearchTrieIndexService implements TextSearchService, LexemeSink {
 
     private final TextSearchIndex prefixTextSearchIndex;
     private final TextSearchIndex suffixTextSearchIndex;
     private final Cache<String, List<String>> cache;
 
-    public TextSearchTrieCacheComponent(TextSearchIndex prefixTextSearchIndex, TextSearchIndex suffixTextSearchIndex, Cache<String, List<String>> cache){
+    public TextSearchTrieIndexService(TextSearchIndex prefixTextSearchIndex, TextSearchIndex suffixTextSearchIndex, Cache<String, List<String>> cache){
         this.prefixTextSearchIndex = prefixTextSearchIndex;
         this.suffixTextSearchIndex = suffixTextSearchIndex;
         this.cache = cache;
@@ -40,11 +37,6 @@ class TextSearchTrieCacheComponent implements TextSearchComponent, LexemeSink {
             prefixTextSearchIndex.insert(inflection.getForm(), lexeme.getId());
             suffixTextSearchIndex.insert(new StringBuilder(inflection.getForm()).reverse().toString(), lexeme.getId());
         }
-    }
-
-    String getNormalizedString(String normalizeMe){
-        String normalized = Normalizer.normalize(normalizeMe, Normalizer.Form.NFD);
-        return DIACRITICS.matcher(normalized).replaceAll("");
     }
 
     @Override

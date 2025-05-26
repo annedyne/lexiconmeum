@@ -1,9 +1,11 @@
-package com.annepolis.lexiconmeum.shared;
+package com.annepolis.lexiconmeum.shared.data.load;
 
 import com.annepolis.lexiconmeum.lexeme.detail.Conjugation;
 import com.annepolis.lexiconmeum.lexeme.detail.Declension;
 import com.annepolis.lexiconmeum.lexeme.detail.GrammaticalFeature;
 import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
+import com.annepolis.lexiconmeum.shared.Lexeme;
+import com.annepolis.lexiconmeum.shared.Sense;
 import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,7 +21,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import static com.annepolis.lexiconmeum.shared.WiktionaryLexicalDataJsonKey.*;
+import static com.annepolis.lexiconmeum.shared.data.load.WiktionaryLexicalDataJsonKey.*;
 
 @Component
 class WiktionaryLexicalDataParser {

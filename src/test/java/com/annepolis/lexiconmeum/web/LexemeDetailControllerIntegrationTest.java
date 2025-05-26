@@ -1,5 +1,6 @@
 package com.annepolis.lexiconmeum.web;
 
+import com.annepolis.lexiconmeum.TestUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
@@ -13,6 +14,8 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.util.UUID;
 
 import static com.annepolis.lexiconmeum.web.ApiRoutes.DECLENSION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,7 +45,8 @@ class LexemeDetailControllerIntegrationTest {
 
     @Test
     void testPrefixSearchEndpoint() throws JsonProcessingException {
-        String url = getFullBaseUrl() + DECLENSION + "?lexemeId=poculumnoun";
+        UUID lexemeId = TestUtil.getNewTestNounLexeme().getId();
+        String url = getFullBaseUrl() + DECLENSION + "?lexemeId=" + lexemeId.toString();
 
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
         ObjectMapper objectMapper = new ObjectMapper();
