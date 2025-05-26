@@ -1,4 +1,4 @@
-package com.annepolis.lexiconmeum.shared;
+package com.annepolis.lexiconmeum.shared.data.load;
 
 public enum WiktionaryLexicalDataJsonKey {
 

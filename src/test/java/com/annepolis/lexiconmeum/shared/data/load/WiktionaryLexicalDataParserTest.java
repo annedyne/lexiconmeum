@@ -1,5 +1,6 @@
-package com.annepolis.lexiconmeum.shared;
+package com.annepolis.lexiconmeum.shared.data.load;
 
+import com.annepolis.lexiconmeum.shared.Lexeme;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
