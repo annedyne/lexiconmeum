@@ -1,7 +1,11 @@
 import { config } from './config.js';
+import {renderDeclensionTable} from "./renderDeclensionTable.js"
+
+
 const searchURI = `${config.apiBaseUrl}/search/`;
 const prefixURI = "prefix?prefix=";
 const suffixURI = "suffix?suffix=";
+const declensionDetailURI = `${config.apiBaseUrl}/lexeme/detail/declension?lexemeId=`
 const queryCharMin = 2
 const isSuffixSearch = document.getElementById("suffix-search")
 
@@ -9,6 +13,7 @@ const statusBar = document.getElementById("status-bar")
 const wordLookupInput = document.getElementById("word-lookup-input");
 const wordSuggestionsBox = document.getElementById("word-suggestions");
 wordSuggestionsBox.style.display = "none";
+
 
 wordLookupInput.addEventListener("input", async () => {
     const query = wordLookupInput.value.trim();
@@ -47,21 +52,46 @@ function buildWordSuggestionBox(words){
     wordSuggestionsBox.style.display = "block"
     words.forEach(word => {
         const item = document.createElement("div");
-        item.textContent = word;
+        let indexOfDelimiter = word.indexOf(":");
+        let viewWord = word.substring(0, indexOfDelimiter);
+        console.log("after substring" + word);
+        item.textContent = viewWord;
         item.addEventListener("click", () => {
             wordLookupInput.value = word;
             wordSuggestionsBox.innerHTML = ""; // hide suggestions
-            fetchWordDetail(word);
+            buildWordDetailTable(word);
         });
         wordSuggestionsBox.appendChild(item);
     });
 }
 
-function fetchWordDetail(word){
-    setStatus("Fetching definition for: " + word);
+async function fetchWordDetailData(word){
+    let index = word.indexOf(":");
+    word = word.substring(index+1).trim();
+    console.log(word);
+    const uri = declensionDetailURI + encodeURIComponent(word);
+    const res = await fetch( uri);
+    return await res.json();
+
 }
+
+async function buildWordDetailTable(query){
+    try {
+        let wordDetailData = await fetchWordDetailData(query);
+        if (wordDetailData) {
+            renderDeclensionTable(wordDetailData);
+        }
+    } catch (err) {
+        let message = "Error fetching suggestions: ";
+        console.error(message, err);
+        setStatus(message + query);
+    }
+}
+
 
 function setStatus(message){
     statusBar.textContent = message;
 }
+
+
 

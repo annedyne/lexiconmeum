@@ -51,3 +51,77 @@ label {
     font-size: 14px;
 }
 
+.latin-table {
+    border-collapse: collapse;
+    margin: 1em 0;
+    width: 100%;
+    max-width: 600px;
+}
+
+.latin-table caption {
+    font-weight: bold;
+    margin-bottom: 0.5em;
+    text-align: left;
+}
+
+.latin-table th, .latin-table td {
+    border: 1px solid #ccc;
+    padding: 0.5em;
+    text-align: center;
+}
+
+.latin-table th:first-child,
+.latin-table td:first-child {
+    text-align: left;
+}
+
+/* Base table style */
+.declension-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-family: system-ui, sans-serif;
+    font-size: 1rem;
+}
+
+/* Header row */
+.declension-table thead {
+    background-color: #f0f0f0;
+}
+
+.declension-table th {
+    text-align: left;
+    padding: 0.5rem 1rem;
+    border-bottom: 2px solid #ccc;
+}
+
+/* Highlight case name column (first td in each row) */
+.declension-table td:first-child {
+    background-color: #eef5e9; /* soft beige for contrast */
+    width: 10ch; /* fits longest case name like "ACCUSATIVE" */
+    min-width: 10ch;
+    max-width: 10ch;
+    white-space: nowrap; /* Prevent wrapping */
+}
+
+/* Body rows */
+.declension-table td {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* Zebra striping for rows */
+.declension-table tbody tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+/* Optional: highlight row on hover */
+.declension-table tbody tr:hover {
+    background-color: #f5f5f5;
+}
+
+/* Optional: responsive overflow */
+#tables-container {
+    overflow-x: auto;
+}
+
