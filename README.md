@@ -1,22 +1,22 @@
 # MeaLexica App
 
 ## MVP Functional Requirements
-- User should be able to search for a word and get a real-time drop down of suggestions (autocompleted) based on what they’ve typed so far.
-- User should be able to view a detail of the word showing it’s definition and basic tenses in tables
+- User should be able to search for a lexeme and get a real-time drop down of suggestions (autocompleted) based on what they’ve typed so far.
+- User should be able to view a detail of the lexeme showing it’s definition and basic tenses in tables
 
 Phase II
 - User should be able to click on tabs to view participles, passive
 - User should be able to click on tabs to view masculine, feminine or neuter versions of the above
 
 Phase III
-- User should be able to search for words using tags.
-- User should be able to search for words using English equivalents
+- User should be able to search for lexemes using tags.
+- User should be able to search for lexemes using English equivalents
 
 Phase IV
 - containerize
 
 Scale 
-- 1G worth of words
+- 1G worth of lexemes
 
 ## Non Functional Requirements
 - low latency search - < 200 ms
@@ -26,25 +26,25 @@ Scale
 ## Core Entities
 - lemmaDetail
 - definition
-- word
-    - lemma (idx)
+- lexeme
+    - lexeme (idx)
     - tense
     - gender
     - voice
     - aspect
 
 ## APIS
-get all matching words with input text
-- GET /lemmas/words?text={text} -> Word[]
+get all matching lexemes with input text
+- GET /lemmas/lexemes?text={text} -> Word[]
 
-- get lemmas associated with inflected words
+- get lemmas associated with inflected lexemes
 - GET /lemmas?term={inflectedForm} -> Partial<Lemma>
 
-- Get all inflected forms associated with a given lemma
+- Get all inflected forms associated with a given lexeme
 - GET /lemmas/:id -> LemmaDetail
 
 
-add lemmas associated with matching words
+add lemmas associated with matching lexemes
 
 ## Stack
 ### Backend:

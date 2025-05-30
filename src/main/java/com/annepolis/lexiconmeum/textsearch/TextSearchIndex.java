@@ -5,10 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.text.Normalizer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A basic in-memory TextSearchIndex implementation for efficient prefix-based string lookup.
@@ -54,7 +51,7 @@ class TextSearchIndex {
      * Inserts a word into the TextSearchIndex.
      * Each character of the word is stored in a linked structure.
      */
-    public void insert(String word) {
+    public void insert(String word, UUID lexemeKey) {
         TrieNode node = getRoot();
         for (char ch : word.toCharArray()) {
 
@@ -77,13 +74,7 @@ class TextSearchIndex {
         }
         //mark end of word
         node.setEndOfWord(true);
-    }
-
-
-    public void insert(List<String> words){
-        for(String word: words){
-            insert(word);
-        }
+        node.addLexemeKey(lexemeKey);
     }
 
     /**
@@ -110,8 +101,10 @@ class TextSearchIndex {
         // Once we've reached the end of the prefix,
         // recursively collect all the chars/words branching off from it
         dfs(node, new StringBuilder(prefix), results, limit);
+
         return results;
     }
+
 
     /**
      * Depth-First Search (DFS) helper function to collect words from the TextSearchIndex.
@@ -126,16 +119,20 @@ class TextSearchIndex {
         }
 
         if (node.isEndOfWord()) {
-            // If we reach a valid word, add it to the prefixMatchResults
-            prefixMatchResults.add(prefix.toString());
-            logger.info("adding word: " + prefix);
+            // If we reach a valid word, add it and associated lexeme keys to the prefixMatchResults
+            for(UUID lexemeKey : node.getLexemeKeys()){
+                if (prefixMatchResults.size() >= wordLimit) break;
+                String matchResult = prefix + ": " + lexemeKey;
+                prefixMatchResults.add(matchResult);
+                logger.info("adding word: {}", matchResult);
+            }
         }
 
         // navigate recursively down each word/branch of this prefix,
         // collecting its letters and appending them to our prefix
         for (var nodeEntry : node.getChildren().entrySet()) {
             prefix.append(nodeEntry.getValue().getContent());
-            logger.debug("appending " + nodeEntry.getValue().getContent());
+            logger.debug("appending {}", nodeEntry.getValue().getContent());
 
             // traverse to next node
             dfs(nodeEntry.getValue(), prefix, prefixMatchResults, wordLimit);
@@ -145,7 +142,7 @@ class TextSearchIndex {
             // so delete each char of this branch from prefix as we backtrack,
             // in readiness for adding the next branch/word to the common prefix
             prefix.deleteCharAt(prefix.length() - 1);
-            logger.debug("backtracking to parent prefix: " + prefix );
+            logger.debug("backtracking to parent prefix: {}", prefix );
         }
     }
 
@@ -154,6 +151,7 @@ class TextSearchIndex {
         private TrieNode parent;
         private char content;
         private boolean isEndOfWord;
+        private List<UUID> lexemeKeys = new ArrayList<>();
 
         public Map<Character, TrieNode> getChildren() {
             return children;
@@ -177,6 +175,15 @@ class TextSearchIndex {
 
         public void setEndOfWord(boolean isEndOfWord) {
             this.isEndOfWord = isEndOfWord;
+        }
+
+
+        public List<UUID> getLexemeKeys() {
+            return lexemeKeys;
+        }
+
+        public void addLexemeKey(UUID key) {
+            lexemeKeys.add(key);
         }
     }
 }

@@ -1,18 +1,19 @@
 package com.annepolis.lexiconmeum.textsearch;
 
+import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
+import com.annepolis.lexiconmeum.shared.Lexeme;
+import com.annepolis.lexiconmeum.shared.LexemeSink;
 import com.github.benmanes.caffeine.cache.Cache;
 
 import java.util.List;
-import java.util.function.Consumer;
 
-
-class TextSearchTrieCacheComponent implements TextSearchComponent, Consumer<Word> {
+class TextSearchTrieIndexService implements TextSearchService, LexemeSink {
 
     private final TextSearchIndex prefixTextSearchIndex;
     private final TextSearchIndex suffixTextSearchIndex;
     private final Cache<String, List<String>> cache;
 
-    public TextSearchTrieCacheComponent(TextSearchIndex prefixTextSearchIndex, TextSearchIndex suffixTextSearchIndex, Cache<String, List<String>> cache){
+    public TextSearchTrieIndexService(TextSearchIndex prefixTextSearchIndex, TextSearchIndex suffixTextSearchIndex, Cache<String, List<String>> cache){
         this.prefixTextSearchIndex = prefixTextSearchIndex;
         this.suffixTextSearchIndex = suffixTextSearchIndex;
         this.cache = cache;
@@ -31,16 +32,16 @@ class TextSearchTrieCacheComponent implements TextSearchComponent, Consumer<Word
                 .toList();
     }
 
-    public void populateCache(Word word) {
-        for(Inflection inflection: word.getInflections()){
-            prefixTextSearchIndex.insert(inflection.toString());
-            suffixTextSearchIndex.insert(new StringBuilder(inflection.toString()).reverse().toString());
+    public void populateIndex(Lexeme lexeme) {
+        for(Inflection inflection: lexeme.getInflections()){
+            prefixTextSearchIndex.insert(inflection.getForm(), lexeme.getId());
+            suffixTextSearchIndex.insert(new StringBuilder(inflection.getForm()).reverse().toString(), lexeme.getId());
         }
     }
 
     @Override
-    public void accept(Word word) {
-        populateCache(word);
+    public void accept(Lexeme lexeme) {
+        populateIndex(lexeme);
     }
 
 }
