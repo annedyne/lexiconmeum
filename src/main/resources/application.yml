@@ -6,3 +6,5 @@ latin:
 app:
   text-search:
     result-limit-max: 20
+api:
+  base-path: /api/v1

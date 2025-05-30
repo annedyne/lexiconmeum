@@ -1,5 +1,6 @@
 package com.annepolis.lexiconmeum.textsearch;
 
+import com.annepolis.lexiconmeum.shared.Lexeme;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.context.annotation.Bean;
@@ -10,20 +11,20 @@ import java.util.List;
 import java.util.function.Consumer;
 
 @Configuration
-class TextSearchComponentConfig {
+class TextSearchServiceConfig {
 
     @Bean
-    public TextSearchComponent textSearchComponent(TextSearchTrieCacheComponent component){
-        return component;
+    public TextSearchService textSearchService(TextSearchTrieIndexService textSearchTrieIndexService){
+        return textSearchTrieIndexService;
     }
     @Bean
-    public Consumer<Word> wordConsumer(TextSearchTrieCacheComponent component){
-        return component;
+    public Consumer<Lexeme> wordConsumer(TextSearchTrieIndexService textSearchTrieIndexService){
+        return textSearchTrieIndexService;
     }
 
     @Bean
-    public TextSearchTrieCacheComponent textSearchTrieCacheComponent() {
-        return new TextSearchTrieCacheComponent(prefixTrie(), suffixTrie(), caffeineCache());
+    public TextSearchTrieIndexService textSearchTrieCacheComponent() {
+        return new TextSearchTrieIndexService(prefixTrie(), suffixTrie(), caffeineCache());
     }
 
     @Bean
