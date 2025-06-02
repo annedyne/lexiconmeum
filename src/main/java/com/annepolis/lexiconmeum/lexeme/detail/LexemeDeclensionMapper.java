@@ -1,9 +1,11 @@
 package com.annepolis.lexiconmeum.lexeme.detail;
 
+import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalCase;
+import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalNumber;
 import com.annepolis.lexiconmeum.shared.Lexeme;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 @Component
@@ -11,15 +13,15 @@ class LexemeDeclensionMapper {
 
     public DeclensionTableDTO toDeclensionTableDTO(Lexeme lexeme) {
 
-        Map<String, Map<String, String>> table = new HashMap<>();
+        Map<GrammaticalNumber, Map<GrammaticalCase, String>> table = new EnumMap<>(GrammaticalNumber.class);
         if(lexeme != null) {
             for (Inflection inflection : lexeme.getInflections()) {
                 if(inflection instanceof Declension declension){
-                    String number = declension.getNumber().name();
-                    String grammaticalCase = declension.getGrammaticalCase().name();
+                    GrammaticalNumber number = declension.getNumber();
+                    GrammaticalCase grammaticalCase = declension.getGrammaticalCase();
                     String form = declension.getForm();
 
-                    table.computeIfAbsent(number, n -> new HashMap<>())
+                    table.computeIfAbsent(number, n -> new EnumMap<>(GrammaticalCase.class))
                             .put(grammaticalCase, form);
                 }
             }

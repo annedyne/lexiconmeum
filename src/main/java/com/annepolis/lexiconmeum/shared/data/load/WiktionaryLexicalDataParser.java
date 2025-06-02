@@ -2,9 +2,12 @@ package com.annepolis.lexiconmeum.shared.data.load;
 
 import com.annepolis.lexiconmeum.lexeme.detail.Conjugation;
 import com.annepolis.lexiconmeum.lexeme.detail.Declension;
-import com.annepolis.lexiconmeum.lexeme.detail.GrammaticalFeature;
 import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
+import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalGender;
+import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.lexeme.detail.grammar.InflectionFeature;
 import com.annepolis.lexiconmeum.shared.Lexeme;
+import com.annepolis.lexiconmeum.shared.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.Sense;
 import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -57,36 +60,63 @@ class WiktionaryLexicalDataParser {
 
     private Lexeme buildLexeme(JsonNode root) {
         String lemma = root.path(WORD.get()).asText();
-        String position = root.path(POSITION.get()).asText();
-        Lexeme lexeme = new Lexeme(lemma, position);
+        String posTag = root.path(POSITION.get()).asText();
+
+        GrammaticalPosition position = GrammaticalPosition.resolveOrThrow(posTag);
+        LexemeBuilder lexemeBuilder = new LexemeBuilder(lemma, position);
 
         JsonNode sensesNode = root.path(SENSES.get());
         if (sensesNode.isArray() && !sensesNode.isEmpty()) {
             for(JsonNode senseNode : sensesNode){
-                lexeme.addSense(buildSense(senseNode));
+                lexemeBuilder.addSense(buildSense(senseNode));
             }
         }
 
         JsonNode formsNode = root.path(FORMS.get());
-        if (NOUN.get().equalsIgnoreCase(lexeme.getPosition()) && formsNode.isArray()){
-            lexeme.setInflections(buildDeclensionsList(formsNode));
-        } else if (VERB.get().equalsIgnoreCase(lexeme.getPosition()) && formsNode.isArray()){
-            lexeme.setInflections(buildConjugationsList(formsNode));
+        if (NOUN.get().equalsIgnoreCase(lexemeBuilder.getPosition().name()) && formsNode.isArray()){
+            for (JsonNode formNode : formsNode) {
+                if (isDeclensionForm(formNode) ) {
+                    lexemeBuilder.addInflection(buildDeclension(formNode));
+                } else {
+                    setGender(formNode, lexemeBuilder);
+                }
+            }
+
+        } else if (VERB.get().equalsIgnoreCase(lexemeBuilder.getPosition().name()) && formsNode.isArray()){
+            lexemeBuilder.setInflectionList(buildConjugationsList(formsNode));
         }
 
-        return lexeme;
+        return lexemeBuilder.build();
+    }
+
+    private boolean isDeclensionForm(JsonNode formNode){
+        String formValue = formNode.path(FORM.get()).asText();
+        return DECLENSION.get().equalsIgnoreCase(formNode.path(SOURCE.get()).asText())
+                && !FORM_BLACKLIST.contains(formValue);
+    }
+
+    private void setGender(JsonNode formNode, LexemeBuilder lexemeBuilder){
+        JsonNode tags = formNode.path(TAGS.get());
+        for (int i = 0; i < tags.size(); i++) {
+            //if first tag is CANONICAL then next is gender
+            if (CANONICAL.name().equalsIgnoreCase(tags.get(i).asText()) && i + 1 < tags.size()) {
+                lexemeBuilder.setGender(GrammaticalGender.resolveOrThrow(tags.get(i + 1).asText()));
+                break;
+            }
+        }
     }
 
     private Sense buildSense(JsonNode senseNode) {
-        Sense sense = new Sense();
+        Sense.Builder builder = new Sense.Builder();
+
         JsonNode glosses = senseNode.path(GLOSSES.get());
         if (glosses.isArray() && !glosses.isEmpty()) {
 
             for(JsonNode gloss: glosses){
-                sense.addGloss(gloss.asText());
+                builder.addGloss(gloss.asText());
             }
         }
-        return sense;
+        return builder.build();
     }
 
     private List<Inflection> buildConjugationsList(JsonNode formsNode){
@@ -100,28 +130,13 @@ class WiktionaryLexicalDataParser {
         return inflections;
     }
 
-    private List<Inflection> buildDeclensionsList(JsonNode formsNode){
-        List<Inflection> inflections = new ArrayList<>();
-            for (JsonNode formNode : formsNode) {
-                String formValue = formNode.path(FORM.get()).asText();
-                boolean isDeclension = DECLENSION.get().equalsIgnoreCase(formNode.path(SOURCE.get()).asText())
-                        && !FORM_BLACKLIST.contains(formValue);
-                if (isDeclension) {
-                    inflections.add(buildDeclension(formNode));
-                }
-            }
-
-        return inflections;
-    }
-
     Inflection buildDeclension(JsonNode formNode){
-        Declension inflection = new Declension();
-        inflection.setForm(formNode.path(FORM.get()).asText());
+        Declension.Builder builder = new Declension.Builder(formNode.path(FORM.get()).asText());
 
         for (JsonNode tag : formNode.path(TAGS.get())) {
-            GrammaticalFeature.fromTag(tag.asText()).ifPresent(fc -> fc.applyTo(inflection));
+            InflectionFeature.fromTag(tag.asText()).ifPresent(fc -> fc.applyTo(builder));
         }
-        return inflection;
+        return builder.build();
     }
 
     Inflection buildConjugation(JsonNode formNode){
@@ -131,7 +146,6 @@ class WiktionaryLexicalDataParser {
         for (JsonNode tag : formNode.path(TAGS.get())) {
             tags.add(tag.asText());
         }
-        inflection.setTags(tags);
         return inflection;
     }
 

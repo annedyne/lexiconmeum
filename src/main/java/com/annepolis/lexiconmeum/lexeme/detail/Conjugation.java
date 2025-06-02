@@ -15,16 +15,7 @@ public class Conjugation implements Inflection {
         return form;
     }
 
-    @Override
-    public void setForm(String form) {
-        this.form = form;
-    }
-
     public List<String> getTags() {
         return tags;
-    }
-
-    public void setTags(List<String> tags) {
-        this.tags = tags;
     }
 }

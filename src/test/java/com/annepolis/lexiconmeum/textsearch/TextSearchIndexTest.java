@@ -2,7 +2,9 @@ package com.annepolis.lexiconmeum.textsearch;
 
 import com.annepolis.lexiconmeum.TestUtil;
 import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
+import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.shared.Lexeme;
+import com.annepolis.lexiconmeum.shared.LexemeBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -25,10 +27,11 @@ class TextSearchIndexTest {
     void trieReturnsAllMatchingWordsGivenPrefix(){
         String prefix = "test";
         String word = prefix + "word";
-        Lexeme lexeme = new Lexeme(word, "noun");
+        LexemeBuilder lexemeBuilder = new LexemeBuilder(word, GrammaticalPosition.NOUN);
+        Lexeme lexeme = lexemeBuilder.build();
 
-        String word2 = prefix + "word";
-        Lexeme lexeme2 = new Lexeme(word2, "adjective");
+        lexemeBuilder = new LexemeBuilder( word, GrammaticalPosition.VERB);
+        Lexeme lexeme2 = lexemeBuilder.build();
 
         TextSearchIndex underTest = new TextSearchIndex();
         underTest.insert(lexeme.getLemma(), lexeme.getId());
@@ -48,7 +51,7 @@ class TextSearchIndexTest {
             underTest.insert(inflection.getForm(), lexeme.getId());
         }
         List<String> results = underTest.search("amico", 20);
-        assertEquals(4, results.size());
+        assertEquals(2, results.size());
     }
 
     @Test

@@ -1,17 +1,26 @@
 package com.annepolis.lexiconmeum.lexeme.detail;
 
-import java.util.HashMap;
+import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalCase;
+import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalNumber;
+
+import java.util.EnumMap;
 import java.util.Map;
 
+/**
+ * DTO representing a declension table.
+ * <p>
+ * Table format:
+ * Map<Number (e.g. "SINGULAR"), Map<GrammaticalCase (e.g. "NOMINATIVE"), Form (e.g. "pōculum">>
+ */
 public class DeclensionTableDTO {
 
-    Map<String, Map<String, String>> table  = new HashMap<>();
+    Map<GrammaticalNumber, Map<GrammaticalCase, String>> table  = new EnumMap<>(GrammaticalNumber.class);
 
-    public void setTable(Map<String, Map<String, String>> table) {
+    public void setTable(Map<GrammaticalNumber, Map<GrammaticalCase, String>> table) {
         this.table = table;
     }
 
-    public Map<String, Map<String, String>> getTable() {
+    public Map<GrammaticalNumber, Map<GrammaticalCase, String>> getTable() {
         return table;
     }
 }
