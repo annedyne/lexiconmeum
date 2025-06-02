@@ -4,6 +4,4 @@ public interface Inflection {
 
     String getForm();
 
-    void setForm(String form);
-
 }
