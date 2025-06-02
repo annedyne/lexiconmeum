@@ -13,7 +13,8 @@ public enum WiktionaryLexicalDataJsonKey {
     GLOSSES("glosses"),
     FORMS("forms"),
     FORM("form"),
-    TAGS("tags");
+    TAGS("tags"),
+    CANONICAL("canonical");
 
     private final String key;
 

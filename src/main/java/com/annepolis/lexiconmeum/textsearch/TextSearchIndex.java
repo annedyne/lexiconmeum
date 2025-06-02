@@ -64,7 +64,6 @@ class TextSearchIndex {
 
             //populate the node associated with the current char
             TrieNode child = node.getChildren().get(normalizedKey);
-            child.setParent(node);
 
             //set content with non-normalized character
             child.setContent(ch);
@@ -148,17 +147,12 @@ class TextSearchIndex {
 
     private static class TrieNode {
         private final Map<Character, TrieNode> children = new HashMap<>();
-        private TrieNode parent;
         private char content;
         private boolean isEndOfWord;
-        private List<UUID> lexemeKeys = new ArrayList<>();
+        private final List<UUID> lexemeKeys = new ArrayList<>();
 
         public Map<Character, TrieNode> getChildren() {
             return children;
-        }
-
-        public void setParent(TrieNode parent) {
-            this.parent = parent;
         }
 
         public char getContent() {

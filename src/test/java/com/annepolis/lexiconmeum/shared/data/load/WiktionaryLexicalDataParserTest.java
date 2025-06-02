@@ -1,5 +1,6 @@
 package com.annepolis.lexiconmeum.shared.data.load;
 
+import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.shared.Lexeme;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,8 +63,8 @@ class WiktionaryLexicalDataParserTest {
             parser.parseJsonl(reader, lexemes::add);
 
             assertEquals(3, lexemes.size());
-            assertEquals("verb", lexemes.get(0).getPosition());
-            assertEquals("noun", lexemes.get(1).getPosition());
+            assertEquals(GrammaticalPosition.VERB, lexemes.get(0).getPosition());
+            assertEquals(GrammaticalPosition.NOUN, lexemes.get(1).getPosition());
         }
     }
 
