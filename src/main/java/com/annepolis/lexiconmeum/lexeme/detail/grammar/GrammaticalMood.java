@@ -2,7 +2,9 @@ package com.annepolis.lexiconmeum.lexeme.detail.grammar;
 
 public enum GrammaticalMood {
     INDICATIVE("Indicative","Indicative"),
-    SUBJUNCTIVE("Subjunctive","Progressive"),;
+    SUBJUNCTIVE("Subjunctive","Progressive"),
+    INFINITIVE("Infinitive","Infinitive"),
+    IMPERATIVE("Imperative","Imperative");
 
     private final String historicalName;
     private final String alternativeName;
@@ -10,5 +12,13 @@ public enum GrammaticalMood {
     GrammaticalMood(String historicalName, String alternativeName){
         this.historicalName = historicalName;
         this.alternativeName = alternativeName;
+    }
+
+    public String getHistoricalName() {
+        return historicalName;
+    }
+
+    public String getAlternativeName() {
+        return alternativeName;
     }
 }

@@ -1,5 +1,6 @@
-package com.annepolis.lexiconmeum.lexeme.detail;
+package com.annepolis.lexiconmeum.lexeme.detail.noun;
 
+import com.annepolis.lexiconmeum.lexeme.detail.InflectionTableDTO;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalNumber;
 
@@ -12,7 +13,7 @@ import java.util.Map;
  * Table format:
  * Map<Number (e.g. "SINGULAR"), Map<GrammaticalCase (e.g. "NOMINATIVE"), Form (e.g. "pōculum">>
  */
-public class DeclensionTableDTO {
+public class DeclensionTableDTO implements InflectionTableDTO {
 
     Map<GrammaticalNumber, Map<GrammaticalCase, String>> table  = new EnumMap<>(GrammaticalNumber.class);
 

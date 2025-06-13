@@ -1,5 +1,7 @@
-package com.annepolis.lexiconmeum.lexeme.detail;
+package com.annepolis.lexiconmeum.lexeme.detail.noun;
 
+import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
+import com.annepolis.lexiconmeum.lexeme.detail.InflectionBuilder;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalNumber;
 
@@ -39,9 +41,8 @@ public class Declension implements Inflection {
 
         private GrammaticalNumber number;
         private GrammaticalCase grammaticalCase;
-        private String form;
+        private final String form;
 
-        public Builder(){}
         public Builder(String form) {
             this.form = form;
         }
