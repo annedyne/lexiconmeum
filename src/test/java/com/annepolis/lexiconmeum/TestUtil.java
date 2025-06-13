@@ -1,11 +1,11 @@
 package com.annepolis.lexiconmeum;
 
-import com.annepolis.lexiconmeum.lexeme.detail.Conjugation;
-import com.annepolis.lexiconmeum.lexeme.detail.Declension;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalGender;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalNumber;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.lexeme.detail.noun.Declension;
+import com.annepolis.lexiconmeum.lexeme.detail.verb.Conjugation;
 import com.annepolis.lexiconmeum.shared.Lexeme;
 import com.annepolis.lexiconmeum.shared.LexemeBuilder;
 
@@ -13,9 +13,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalCase.*;
+import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalMood.INDICATIVE;
+import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalMood.INFINITIVE;
 import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalNumber.PLURAL;
 import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalNumber.SINGULAR;
+import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPerson.*;
 import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition.VERB;
+import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalTense.PRESENT;
+import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalVoice.ACTIVE;
 
 public class TestUtil {
 
@@ -47,12 +52,37 @@ public class TestUtil {
         return new Declension.Builder( form).setGrammaticalCase(gramCase).setNumber(number).build();
     }
     public static Lexeme getNewTestVerbLexeme(){
-        LexemeBuilder builder = new LexemeBuilder("amare", VERB);
+        LexemeBuilder builder = new LexemeBuilder("amo", VERB);
 
-        builder.addInflection(new Conjugation("amabilis"));
-        builder.addInflection(new Conjugation("amandare"));
-        builder.addInflection(new Conjugation("amandatio"));
-        builder.addInflection(new Conjugation("amor"));
+        Conjugation.Builder conjugationBuilder = new Conjugation.Builder("amāre");
+        conjugationBuilder.setVoice(ACTIVE).setMood(INFINITIVE).setTense(PRESENT);
+        builder.addInflection(conjugationBuilder.build());
+
+        conjugationBuilder = new Conjugation.Builder("amō");
+        conjugationBuilder.setVoice(ACTIVE).setMood(INDICATIVE).setPerson(FIRST).setTense(PRESENT).setNumber(SINGULAR);
+        builder.addInflection(conjugationBuilder.build());
+
+        conjugationBuilder = new Conjugation.Builder("amās");
+        conjugationBuilder.setVoice(ACTIVE).setMood(INDICATIVE).setPerson(SECOND).setTense(PRESENT).setNumber(SINGULAR);
+        builder.addInflection(conjugationBuilder.build());
+
+        conjugationBuilder = new Conjugation.Builder("amat");
+        conjugationBuilder.setVoice(ACTIVE).setMood(INDICATIVE).setPerson(THIRD).setTense(PRESENT).setNumber(SINGULAR);
+        builder.addInflection(conjugationBuilder.build());
+
+        conjugationBuilder = new Conjugation.Builder("amāmus");
+        conjugationBuilder.setVoice(ACTIVE).setMood(INDICATIVE).setPerson(FIRST).setTense(PRESENT).setNumber(PLURAL);
+        builder.addInflection(conjugationBuilder.build());
+
+        conjugationBuilder = new Conjugation.Builder("amātis");
+        conjugationBuilder.setVoice(ACTIVE).setMood(INDICATIVE).setPerson(SECOND).setTense(PRESENT).setNumber(PLURAL);
+        builder.addInflection(conjugationBuilder.build());
+
+        conjugationBuilder = new Conjugation.Builder("amant");
+        conjugationBuilder.setVoice(ACTIVE).setMood(INDICATIVE).setPerson(THIRD).setTense(PRESENT).setNumber(PLURAL);
+        builder.addInflection(conjugationBuilder.build());
+
+
 
         return builder.build();
 

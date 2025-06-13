@@ -4,7 +4,7 @@ public enum GrammaticalTense {
 
     PRESENT("Present","Simple Present"),
     IMPERFECT("Imperfect","Past Progressive"),
-    PERFECT("perfect","Simple Present"),
+    PERFECT("perfect","Present Perfect"),
     PLUPERFECT("Pluperfect","Past Perfect"),
     FUTURE("Future", "Simple Future"),
     FUTURE_PERFECT("Future Perfect","Future Perfect");
@@ -16,5 +16,13 @@ public enum GrammaticalTense {
     GrammaticalTense(String historicalName, String alternativeName) {
         this.alternativeName = alternativeName;
         this.historicalName = historicalName;
+    }
+
+    public String getHistoricalName() {
+        return historicalName;
+    }
+
+    public String getAlternativeName() {
+        return alternativeName;
     }
 }

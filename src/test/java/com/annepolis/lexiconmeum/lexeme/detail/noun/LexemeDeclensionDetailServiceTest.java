@@ -1,4 +1,4 @@
-package com.annepolis.lexiconmeum.lexeme.detail;
+package com.annepolis.lexiconmeum.lexeme.detail.noun;
 
 import com.annepolis.lexiconmeum.TestUtil;
 import com.annepolis.lexiconmeum.shared.LexemeProvider;

@@ -12,4 +12,5 @@ public class ApiRoutes {
     public static final String LEXEME = "/lexeme";
     public static final String DETAIL = LEXEME + "/detail";
     public static final String DECLENSION = DETAIL + "/declension";
+    public static final String CONJUGATION = DETAIL + "/conjugation";
 }

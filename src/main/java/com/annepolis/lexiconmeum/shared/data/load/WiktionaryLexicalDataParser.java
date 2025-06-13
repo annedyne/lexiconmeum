@@ -1,11 +1,11 @@
 package com.annepolis.lexiconmeum.shared.data.load;
 
-import com.annepolis.lexiconmeum.lexeme.detail.Conjugation;
-import com.annepolis.lexiconmeum.lexeme.detail.Declension;
 import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalGender;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.InflectionFeature;
+import com.annepolis.lexiconmeum.lexeme.detail.noun.Declension;
+import com.annepolis.lexiconmeum.lexeme.detail.verb.Conjugation;
 import com.annepolis.lexiconmeum.shared.Lexeme;
 import com.annepolis.lexiconmeum.shared.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.Sense;
@@ -65,34 +65,48 @@ class WiktionaryLexicalDataParser {
         GrammaticalPosition position = GrammaticalPosition.resolveOrThrow(posTag);
         LexemeBuilder lexemeBuilder = new LexemeBuilder(lemma, position);
 
-        JsonNode sensesNode = root.path(SENSES.get());
-        if (sensesNode.isArray() && !sensesNode.isEmpty()) {
-            for(JsonNode senseNode : sensesNode){
-                lexemeBuilder.addSense(buildSense(senseNode));
-            }
-        }
-
-        JsonNode formsNode = root.path(FORMS.get());
-        if (NOUN.get().equalsIgnoreCase(lexemeBuilder.getPosition().name()) && formsNode.isArray()){
-            for (JsonNode formNode : formsNode) {
-                if (isDeclensionForm(formNode) ) {
-                    lexemeBuilder.addInflection(buildDeclension(formNode));
-                } else {
-                    setGender(formNode, lexemeBuilder);
-                }
-            }
-
-        } else if (VERB.get().equalsIgnoreCase(lexemeBuilder.getPosition().name()) && formsNode.isArray()){
-            lexemeBuilder.setInflectionList(buildConjugationsList(formsNode));
-        }
+        addSenses(root.path(SENSES.get()), lexemeBuilder);
+        addForms(root.path(FORMS.get()), lexemeBuilder);
 
         return lexemeBuilder.build();
     }
 
+    private void addForms(JsonNode formsNode, LexemeBuilder lexemeBuilder) {
+        if (!formsNode.isArray()) return;
+
+        String pos = lexemeBuilder.getPosition().name();
+
+        if (NOUN.get().equalsIgnoreCase(pos)) {
+            addDeclensionForms(formsNode, lexemeBuilder);
+        } else if (VERB.get().equalsIgnoreCase(pos)) {
+            addConjugationForms(formsNode, lexemeBuilder);
+        }
+    }
+
+    private void addDeclensionForms(JsonNode formsNode, LexemeBuilder lexemeBuilder) {
+        for (JsonNode formNode : formsNode) {
+            if (isDeclensionForm(formNode)) {
+                lexemeBuilder.addInflection(buildDeclension(formNode));
+            } else {
+                setGender(formNode, lexemeBuilder);
+            }
+        }
+    }
+
     private boolean isDeclensionForm(JsonNode formNode){
         String formValue = formNode.path(FORM.get()).asText();
+
         return DECLENSION.get().equalsIgnoreCase(formNode.path(SOURCE.get()).asText())
                 && !FORM_BLACKLIST.contains(formValue);
+    }
+
+    private boolean isConjugationForm(JsonNode formNode){
+        String formValue = formNode.path(FORM.get()).asText();
+
+        return CONJUGATION.get().equalsIgnoreCase(formNode.path(SOURCE.get()).asText())
+                && !FORM_BLACKLIST.contains(formValue)
+                && !formValue.contains("+"); //for passive of compound tenses, wiktionary
+                                             // doesn't include person so excluding for now
     }
 
     private void setGender(JsonNode formNode, LexemeBuilder lexemeBuilder){
@@ -102,6 +116,14 @@ class WiktionaryLexicalDataParser {
             if (CANONICAL.name().equalsIgnoreCase(tags.get(i).asText()) && i + 1 < tags.size()) {
                 lexemeBuilder.setGender(GrammaticalGender.resolveOrThrow(tags.get(i + 1).asText()));
                 break;
+            }
+        }
+    }
+
+    private void addSenses(JsonNode sensesNode, LexemeBuilder lexemeBuilder) {
+        if (sensesNode.isArray()) {
+            for (JsonNode senseNode : sensesNode) {
+                lexemeBuilder.addSense(buildSense(senseNode));
             }
         }
     }
@@ -119,34 +141,37 @@ class WiktionaryLexicalDataParser {
         return builder.build();
     }
 
-    private List<Inflection> buildConjugationsList(JsonNode formsNode){
-        List<Inflection> inflections = new ArrayList<>();
-        for (JsonNode formNode : formsNode) {
-            String formValue = formNode.path(FORM.get()).asText();
-            if (!FORM_BLACKLIST.contains(formValue)) {
-                inflections.add(buildConjugation(formNode));
-            }
-        }
-        return inflections;
-    }
-
     Inflection buildDeclension(JsonNode formNode){
         Declension.Builder builder = new Declension.Builder(formNode.path(FORM.get()).asText());
 
         for (JsonNode tag : formNode.path(TAGS.get())) {
-            InflectionFeature.fromTag(tag.asText()).ifPresent(fc -> fc.applyTo(builder));
+            InflectionFeature.resolveOrThrow(tag.asText()).applyTo(builder);
+
         }
         return builder.build();
     }
 
+    private void addConjugationForms(JsonNode formsNode, LexemeBuilder lexemeBuilder) {
+        for (JsonNode formNode : formsNode) {
+            if (isConjugationForm(formNode)) {
+                try {
+                    lexemeBuilder.addInflection(buildConjugation(formNode));
+                } catch (IllegalArgumentException | IllegalStateException ex) {
+                    LOGGER.warn("Skipping invalid form: {}", ex.getMessage());
+                }
+            }
+        }
+    }
+
     Inflection buildConjugation(JsonNode formNode){
-        Conjugation inflection = new Conjugation(formNode.path(FORM.get()).asText());
+        Conjugation.Builder builder = new Conjugation.Builder(formNode.path(FORM.get()).asText());
 
         List<String> tags = new ArrayList<>();
         for (JsonNode tag : formNode.path(TAGS.get())) {
+            InflectionFeature.resolveOrThrow(tag.asText()).applyTo(builder);
             tags.add(tag.asText());
         }
-        return inflection;
+        return builder.build();
     }
 
 

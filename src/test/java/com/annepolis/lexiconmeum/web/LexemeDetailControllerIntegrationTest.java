@@ -17,6 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.UUID;
 
+import static com.annepolis.lexiconmeum.web.ApiRoutes.CONJUGATION;
 import static com.annepolis.lexiconmeum.web.ApiRoutes.DECLENSION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -44,10 +45,24 @@ class LexemeDetailControllerIntegrationTest {
 
 
     @Test
-    void testPrefixSearchEndpoint() throws JsonProcessingException {
+    void testDeclensionDetailEndpoint() throws JsonProcessingException {
         UUID lexemeId = TestUtil.getNewTestNounLexeme().getId();
         String url = getFullBaseUrl() + DECLENSION + "?lexemeId=" + lexemeId.toString();
 
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        Object jsonObject = objectMapper.readValue(response.getBody(), Object.class);
+        String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
+
+        LOGGER.info("Pretty printed DTO:\n{}", prettyJson);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void testConjugationDetailEndpoint() throws JsonProcessingException {
+        UUID lexemeId = TestUtil.getNewTestVerbLexeme().getId();
+        String url = getFullBaseUrl() + CONJUGATION + "?lexemeId=" + lexemeId.toString();
+        //4d6a2666-22a4-3a18-8a56-0c0e6a8ae404
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
         ObjectMapper objectMapper = new ObjectMapper();
         Object jsonObject = objectMapper.readValue(response.getBody(), Object.class);

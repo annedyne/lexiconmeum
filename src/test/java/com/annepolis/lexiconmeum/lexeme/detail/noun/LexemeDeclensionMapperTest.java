@@ -1,4 +1,4 @@
-package com.annepolis.lexiconmeum.lexeme.detail;
+package com.annepolis.lexiconmeum.lexeme.detail.noun;
 
 import com.annepolis.lexiconmeum.TestUtil;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalCase;
@@ -11,7 +11,7 @@ class LexemeDeclensionMapperTest {
     @Test
     void toDeclensionTableDTOCorrectlyFormed(){
         LexemeDeclensionMapper mapper = new LexemeDeclensionMapper();
-        DeclensionTableDTO tableDTO = mapper.toDeclensionTableDTO(TestUtil.getNewTestNounLexeme());
+        DeclensionTableDTO tableDTO = mapper.toInflectionTableDTO(TestUtil.getNewTestNounLexeme());
         Assertions.assertEquals("amīcus", tableDTO.table.get(GrammaticalNumber.SINGULAR).get(GrammaticalCase.NOMINATIVE));
     }
 

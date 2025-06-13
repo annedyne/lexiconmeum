@@ -1,5 +1,7 @@
-package com.annepolis.lexiconmeum.lexeme.detail;
+package com.annepolis.lexiconmeum.lexeme.detail.noun;
 
+import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
+import com.annepolis.lexiconmeum.lexeme.detail.LexemeInflectionMapper;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalNumber;
 import com.annepolis.lexiconmeum.shared.Lexeme;
@@ -9,9 +11,10 @@ import java.util.EnumMap;
 import java.util.Map;
 
 @Component
-class LexemeDeclensionMapper {
+class LexemeDeclensionMapper implements LexemeInflectionMapper {
 
-    public DeclensionTableDTO toDeclensionTableDTO(Lexeme lexeme) {
+    @Override
+    public DeclensionTableDTO toInflectionTableDTO(Lexeme lexeme) {
 
         Map<GrammaticalNumber, Map<GrammaticalCase, String>> table = new EnumMap<>(GrammaticalNumber.class);
         if(lexeme != null) {
@@ -21,7 +24,7 @@ class LexemeDeclensionMapper {
                     GrammaticalCase grammaticalCase = declension.getGrammaticalCase();
                     String form = declension.getForm();
 
-                    table.computeIfAbsent(number, n -> new EnumMap<>(GrammaticalCase.class))
+                    table.computeIfAbsent(number, numberKey -> new EnumMap<>(GrammaticalCase.class))
                             .put(grammaticalCase, form);
                 }
             }
@@ -31,4 +34,5 @@ class LexemeDeclensionMapper {
 
         return dto;
     }
+
 }
