@@ -57,7 +57,7 @@ function buildWordSuggestionBox(words){
         console.log("after substring" + word);
         item.textContent = viewWord;
         item.addEventListener("click", () => {
-            wordLookupInput.value = word;
+            wordLookupInput.value = viewWord;
             wordSuggestionsBox.innerHTML = ""; // hide suggestions
             buildWordDetailTable(word);
         });
@@ -65,14 +65,15 @@ function buildWordSuggestionBox(words){
     });
 }
 
-async function fetchWordDetailData(word){
+async function fetchWordDetailData(word) {
     let index = word.indexOf(":");
-    word = word.substring(index+1).trim();
+    word = word.substring(index + 1).trim();
     console.log(word);
     const uri = declensionDetailURI + encodeURIComponent(word);
-    const res = await fetch( uri);
-    return await res.json();
-
+    const res = await fetch(uri);
+    let jsn = await res.json();
+    console.log(jsn);
+    return jsn;
 }
 
 async function buildWordDetailTable(query){

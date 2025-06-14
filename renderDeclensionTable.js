@@ -22,7 +22,7 @@ export function renderDeclensionTable(data) {
         const row = document.createElement("tr");
 
         const caseCell = document.createElement("td");
-        caseCell.textContent = capitalize(c.toLowerCase()); // Optional: nicer formatting
+        caseCell.textContent = capitalize(c.toLowerCase());
         row.appendChild(caseCell);
 
         const singularCell = document.createElement("td");
