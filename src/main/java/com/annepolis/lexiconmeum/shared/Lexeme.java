@@ -1,9 +1,8 @@
 package com.annepolis.lexiconmeum.shared;
 
 import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
+import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -11,54 +10,34 @@ import java.util.UUID;
 public class Lexeme {
 
     private final UUID id;
-    private String lemma;
-    private String position;
-    private List<Sense> senses = new ArrayList<>();
-    private List<Inflection> inflections = new ArrayList<>();
+    private final String lemma;
+    private final GrammaticalPosition position;
+    private final List<Sense> senses;
+    private final List<Inflection> inflections;
 
-    public Lexeme(String lemma, String position) {
-        this.lemma = lemma;
-        this.position = position;
-        this.id = UUID.nameUUIDFromBytes(computeId(lemma, position).getBytes(StandardCharsets.UTF_8));
-    }
-
-    private static String computeId(String lemma, String position) {
-        return lemma + "#" + position;
+    Lexeme(LexemeBuilder builder ) {
+        this.lemma = builder.getLemma();
+        this.position = builder.getPosition();
+        this.id = builder.getId();
+        this.inflections = builder.getInflections();
+        this.senses = builder.getSenses();
     }
 
     public UUID getId() {
         return id;
     }
 
-    public String getLemma() {
-        return lemma;
-    }
+    public String getLemma() { return lemma; }
 
-    public void setLemma(String lemma) {
-        this.lemma = lemma;
-    }
-
-
-    public String getPosition() {
+    public GrammaticalPosition getPosition() {
         return position;
-    }
-
-    public void setPosition(String position) {
-        this.position = position;
-    }
-
-
-    public void addSense(Sense sense){
-        senses.add(sense);
-    }
-
-    public void setInflections(List<Inflection> inflections) {
-        this.inflections = inflections;
     }
 
     public List<Inflection> getInflections(){
         return inflections;
     }
+
+    public List<Sense> getSenses() { return senses; }
 
     @Override
     public boolean equals(Object o) {
@@ -77,4 +56,5 @@ public class Lexeme {
     public String toString() {
         return String.format("Lexeme{id='%s', lemma='%s', position='%s'}", id, lemma, position);
     }
+
 }
