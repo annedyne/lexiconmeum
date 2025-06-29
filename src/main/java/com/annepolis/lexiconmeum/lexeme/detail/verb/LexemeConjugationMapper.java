@@ -7,62 +7,92 @@ import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalVoice;
 import com.annepolis.lexiconmeum.shared.Lexeme;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
 public class LexemeConjugationMapper implements LexemeInflectionMapper {
 
+    static Comparator<ConjugationTableDTO> conjugationTableDTOComparator =
+            Comparator.comparing(LexemeConjugationMapper::resolveVoiceOrder)
+                    .thenComparing(LexemeConjugationMapper::resolveMoodOrder);
+
+    private static int resolveVoiceOrder(ConjugationTableDTO dto) {
+        try {
+            return GrammaticalVoice.valueOf(dto.getVoice()).ordinal();
+        } catch (Exception e) {
+            return Integer.MAX_VALUE;
+        }
+    }
+
+    private static int resolveMoodOrder(ConjugationTableDTO dto) {
+        String mood = dto.getMood();
+        if (mood == null) return Integer.MAX_VALUE;
+        try {
+            return GrammaticalMood.valueOf(mood.toUpperCase()).ordinal();
+        } catch (IllegalArgumentException e) {
+            return Integer.MAX_VALUE - 1;
+        }
+    }
+
+    record MoodVoiceKey(GrammaticalMood mood, GrammaticalVoice voice) {}
 
     @Override
-    public ConjugationTableDTO toInflectionTableDTO(Lexeme lexeme) {
+    public ConjugationGroupDTO toInflectionTableDTO(Lexeme lexeme) {
 
         List<Conjugation> conjugations = lexeme.getInflections().stream()
                 .filter(Conjugation.class::isInstance)
                 .map(Conjugation.class::cast)
                 .toList();
 
-
         if (conjugations.isEmpty()) {
             throw new IllegalArgumentException("Lexeme contains no conjugation forms.");
         }
 
-        // Assume all conjugations in the lexeme share the same mood and voice
-        // Assume all conjugations in the lexeme share the same mood and voice
-        GrammaticalMood mood = conjugations.get(0).getMood();
-        GrammaticalVoice voice = conjugations.get(0).getVoice(); // assuming added
-
-        Map<GrammaticalTense, List<String>> groupedByTense = conjugations.stream()
+        //Group forms by mood and voice tag
+        Map<MoodVoiceKey, List<Conjugation>> grouped = conjugations.stream()
                 .collect(Collectors.groupingBy(
-                        Conjugation::getTense,
-                        TreeMap::new, // maintain tense order if enum is ordered
-                        Collectors.mapping(Conjugation::getForm, Collectors.toList())
+                        c -> new MoodVoiceKey(c.getMood(), c.getVoice())
                 ));
 
-        List<ConjugationTableDTO.TenseDTO> tenseDTOs = new ArrayList<>();
-        for (Map.Entry<GrammaticalTense, List<String>> entry : groupedByTense.entrySet()) {
-            GrammaticalTense tense = entry.getKey();
-            List<String> forms = entry.getValue();
+        List<ConjugationTableDTO> result = new ArrayList<>();
 
-            ConjugationTableDTO conjugationTableDTO = new ConjugationTableDTO();
-            ConjugationTableDTO.TenseDTO tenseDTO = conjugationTableDTO.new TenseDTO();
+        //Within the same Voice and Mood, group forms by tense tag
+        for (Map.Entry<MoodVoiceKey, List<Conjugation>> entry : grouped.entrySet()) {
+            MoodVoiceKey key = entry.getKey();
+            List<Conjugation> groupConjugations = entry.getValue();
 
-            tenseDTO.setDefaultName(tense.getHistoricalName());
-            tenseDTO.setAltName(tense.getAlternativeName()); // if available
-            tenseDTO.setForms(forms);
+            Map<GrammaticalTense, List<String>> byTense = groupConjugations.stream()
+                    .collect(Collectors.groupingBy(
+                            Conjugation::getTense,
+                            TreeMap::new,
+                            Collectors.mapping(Conjugation::getForm, Collectors.toList())
+                    ));
 
-            tenseDTOs.add(tenseDTO);
+            //Map other tense info into tense DTO
+            List<ConjugationTableDTO.TenseDTO> tenseDTOs = byTense.entrySet().stream()
+                    .map(e -> {
+                        ConjugationTableDTO.TenseDTO dto = new ConjugationTableDTO.TenseDTO();
+                        dto.setDefaultName(e.getKey().getHistoricalName());
+                        dto.setAltName(e.getKey().getAlternativeName());
+                        dto.setForms(e.getValue());
+                        return dto;
+                    })
+                    .toList();
+
+            ConjugationTableDTO dto = new ConjugationTableDTO();
+            dto.setMood(key.mood().getHistoricalName());
+            dto.setVoice(key.voice().name());
+            dto.setTenses(tenseDTOs);
+
+            result.add(dto);
         }
 
-        ConjugationTableDTO dto = new ConjugationTableDTO();
-        dto.setMood(mood.getHistoricalName());
-        dto.setVoice(voice.name());
-        dto.setTenses(tenseDTOs);
+        List<ConjugationTableDTO> sorted = result.stream()
+                .sorted(conjugationTableDTOComparator)
+                .toList();
 
-        return dto;
+        return new ConjugationGroupDTO(sorted);
     }
 
 }

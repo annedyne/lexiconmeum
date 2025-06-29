@@ -10,6 +10,7 @@ import java.util.List;
 public class Conjugation implements Inflection {
 
     private final String form;
+    private final String alternateForm;
     private final GrammaticalVoice voice;
     private final GrammaticalMood mood;
     private final GrammaticalTense tense;
@@ -24,6 +25,7 @@ public class Conjugation implements Inflection {
         this.person = builder.getPerson();
         this.number = builder.getNumber();
         this.form = builder.getForm();
+        this.alternateForm = builder.getForm();
     }
 
     @Override
@@ -31,13 +33,22 @@ public class Conjugation implements Inflection {
         return form;
     }
 
+    public String getAlternateForm() { return alternateForm; }
     public GrammaticalVoice getVoice() { return voice; }
     public GrammaticalTense getTense() { return tense; }
     public GrammaticalPerson getPerson() { return person;}
     public GrammaticalNumber getNumber() { return number; }
     public GrammaticalMood getMood() { return mood; }
 
-
+    public Builder toBuilder() {
+        return new Builder(form)
+                .setVoice(voice)
+                .setTense(tense)
+                .setPerson(person)
+                .setNumber(number)
+                .setMood(mood)
+                .setAlternateForm(alternateForm);
+    }
     public static class Builder implements InflectionBuilder<Conjugation> {
 
         private GrammaticalVoice voice;
@@ -46,7 +57,8 @@ public class Conjugation implements Inflection {
         private GrammaticalPerson person;
         private GrammaticalNumber number;
 
-        private String form;
+        private final String form;
+        private String alternateForm;
 
         public Builder(String form) {
             this.form = form;
@@ -99,6 +111,15 @@ public class Conjugation implements Inflection {
 
         public String getForm() {
             return form;
+        }
+
+        public String getAlternateForm() {
+            return alternateForm;
+        }
+
+        public Conjugation.Builder setAlternateForm(String alternateForm) {
+            this.alternateForm = alternateForm;
+            return this;
         }
 
         @Override

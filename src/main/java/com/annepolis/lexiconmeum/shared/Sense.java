@@ -13,9 +13,17 @@ public class Sense {
         this.tags = builder.tags;
     }
 
+    public List<String> getGloss(){
+        return glosses;
+    }
+
+    public List<String> getTags(){
+        return tags;
+    }
+
     public static class Builder {
-        List<String> glosses = new ArrayList<>();
-        List<String> tags= new ArrayList<>();
+        final List<String> glosses = new ArrayList<>();
+        final List<String> tags= new ArrayList<>();
 
         public Builder addGloss(String gloss){
             this.glosses.add(gloss);

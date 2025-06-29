@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ActiveProfiles("test")
 class LexemeDetailControllerIntegrationTest {
 
-    static final Logger LOGGER = LogManager.getLogger(LexemeDetailControllerIntegrationTest.class);
+    static final Logger logger = LogManager.getLogger(LexemeDetailControllerIntegrationTest.class);
 
     @Value("${test.base-url}")
     private String baseUrl;
@@ -54,7 +54,7 @@ class LexemeDetailControllerIntegrationTest {
         Object jsonObject = objectMapper.readValue(response.getBody(), Object.class);
         String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
 
-        LOGGER.info("Pretty printed DTO:\n{}", prettyJson);
+        logger.info("Pretty printed DTO:\n{}", prettyJson);
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
@@ -63,12 +63,13 @@ class LexemeDetailControllerIntegrationTest {
         UUID lexemeId = TestUtil.getNewTestVerbLexeme().getId();
         String url = getFullBaseUrl() + CONJUGATION + "?lexemeId=" + lexemeId.toString();
         //4d6a2666-22a4-3a18-8a56-0c0e6a8ae404
+        //ffa9e2b1-6694-3436-8f24-b40ae10caeb3
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
         ObjectMapper objectMapper = new ObjectMapper();
         Object jsonObject = objectMapper.readValue(response.getBody(), Object.class);
         String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
 
-        LOGGER.info("Pretty printed DTO:\n{}", prettyJson);
+        logger.info("Pretty printed DTO:\n{}", prettyJson);
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 }

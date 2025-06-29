@@ -14,11 +14,11 @@ import java.util.function.Consumer;
 class TextSearchServiceConfig {
 
     @Bean
-    public TextSearchService textSearchService(TextSearchTrieIndexService textSearchTrieIndexService){
+    public TextSearchService<String> textSearchService(TextSearchTrieIndexService textSearchTrieIndexService){
         return textSearchTrieIndexService;
     }
     @Bean
-    public Consumer<Lexeme> wordConsumer(TextSearchTrieIndexService textSearchTrieIndexService){
+public Consumer<Lexeme> wordConsumer(TextSearchTrieIndexService textSearchTrieIndexService){
         return textSearchTrieIndexService;
     }
 
@@ -36,13 +36,13 @@ class TextSearchServiceConfig {
     }
 
     @Bean
-    public TextSearchIndex prefixTrie(){
-        return new TextSearchIndex();
+    public TextSearchTrieIndex prefixTrie(){
+        return new TextSearchTrieIndex(new TextSearchSuggestionMapper());
     }
 
     @Bean
-    public TextSearchIndex suffixTrie(){
-        return new TextSearchIndex();
+    public TextSearchTrieIndex suffixTrie(){
+        return new TextSearchTrieIndex(new TextSearchSuggestionMapper());
     }
 
 }

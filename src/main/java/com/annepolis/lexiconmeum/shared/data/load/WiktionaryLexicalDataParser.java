@@ -3,6 +3,7 @@ package com.annepolis.lexiconmeum.shared.data.load;
 import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalGender;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalTense;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.InflectionFeature;
 import com.annepolis.lexiconmeum.lexeme.detail.noun.Declension;
 import com.annepolis.lexiconmeum.lexeme.detail.verb.Conjugation;
@@ -29,7 +30,7 @@ import static com.annepolis.lexiconmeum.shared.data.load.WiktionaryLexicalDataJs
 @Component
 class WiktionaryLexicalDataParser {
 
-    static final Logger LOGGER = LogManager.getLogger(WiktionaryLexicalDataParser.class);
+    static final Logger logger = LogManager.getLogger(WiktionaryLexicalDataParser.class);
 
     private static final Set<String> FORM_BLACKLIST = Set.of(
             "no-table-tags",
@@ -48,7 +49,7 @@ class WiktionaryLexicalDataParser {
                 JsonNode root = mapper.readTree(line);
                 consumer.accept(buildLexeme(root));
             } catch(JsonEOFException eofException) {
-                LOGGER.error("Check that JSONL is correctly formatted and not 'prettified'", eofException);
+                logger.error("Check that JSONL is correctly formatted and not 'prettified'", eofException);
                 throw eofException;
             }
         }
@@ -157,7 +158,7 @@ class WiktionaryLexicalDataParser {
                 try {
                     lexemeBuilder.addInflection(buildConjugation(formNode));
                 } catch (IllegalArgumentException | IllegalStateException ex) {
-                    LOGGER.warn("Skipping invalid form: {}", ex.getMessage());
+                    logger.warn("Skipping invalid form: {}", ex.getMessage());
                 }
             }
         }
@@ -165,15 +166,21 @@ class WiktionaryLexicalDataParser {
 
     Inflection buildConjugation(JsonNode formNode){
         Conjugation.Builder builder = new Conjugation.Builder(formNode.path(FORM.get()).asText());
-
         List<String> tags = new ArrayList<>();
         for (JsonNode tag : formNode.path(TAGS.get())) {
-            InflectionFeature.resolveOrThrow(tag.asText()).applyTo(builder);
-            tags.add(tag.asText());
+            String tagText = tag.asText().toLowerCase();
+            tags.add(tagText);
         }
+        if(tags.contains(GrammaticalTense.FUTURE.name().toLowerCase()) && tags.contains(GrammaticalTense.PERFECT.name().toLowerCase())){
+            tags.remove(GrammaticalTense.FUTURE.name().toLowerCase());
+            tags.remove(GrammaticalTense.PERFECT.name().toLowerCase());
+            tags.add(GrammaticalTense.FUTURE_PERFECT.name().toLowerCase());
+        }
+        for (String tag : tags){
+            InflectionFeature.resolveOrThrow(tag).applyTo(builder);
+        }
+
         return builder.build();
     }
-
-
 }
 
