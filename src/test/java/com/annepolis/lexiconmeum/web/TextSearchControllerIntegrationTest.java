@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ActiveProfiles("test")
 class TextSearchControllerIntegrationTest {
 
-    static final Logger LOGGER = LogManager.getLogger(TextSearchControllerIntegrationTest.class);
+    static final Logger logger = LogManager.getLogger(TextSearchControllerIntegrationTest.class);
 
     @Value("${test.base-url}")
     private String baseUrl;
@@ -43,7 +43,7 @@ class TextSearchControllerIntegrationTest {
         String url = getFullBaseUrl() + PREFIX + "?prefix=ama";
 
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-        LOGGER.info(response.getBody());
+        logger.info(response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
@@ -52,7 +52,7 @@ class TextSearchControllerIntegrationTest {
         String url = getFullBaseUrl() + SUFFIX + "?suffix=re";
 
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-        LOGGER.info(response.getBody());
+        logger.info(response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 }

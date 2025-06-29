@@ -7,13 +7,13 @@ import com.github.benmanes.caffeine.cache.Cache;
 
 import java.util.List;
 
-class TextSearchTrieIndexService implements TextSearchService, LexemeSink {
+class TextSearchTrieIndexService implements TextSearchService<String>, LexemeSink {
 
-    private final TextSearchIndex prefixTextSearchIndex;
-    private final TextSearchIndex suffixTextSearchIndex;
+    private final TextSearchTrieIndex prefixTextSearchIndex;
+    private final TextSearchTrieIndex suffixTextSearchIndex;
     private final Cache<String, List<String>> cache;
 
-    public TextSearchTrieIndexService(TextSearchIndex prefixTextSearchIndex, TextSearchIndex suffixTextSearchIndex, Cache<String, List<String>> cache){
+    public TextSearchTrieIndexService(TextSearchTrieIndex prefixTextSearchIndex, TextSearchTrieIndex suffixTextSearchIndex, Cache<String, List<String>> cache){
         this.prefixTextSearchIndex = prefixTextSearchIndex;
         this.suffixTextSearchIndex = suffixTextSearchIndex;
         this.cache = cache;
@@ -24,12 +24,7 @@ class TextSearchTrieIndexService implements TextSearchService, LexemeSink {
     }
 
     public List<String> getWordsEndingWith(String suffix, int limit) {
-        String reversedSuffix = new StringBuilder(suffix).reverse().toString();
-
-        List<String> results =  cache.get("_" + suffix, k -> suffixTextSearchIndex.search(reversedSuffix, limit));
-        return results.stream()
-                .map(s -> new StringBuilder(s).reverse().toString())
-                .toList();
+        return cache.get("_" + suffix, k -> suffixTextSearchIndex.search(suffix, limit));
     }
 
     public void populateIndex(Lexeme lexeme) {

@@ -12,10 +12,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 @Profile("dev")
 public class DevCorsConfig {
-    static final Logger LOGGER = LogManager.getLogger(DevCorsConfig.class);
+    static final Logger logger = LogManager.getLogger(DevCorsConfig.class);
 
     public DevCorsConfig(){
-        LOGGER.info("✔️ Dev CORS config initialized!");
+        logger.info("✔️ Dev CORS config initialized!");
     }
 
     @Bean

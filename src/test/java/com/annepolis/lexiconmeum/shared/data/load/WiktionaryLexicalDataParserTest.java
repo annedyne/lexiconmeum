@@ -1,5 +1,9 @@
 package com.annepolis.lexiconmeum.shared.data.load;
 
+import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
+import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalTense;
+import com.annepolis.lexiconmeum.lexeme.detail.verb.Conjugation;
 import com.annepolis.lexiconmeum.shared.Lexeme;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,8 +66,8 @@ class WiktionaryLexicalDataParserTest {
             parser.parseJsonl(reader, lexemes::add);
 
             assertEquals(3, lexemes.size());
-            assertEquals("verb", lexemes.get(0).getPosition());
-            assertEquals("noun", lexemes.get(1).getPosition());
+            assertEquals(GrammaticalPosition.VERB, lexemes.get(0).getPosition());
+            assertEquals(GrammaticalPosition.NOUN, lexemes.get(1).getPosition());
         }
     }
 
@@ -97,6 +101,21 @@ class WiktionaryLexicalDataParserTest {
             parser.parseJsonl(reader, lexemes::add);
             assertEquals("pōculum", lexemes.get(0).getInflections().get(0).toString());
 
+        }
+    }
+
+    @Test
+    void parserMapsFutureAndPerfectTagsToFuturePerfectTense() throws Exception{
+        Resource resource = resourceLoader.getResource("classpath:testDataVerb.jsonl");
+        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
+            List<Lexeme> lexemes = new ArrayList<>();
+            parser.parseJsonl(reader, lexemes::add);
+            Inflection tenseTag = lexemes.get(0).getInflections().stream()
+                    .filter(g -> g.getForm().equals("amāverō"))
+                    .findFirst()
+                    .orElseThrow(() -> new AssertionError("Missing future-perfect test form"));
+
+            assertEquals(GrammaticalTense.FUTURE_PERFECT,  ((Conjugation)tenseTag).getTense());
         }
     }
 

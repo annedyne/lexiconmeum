@@ -1,4 +1,4 @@
-package com.annepolis.lexiconmeum.lexeme.detail;
+package com.annepolis.lexiconmeum.lexeme.detail.noun;
 
 import com.annepolis.lexiconmeum.shared.Lexeme;
 import com.annepolis.lexiconmeum.shared.LexemeProvider;
@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 @Service
-class LexemeDeclensionService implements LexemeDetailService {
+public class LexemeDeclensionService {
 
     private final LexemeDeclensionMapper lexemeDeclensionMapper;
     private final LexemeProvider lexemeProvider;
@@ -16,9 +16,9 @@ class LexemeDeclensionService implements LexemeDetailService {
         this.lexemeDeclensionMapper = lexemeDeclensionMapper;
         this.lexemeProvider = lexemeProvider;
     }
-    @Override
+
     public DeclensionTableDTO getLexemeDetail(UUID lexemeId) {
         Lexeme lexeme = lexemeProvider.getLexeme(lexemeId);
-        return lexemeDeclensionMapper.toDeclensionTableDTO(lexeme);
+        return lexemeDeclensionMapper.toInflectionTableDTO(lexeme);
     }
 }
