@@ -1,9 +1,6 @@
 package com.annepolis.lexiconmeum;
 
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalCase;
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalGender;
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalNumber;
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.lexeme.detail.grammar.*;
 import com.annepolis.lexiconmeum.lexeme.detail.noun.Declension;
 import com.annepolis.lexiconmeum.lexeme.detail.verb.Conjugation;
 import com.annepolis.lexiconmeum.shared.Lexeme;
@@ -13,14 +10,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalCase.*;
-import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalMood.INDICATIVE;
-import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalMood.INFINITIVE;
+import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalMood.*;
 import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalNumber.PLURAL;
 import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalNumber.SINGULAR;
 import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPerson.*;
 import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition.VERB;
 import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalTense.PRESENT;
 import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalVoice.ACTIVE;
+import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalVoice.PASSIVE;
 
 public class TestUtil {
 
@@ -58,34 +55,47 @@ public class TestUtil {
         conjugationBuilder.setVoice(ACTIVE).setMood(INFINITIVE).setTense(PRESENT);
         builder.addInflection(conjugationBuilder.build());
 
-        conjugationBuilder = new Conjugation.Builder("amō");
-        conjugationBuilder.setVoice(ACTIVE).setMood(INDICATIVE).setPerson(FIRST).setTense(PRESENT).setNumber(SINGULAR);
+
+        buildConjugation(builder, "amō", ACTIVE, INDICATIVE, FIRST, PRESENT, SINGULAR);
+        buildConjugation(builder, "amās", ACTIVE, INDICATIVE, SECOND, PRESENT, SINGULAR);
+        buildConjugation(builder, "amat", ACTIVE, INDICATIVE, THIRD, PRESENT, SINGULAR);
+        buildConjugation(builder, "amāmus", ACTIVE, INDICATIVE, FIRST, PRESENT, PLURAL);
+        buildConjugation(builder, "amātis", ACTIVE, INDICATIVE, SECOND, PRESENT, PLURAL);
+        buildConjugation(builder, "amant", ACTIVE, INDICATIVE, THIRD, PRESENT, PLURAL);
+
+        buildConjugation(builder, "amem", ACTIVE, SUBJUNCTIVE, FIRST, PRESENT, SINGULAR);
+        buildConjugation(builder, "ames", ACTIVE, SUBJUNCTIVE, SECOND, PRESENT, SINGULAR);
+        buildConjugation(builder, "amet", ACTIVE, SUBJUNCTIVE, THIRD, PRESENT, SINGULAR);
+        buildConjugation(builder, "amēmus", ACTIVE, SUBJUNCTIVE, FIRST, PRESENT, PLURAL);
+        buildConjugation(builder, "amētis", ACTIVE, SUBJUNCTIVE, SECOND, PRESENT, PLURAL);
+        buildConjugation(builder, "ament", ACTIVE, SUBJUNCTIVE, THIRD, PRESENT, PLURAL);
+
+        buildConjugation(builder, "amor", PASSIVE, INDICATIVE, FIRST, PRESENT, SINGULAR);
+        buildConjugation(builder, "amāris", PASSIVE, INDICATIVE, SECOND, PRESENT, SINGULAR);
+        buildConjugation(builder, "amātur", PASSIVE, INDICATIVE, THIRD, PRESENT, SINGULAR);
+        buildConjugation(builder, "amāmur", PASSIVE, INDICATIVE, FIRST, PRESENT, PLURAL);
+        buildConjugation(builder, "amāmini", PASSIVE, INDICATIVE, SECOND, PRESENT, PLURAL);
+        buildConjugation(builder, "amantur", PASSIVE, INDICATIVE, THIRD, PRESENT, PLURAL);
+
+        buildConjugation(builder, "amer", PASSIVE, SUBJUNCTIVE, FIRST, PRESENT, SINGULAR);
+        buildConjugation(builder, "amēris", PASSIVE, SUBJUNCTIVE, SECOND, PRESENT, SINGULAR);
+        buildConjugation(builder, "amētur", PASSIVE, SUBJUNCTIVE, THIRD, PRESENT, SINGULAR);
+        buildConjugation(builder, "amēmur", PASSIVE, SUBJUNCTIVE, FIRST, PRESENT, PLURAL);
+        buildConjugation(builder, "amēmini", PASSIVE, SUBJUNCTIVE, SECOND, PRESENT, PLURAL);
+        buildConjugation(builder, "amentur", PASSIVE, SUBJUNCTIVE, THIRD, PRESENT, PLURAL);
+
         builder.addInflection(conjugationBuilder.build());
-
-        conjugationBuilder = new Conjugation.Builder("amās");
-        conjugationBuilder.setVoice(ACTIVE).setMood(INDICATIVE).setPerson(SECOND).setTense(PRESENT).setNumber(SINGULAR);
-        builder.addInflection(conjugationBuilder.build());
-
-        conjugationBuilder = new Conjugation.Builder("amat");
-        conjugationBuilder.setVoice(ACTIVE).setMood(INDICATIVE).setPerson(THIRD).setTense(PRESENT).setNumber(SINGULAR);
-        builder.addInflection(conjugationBuilder.build());
-
-        conjugationBuilder = new Conjugation.Builder("amāmus");
-        conjugationBuilder.setVoice(ACTIVE).setMood(INDICATIVE).setPerson(FIRST).setTense(PRESENT).setNumber(PLURAL);
-        builder.addInflection(conjugationBuilder.build());
-
-        conjugationBuilder = new Conjugation.Builder("amātis");
-        conjugationBuilder.setVoice(ACTIVE).setMood(INDICATIVE).setPerson(SECOND).setTense(PRESENT).setNumber(PLURAL);
-        builder.addInflection(conjugationBuilder.build());
-
-        conjugationBuilder = new Conjugation.Builder("amant");
-        conjugationBuilder.setVoice(ACTIVE).setMood(INDICATIVE).setPerson(THIRD).setTense(PRESENT).setNumber(PLURAL);
-        builder.addInflection(conjugationBuilder.build());
-
-
 
         return builder.build();
 
+    }
+
+    private static void buildConjugation(LexemeBuilder builder, String form, GrammaticalVoice voice, GrammaticalMood mood,
+                                  GrammaticalPerson person, GrammaticalTense tense, GrammaticalNumber number){
+
+            Conjugation.Builder conjugationBuilder = new Conjugation.Builder(form);
+            conjugationBuilder.setVoice(voice).setMood(mood).setPerson(person).setTense(tense).setNumber(number);
+            builder.addInflection(conjugationBuilder.build());
     }
 
     public static List<Lexeme> getMixedPositionTestLexemes(){
@@ -95,9 +105,4 @@ public class TestUtil {
         lexemes.add(getNewTestNounLexeme());
         return lexemes;
     }
-
-
-
-
-
 }

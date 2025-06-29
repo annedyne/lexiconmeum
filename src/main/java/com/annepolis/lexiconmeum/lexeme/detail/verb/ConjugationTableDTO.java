@@ -26,7 +26,7 @@ public class ConjugationTableDTO implements InflectionTableDTO {
         this.mood = mood;
     }
 
-    List<TenseDTO> getTenses() {
+   List<TenseDTO> getTenses() {
         return tenses;
     }
 
@@ -34,7 +34,7 @@ public class ConjugationTableDTO implements InflectionTableDTO {
         this.tenses = tenses;
     }
 
-    class TenseDTO {
+    public static class TenseDTO {
         private String defaultName;
         private String altName;
         private List<String> forms;
@@ -63,6 +63,8 @@ public class ConjugationTableDTO implements InflectionTableDTO {
             this.forms = forms;
         }
     }
+
+
 
 }
 

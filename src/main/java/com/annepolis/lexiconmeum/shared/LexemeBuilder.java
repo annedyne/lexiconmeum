@@ -15,7 +15,7 @@ public class LexemeBuilder {
     private final String lemma;
     private final GrammaticalPosition position;
     private GrammaticalGender gender;
-    private List<Sense> senses = new ArrayList<>();
+    private final List<Sense> senses = new ArrayList<>();
     private List<Inflection> inflections = new ArrayList<>();
 
     public LexemeBuilder(String lemma, GrammaticalPosition position){

@@ -18,7 +18,7 @@ public class LexemeConjugationService {
         this.lexemeProvider = lexemeProvider;
     }
 
-    public ConjugationTableDTO getLexemeDetail(UUID lexemeId) {
+    public ConjugationGroupDTO getLexemeDetail(UUID lexemeId) {
         Lexeme lexeme = lexemeProvider.getLexeme(lexemeId);
         return lexemeConjugationMapper.toInflectionTableDTO(lexeme);
     }
