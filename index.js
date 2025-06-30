@@ -88,6 +88,12 @@ async function buildWordDetailTable(lemma, lexemeId, grammaticalPosition ){
             );
             const container = document.getElementById("tables-container");
             container.innerHTML = ""; // Clear once at the top
+
+            // Add a voice-level heading once at the top
+            const voiceHeader = document.createElement("h2");
+            voiceHeader.textContent = "Voice: ACTIVE";
+            container.appendChild(voiceHeader);
+
             if (activeMoods) {
                 activeMoods.forEach(renderConjugationTable);
             }

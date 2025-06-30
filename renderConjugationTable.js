@@ -2,7 +2,6 @@
 export function renderConjugationTable(data) {
 
     const { voice, mood, tenses } = data;
-    //const sectionTitle = `${capitalize(voice)} — ${capitalize(mood)}`;
 
     // Create a table
     const table = document.createElement("table");
@@ -14,7 +13,7 @@ export function renderConjugationTable(data) {
     const headerCell = document.createElement("th");
     headerCell.colSpan = 2;
     headerCell.className = "header";
-    headerCell.textContent = `Voice: ${voice} | Mood: ${mood}`;
+    headerCell.textContent = `Voice: ${voice}`;
     headerRow.appendChild(headerCell);
     thead.appendChild(headerRow);
     table.appendChild(thead);
@@ -31,12 +30,12 @@ export function renderConjugationTable(data) {
         const leftHeader = headerRow.insertCell();
         leftHeader.colSpan = 1;
         leftHeader.className = "tense-header";
-        leftHeader.textContent = capitalize(left.defaultName);
+        leftHeader.textContent = `${mood} ${left.defaultName}`
 
         const rightHeader = headerRow.insertCell();
         rightHeader.colSpan = 1;
         rightHeader.className = "tense-header";
-        rightHeader.textContent = right ? capitalize(right.defaultName) : "";
+        rightHeader.textContent =  `${mood} ${right.defaultName}`
 
         // Compute max form count
         const maxRows = Math.max(left.forms.length, right?.forms.length || 0);
