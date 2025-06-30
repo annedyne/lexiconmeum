@@ -1,11 +1,13 @@
 import { config } from './config.js';
 import {renderDeclensionTable} from "./renderDeclensionTable.js"
+import {renderConjugationTable} from "./renderConjugationTable.js"
 
 
 const searchURI = `${config.apiBaseUrl}/search/`;
 const prefixURI = "prefix?prefix=";
 const suffixURI = "suffix?suffix=";
 const declensionDetailURI = `${config.apiBaseUrl}/lexeme/detail/declension?lexemeId=`
+const conjugationDetailURI = `${config.apiBaseUrl}/lexeme/detail/conjugation?lexemeId=`
 const queryCharMin = 2
 const isSuffixSearch = document.getElementById("suffix-search")
 
@@ -24,6 +26,7 @@ wordLookupInput.addEventListener("input", async () => {
 
     try {
         let words = await fetchWordSuggestions(query);
+        console.log(words);
         if (Array.isArray(words) && words.length > 0) {
             buildWordSuggestionBox(words);
         }
@@ -50,25 +53,57 @@ async function fetchWordSuggestions(query){
 
 function buildWordSuggestionBox(words){
     wordSuggestionsBox.style.display = "block"
-    words.forEach(word => {
+    words.forEach(wordObj => {
+
+        const { word, lexemeId, grammaticalPosition } = wordObj;
         const item = document.createElement("div");
-        let indexOfDelimiter = word.indexOf(":");
-        let viewWord = word.substring(0, indexOfDelimiter);
-        console.log("after substring" + word);
-        item.textContent = viewWord;
+
+        console.log("lemma: " + word);
+        item.textContent = word;
         item.addEventListener("click", () => {
-            wordLookupInput.value = viewWord;
+            wordLookupInput.value = lexemeId;
             wordSuggestionsBox.innerHTML = ""; // hide suggestions
-            buildWordDetailTable(word);
+            buildWordDetailTable(word, lexemeId, grammaticalPosition);
         });
         wordSuggestionsBox.appendChild(item);
     });
 }
 
+
+
+async function buildWordDetailTable(lemma, lexemeId, grammaticalPosition ){
+    try {
+        if(grammaticalPosition === "NOUN"){
+            console.log(lemma);
+            let wordDetailData = await fetchWordDetailData(lexemeId);
+
+            if (wordDetailData) {
+                renderDeclensionTable(wordDetailData);
+            }
+        }
+        else if(grammaticalPosition === "VERB"){
+            let wordDetailData = await fetchConjugationDetailData(lexemeId);
+            const  activeMoods = wordDetailData.conjugationTableDTOList.filter(
+                d => d.voice === "ACTIVE"
+            );
+            const container = document.getElementById("tables-container");
+            container.innerHTML = ""; // Clear once at the top
+            if (activeMoods) {
+                activeMoods.forEach(renderConjugationTable);
+            }
+        }
+
+    } catch (err) {
+        let message = "Error fetching suggestions: ";
+        console.error(message, err);
+        setStatus(message + lemma);
+    }
+}
+
+
+
 async function fetchWordDetailData(word) {
-    let index = word.indexOf(":");
-    word = word.substring(index + 1).trim();
-    console.log(word);
+
     const uri = declensionDetailURI + encodeURIComponent(word);
     const res = await fetch(uri);
     let jsn = await res.json();
@@ -76,17 +111,13 @@ async function fetchWordDetailData(word) {
     return jsn;
 }
 
-async function buildWordDetailTable(query){
-    try {
-        let wordDetailData = await fetchWordDetailData(query);
-        if (wordDetailData) {
-            renderDeclensionTable(wordDetailData);
-        }
-    } catch (err) {
-        let message = "Error fetching suggestions: ";
-        console.error(message, err);
-        setStatus(message + query);
-    }
+async function fetchConjugationDetailData(word) {
+
+    const uri = conjugationDetailURI + encodeURIComponent(word);
+    const res = await fetch(uri);
+    let jsn = await res.json();
+    console.log(jsn);
+    return jsn;
 }
 
 

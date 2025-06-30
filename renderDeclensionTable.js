@@ -3,6 +3,7 @@ export function renderDeclensionTable(data) {
     const cases = Object.keys(tableData.SINGULAR); // Assume both singular and plural have same cases
 
     const table = document.createElement("table");
+    table.classList.add("latin-table");
     table.classList.add("declension-table");
 
     // Create table header
