@@ -26,7 +26,7 @@ public class ConjugationTableDTO implements InflectionTableDTO {
         this.mood = mood;
     }
 
-   List<TenseDTO> getTenses() {
+   public List<TenseDTO> getTenses() {
         return tenses;
     }
 
