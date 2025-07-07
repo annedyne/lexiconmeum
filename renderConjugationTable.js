@@ -1,11 +1,16 @@
+export function renderConjugationTable(wordDetailData, voice) {
 
-export function renderConjugationTable(data) {
 
-    const { voice, mood, tenses } = data;
+    const  activeMoods = wordDetailData.conjugationTableDTOList.filter(
+        d => d.voice === voice
+    );
+    const container = document.getElementById("tables-container");
+    container.innerHTML = ""; // Clear once at the top
 
-    // Create a table
     const table = document.createElement("table");
     table.classList.add("latin-table");
+    table.id = "conjugation-table";
+    container.appendChild(table);
 
     // Create header row that spans both columns
     const thead = document.createElement("thead");
@@ -13,10 +18,18 @@ export function renderConjugationTable(data) {
     const headerCell = document.createElement("th");
     headerCell.colSpan = 2;
     headerCell.className = "header";
-    headerCell.textContent = `Voice: ${voice}`;
+    headerCell.textContent = `${voice}`;
     headerRow.appendChild(headerCell);
     thead.appendChild(headerRow);
     table.appendChild(thead);
+
+    if (activeMoods) {
+        activeMoods.forEach(buildRows);
+    }
+}
+function buildRows(data) {
+
+    const { mood, tenses } = data;
 
     // Table body with tenses in pairs
     const tbody = document.createElement("tbody");
@@ -50,13 +63,9 @@ export function renderConjugationTable(data) {
             formRow.insertCell().innerHTML = rightForm;
         }
     }
-
+    const table = document.getElementById("conjugation-table");
     table.appendChild(tbody)
-    const container = document.getElementById("tables-container");
-    container.appendChild(table);
 
 
-    function capitalize(str) {
-        return str.charAt(0).toUpperCase() + str.slice(1);
-    }
+
 }

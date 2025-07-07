@@ -61,7 +61,6 @@ function buildWordSuggestionBox(words){
         console.log("lemma: " + word);
         item.textContent = word;
         item.addEventListener("click", () => {
-            wordLookupInput.value = lexemeId;
             wordSuggestionsBox.innerHTML = ""; // hide suggestions
             buildWordDetailTable(word, lexemeId, grammaticalPosition);
         });
@@ -83,20 +82,11 @@ async function buildWordDetailTable(lemma, lexemeId, grammaticalPosition ){
         }
         else if(grammaticalPosition === "VERB"){
             let wordDetailData = await fetchConjugationDetailData(lexemeId);
-            const  activeMoods = wordDetailData.conjugationTableDTOList.filter(
-                d => d.voice === "ACTIVE"
-            );
-            const container = document.getElementById("tables-container");
-            container.innerHTML = ""; // Clear once at the top
+            if (wordDetailData) {
 
-            // Add a voice-level heading once at the top
-            const voiceHeader = document.createElement("h2");
-            voiceHeader.textContent = "Voice: ACTIVE";
-            container.appendChild(voiceHeader);
-
-            if (activeMoods) {
-                activeMoods.forEach(renderConjugationTable);
+                renderConjugationTable(wordDetailData, "ACTIVE");
             }
+
         }
 
     } catch (err) {
