@@ -1,4 +1,20 @@
-# MeaLexica App
+# LexiconMeum App
+
+## Deployment
+
+
+### 🔄 API Contract
+
+##### word search endpoint:
+* given prefix
+  - `GET /api/search/prefix?prefix=<string>`
+    Response: JSON array of matching words (e.g., `["amare", "amatus"]`)
+* given suffix
+  - `GET /api/search/suffix?suffix=<string>`
+    Response: JSON array of matching words (e.g., `["amaturus", "amonibus, "]`)
+
+GET /api/search/prefix?prefix=
+"http://localhost:8080/api/v1"
 
 ## MVP Functional Requirements
 - User should be able to search for a lexeme and get a real-time drop down of suggestions (autocompleted) based on what they’ve typed so far.
