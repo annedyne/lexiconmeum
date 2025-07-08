@@ -1,11 +1,11 @@
-const ENV = "development";
+const ENV = window.location.hostname === "localhost" ? "development" : "production";
 
 const configs = {
     development: {
         apiBaseUrl: "http://localhost:8085/api/v1"
     },
     production: {
-        apiBaseUrl: "http://localhost:8085/api/v1"
+        apiBaseUrl: "/api/v1"
     }
 };
 
