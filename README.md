@@ -80,10 +80,10 @@ This frontend depends on a Spring Boot backend available in a **separate reposit
 ### 🔄 API Contract
 
 * The frontend relies on these endpoints:
-  - `GET /api/search/prefix?prefix=<string>`
+  - `GET /api/v1/search/prefix?prefix=<string>`
   Response: JSON array of matching words (e.g., `["amare", "amatus"]`)
 
-  - `GET /api/search/suffix?suffix=<string>`
+  - `GET /api/v1/search/suffix?suffix=<string>`
    Response: JSON array of matching words (e.g., `["amaturus", "amonibus, "]`)
 
 ### 🌐 CORS
