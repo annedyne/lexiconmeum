@@ -19,7 +19,13 @@ import static com.annepolis.lexiconmeum.web.ApiRoutes.PREFIX;
 import static com.annepolis.lexiconmeum.web.ApiRoutes.SUFFIX;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = {
+                "app.text-search.default-limit=8",
+                "app.text-search.result-limit-max=15"
+        }
+)
 @ActiveProfiles("test")
 class TextSearchControllerIntegrationTest {
 
@@ -62,21 +68,6 @@ class TextSearchControllerIntegrationTest {
     }
 
     @Test
-    void testTextSuggestionResultLimitDefault() throws JsonProcessingException {
-        String url = getFullBaseUrl() + PREFIX + "?prefix=ama";
-
-        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-        String result = response.getBody();
-        assertNotNull(result);
-
-        JsonNode root = objectMapper.readTree(result);
-
-        // Make sure it's an array and check its size
-        assertTrue(root.isArray(), "Response should be a JSON array");
-        assertTrue(root.size() <= 10, "Should return no more than 10 suggestions");
-    }
-
-    @Test
     void testTextSuggestionResultClientLimit() throws JsonProcessingException {
         String url = getFullBaseUrl() + PREFIX + "?prefix=ama" + "&limit=12";
 
@@ -104,5 +95,21 @@ class TextSearchControllerIntegrationTest {
         // Make sure it's an array and check its size
         assertTrue(root.isArray(), "Response should be a JSON array");
         assertTrue(root.size() <= 15, "Should return no more than 15 suggestions");
+    }
+
+    @Test
+    void testTextSuggestionResultLimitDefault() throws JsonProcessingException {
+        String url = getFullBaseUrl() + PREFIX + "?prefix=am";
+
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        String result = response.getBody();
+        assertNotNull(result);
+
+        JsonNode root = objectMapper.readTree(result);
+
+        // Make sure it's an array and check its size
+        assertTrue(root.isArray(), "Response should be a JSON array");
+        logger.info(root.size());
+        assertTrue(root.size() <= 8, "Should return no more than 8 suggestions");
     }
 }
