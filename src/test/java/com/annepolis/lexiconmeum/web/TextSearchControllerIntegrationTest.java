@@ -1,5 +1,8 @@
 package com.annepolis.lexiconmeum.web;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
@@ -14,7 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import static com.annepolis.lexiconmeum.web.ApiRoutes.PREFIX;
 import static com.annepolis.lexiconmeum.web.ApiRoutes.SUFFIX;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -33,6 +36,8 @@ class TextSearchControllerIntegrationTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     String getFullBaseUrl(){
         return baseUrl + ":" + port + path;
@@ -54,5 +59,50 @@ class TextSearchControllerIntegrationTest {
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
         logger.info(response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void testTextSuggestionResultLimitDefault() throws JsonProcessingException {
+        String url = getFullBaseUrl() + PREFIX + "?prefix=ama";
+
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        String result = response.getBody();
+        assertNotNull(result);
+
+        JsonNode root = objectMapper.readTree(result);
+
+        // Make sure it's an array and check its size
+        assertTrue(root.isArray(), "Response should be a JSON array");
+        assertTrue(root.size() <= 10, "Should return no more than 10 suggestions");
+    }
+
+    @Test
+    void testTextSuggestionResultClientLimit() throws JsonProcessingException {
+        String url = getFullBaseUrl() + PREFIX + "?prefix=ama" + "&limit=12";
+
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        String result = response.getBody();
+        assertNotNull(result);
+
+        JsonNode root = objectMapper.readTree(result);
+
+        // Make sure it's an array and check its size
+        assertTrue(root.isArray(), "Response should be a JSON array");
+        assertTrue(root.size() <= 12, "Should return no more than 12 suggestions");
+    }
+
+    @Test
+    void testTextSuggestionResultClientLimitMax() throws JsonProcessingException {
+        String url = getFullBaseUrl() + PREFIX + "?prefix=ama" + "&limit=100";
+
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        String result = response.getBody();
+        assertNotNull(result);
+
+        JsonNode root = objectMapper.readTree(result);
+
+        // Make sure it's an array and check its size
+        assertTrue(root.isArray(), "Response should be a JSON array");
+        assertTrue(root.size() <= 15, "Should return no more than 15 suggestions");
     }
 }
