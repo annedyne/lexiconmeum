@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: lexiconmeum
+latin:
+  data-file: classpath:lexicalData.jsonl
+app:
+  text-search:
+    default-limit: 8
+    result-limit-max: 15
+api:
+  base-path: /api/v1
+server:
+  port: 8085

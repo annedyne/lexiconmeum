@@ -1,4 +1,4 @@
-HELP.md
+### Maven
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
@@ -31,3 +31,5 @@ build/
 
 ### VS Code ###
 .vscode/
+HELP.md
+../../../Library/Application Support/JetBrains/IntelliJIdea2023.2/scratches/jsonExample.jsonl

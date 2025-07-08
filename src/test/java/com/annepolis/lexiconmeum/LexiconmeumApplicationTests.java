@@ -8,6 +8,6 @@ class LexiconmeumApplicationTests {
 
     @Test
     void contextLoads() {
+        // This will pass if the application context starts successfully
     }
-
 }
