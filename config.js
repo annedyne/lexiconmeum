@@ -2,10 +2,10 @@ const ENV = "development";
 
 const configs = {
     development: {
-        apiBaseUrl: "http://localhost:8080/api/v1"
+        apiBaseUrl: "http://localhost:8085/api/v1"
     },
     production: {
-        apiBaseUrl: ""
+        apiBaseUrl: "http://localhost:8085/api/v1"
     }
 };
 
