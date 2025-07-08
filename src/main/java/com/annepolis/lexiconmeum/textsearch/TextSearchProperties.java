@@ -7,7 +7,9 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "app.text-search")
 public class TextSearchProperties {
 
-    private int defaultLimit = 10; // fallback if yaml missing
+    private int defaultLimit = 8;
+    private int resultLimitMax = 20;
+
 
     public int getDefaultLimit() {
         return defaultLimit;
@@ -15,5 +17,13 @@ public class TextSearchProperties {
 
     public void setDefaultLimit(int defaultLimit) {
         this.defaultLimit = defaultLimit;
+    }
+
+    public int getResultLimitMax() {
+        return resultLimitMax;
+    }
+
+    public void setResultLimitMax(int resultLimitMax) {
+        this.resultLimitMax = resultLimitMax;
     }
 }

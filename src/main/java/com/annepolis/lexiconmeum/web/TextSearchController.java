@@ -36,10 +36,8 @@ public class TextSearchController {
         return textSearchService.getWordsEndingWith(suffix, getEffectiveLimit(limit));
     }
 
-    private int getEffectiveLimit(Integer limit){
-        return (limit == null || limit > searchProperties.getDefaultLimit())
-                ? searchProperties.getDefaultLimit()
-                : limit;
+    private int getEffectiveLimit(Integer clientLimit){
+        return (clientLimit == null ? searchProperties.getDefaultLimit() :  Math.min(clientLimit, searchProperties.getResultLimitMax()));
     }
 
 
