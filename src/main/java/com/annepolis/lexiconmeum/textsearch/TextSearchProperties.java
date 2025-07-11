@@ -1,9 +1,7 @@
 package com.annepolis.lexiconmeum.textsearch;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
-@Component
 @ConfigurationProperties(prefix = "app.text-search")
 public class TextSearchProperties {
 
