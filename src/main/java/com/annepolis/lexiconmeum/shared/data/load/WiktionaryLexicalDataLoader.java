@@ -22,15 +22,16 @@ class WiktionaryLexicalDataLoader implements LexemeSinkLoader {
     private final Resource lexicalData;
     private final List<LexemeSink> lexemeSinks;
 
-    public WiktionaryLexicalDataLoader(List<LexemeSink> lexemeSinks, WiktionaryLexicalDataParser parser, @Value("${latin.data-file}")
-    Resource dataFile) {
+    public WiktionaryLexicalDataLoader(List<LexemeSink> lexemeSinks, WiktionaryLexicalDataParser parser, LoadProperties loadProperties) {
         this.parser = parser;
-        this.lexicalData = dataFile;
+        this.parser.setParseMode(loadProperties.getParseMode());
+        this.lexicalData = loadProperties.getDataFile();
         this.lexemeSinks = lexemeSinks;
     }
 
     @PostConstruct
     private void loadLexicalData() throws IOException {
+
         try (Reader reader = new InputStreamReader(lexicalData.getInputStream())) {
             logger.info("Initiating lexical data load");
             parser.parseJsonl(reader, lexeme -> {
@@ -38,6 +39,7 @@ class WiktionaryLexicalDataLoader implements LexemeSinkLoader {
                    sink.accept(lexeme);
                 }
             });
+            logger.info("Finished lexical data load");
         }
     }
 

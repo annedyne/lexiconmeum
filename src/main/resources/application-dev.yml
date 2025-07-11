@@ -1,0 +1,7 @@
+app:
+  load:
+    data-file: classpath:lexicalData.jsonl
+
+logging:
+  level:
+    com.annepolis.lexiconmeum: DEBUG
