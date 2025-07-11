@@ -3,6 +3,7 @@ package com.annepolis.lexiconmeum.lexeme.detail.grammar;
 import com.annepolis.lexiconmeum.lexeme.detail.InflectionBuilder;
 import com.annepolis.lexiconmeum.lexeme.detail.noun.Declension;
 import com.annepolis.lexiconmeum.lexeme.detail.verb.Conjugation;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -39,6 +40,16 @@ public enum InflectionFeature {
     CASE_VOCATIVE("vocative", builder -> {
         if (builder instanceof Declension.Builder declBuilder) {
             declBuilder.setGrammaticalCase(GrammaticalCase.VOCATIVE);
+        }
+    }),
+    CASE_LOCATIVE("locative", builder -> {
+        if (builder instanceof Declension.Builder declBuilder) {
+            declBuilder.setGrammaticalCase(GrammaticalCase.LOCATIVE);
+        }
+    }),
+    CASE_OBLIQUE("oblique", builder -> {
+        if (builder instanceof Declension.Builder declBuilder) {
+            declBuilder.setGrammaticalCase(GrammaticalCase.OBLIQUE);
         }
     }),
 
@@ -163,6 +174,14 @@ public enum InflectionFeature {
     public static InflectionFeature resolveOrThrow(String tag) {
         return fromTag(tag)
                 .orElseThrow(() -> new IllegalArgumentException("Unknown grammatical feature tag: " + tag));
+    }
+
+    public static Optional<InflectionFeature> resolveWithWarning(String tag, Logger logger) {
+        Optional<InflectionFeature> inflectionFeature = fromTag(tag);
+        if (inflectionFeature.isEmpty()) {
+            logger.trace("Unknown inflection feature tag: '{}'", tag);
+        }
+        return inflectionFeature;
     }
 
 

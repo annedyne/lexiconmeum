@@ -7,5 +7,7 @@ public enum GrammaticalCase {
     DATIVE,
     ACCUSATIVE,
     ABLATIVE,
-    VOCATIVE
+    VOCATIVE,
+    LOCATIVE,
+    OBLIQUE
 }
