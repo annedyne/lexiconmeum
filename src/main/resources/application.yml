@@ -4,7 +4,7 @@ spring:
 
 app:
   load:
-    data-file: classpath:lexicalData.jsonl
+    data-file: file:/opt/lexiconmeum/data/lexicalData.jsonl
     parse-mode: LENIENT
 
   text-search:
@@ -16,3 +16,7 @@ api:
 
 server:
   port: 8085
+
+logging:
+  level:
+    root: INFO
