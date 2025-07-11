@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -40,6 +41,15 @@ class WiktionaryLexicalDataParser {
     );
 
     private final ObjectMapper mapper = new ObjectMapper();
+    private ParseMode parseMode;
+
+    public ParseMode getParseMode() {
+        return parseMode;
+    }
+
+    public void setParseMode(ParseMode parseMode) {
+        this.parseMode = parseMode;
+    }
 
     public void parseJsonl(Reader reader, Consumer<Lexeme> consumer) throws IOException {
         BufferedReader br = new BufferedReader(reader);
@@ -47,7 +57,7 @@ class WiktionaryLexicalDataParser {
         while ((line = readJsonLine(br)) != null) {
             try {
                 JsonNode root = mapper.readTree(line);
-                consumer.accept(buildLexeme(root));
+                buildLexeme(root).ifPresent(consumer);
             } catch(JsonEOFException eofException) {
                 logger.error("Check that JSONL is correctly formatted and not 'prettified'", eofException);
                 throw eofException;
@@ -59,17 +69,26 @@ class WiktionaryLexicalDataParser {
         return br.readLine();
     }
 
-    private Lexeme buildLexeme(JsonNode root) {
+    private Optional<Lexeme> buildLexeme(JsonNode root) {
         String lemma = root.path(WORD.get()).asText();
         String posTag = root.path(POSITION.get()).asText();
 
-        GrammaticalPosition position = GrammaticalPosition.resolveOrThrow(posTag);
+        Optional<GrammaticalPosition> optionalPosition = GrammaticalPosition.resolveWithWarning(posTag, logger);
+
+        if (optionalPosition.isEmpty()) {
+            return Optional.empty();
+        }
+
+        GrammaticalPosition position = optionalPosition.get();
+
         LexemeBuilder lexemeBuilder = new LexemeBuilder(lemma, position);
 
         addSenses(root.path(SENSES.get()), lexemeBuilder);
         addForms(root.path(FORMS.get()), lexemeBuilder);
 
-        return lexemeBuilder.build();
+
+        return new SafeBuilder<>("LexemeBuilder", lexemeBuilder::build).build(logger, getParseMode());
+
     }
 
     private void addForms(JsonNode formsNode, LexemeBuilder lexemeBuilder) {
@@ -87,9 +106,9 @@ class WiktionaryLexicalDataParser {
     private void addDeclensionForms(JsonNode formsNode, LexemeBuilder lexemeBuilder) {
         for (JsonNode formNode : formsNode) {
             if (isDeclensionForm(formNode)) {
-                lexemeBuilder.addInflection(buildDeclension(formNode));
+                buildDeclension(formNode, getParseMode()).ifPresent(lexemeBuilder::addInflection);
             } else {
-                setGender(formNode, lexemeBuilder);
+                getGender(formNode).ifPresent(lexemeBuilder::setGender);
             }
         }
     }
@@ -110,15 +129,15 @@ class WiktionaryLexicalDataParser {
                                              // doesn't include person so excluding for now
     }
 
-    private void setGender(JsonNode formNode, LexemeBuilder lexemeBuilder){
+    private Optional<GrammaticalGender> getGender(JsonNode formNode){
         JsonNode tags = formNode.path(TAGS.get());
         for (int i = 0; i < tags.size(); i++) {
             //if first tag is CANONICAL then next is gender
             if (CANONICAL.name().equalsIgnoreCase(tags.get(i).asText()) && i + 1 < tags.size()) {
-                lexemeBuilder.setGender(GrammaticalGender.resolveOrThrow(tags.get(i + 1).asText()));
-                break;
+               return GrammaticalGender.fromTag(tags.get(i + 1).asText());
             }
         }
+        return Optional.empty();
     }
 
     private void addSenses(JsonNode sensesNode, LexemeBuilder lexemeBuilder) {
@@ -142,23 +161,23 @@ class WiktionaryLexicalDataParser {
         return builder.build();
     }
 
-    Inflection buildDeclension(JsonNode formNode){
+    Optional<Declension> buildDeclension(JsonNode formNode, ParseMode mode) {
         Declension.Builder builder = new Declension.Builder(formNode.path(FORM.get()).asText());
 
         for (JsonNode tag : formNode.path(TAGS.get())) {
-            InflectionFeature.resolveOrThrow(tag.asText()).applyTo(builder);
-
+            InflectionFeature.resolveWithWarning(tag.asText(), logger)
+                    .ifPresent(feature -> feature.applyTo(builder));
         }
-        return builder.build();
-    }
 
+        return new SafeBuilder<>("Declension", builder::build).build(logger, mode);
+    }
     private void addConjugationForms(JsonNode formsNode, LexemeBuilder lexemeBuilder) {
         for (JsonNode formNode : formsNode) {
             if (isConjugationForm(formNode)) {
                 try {
                     lexemeBuilder.addInflection(buildConjugation(formNode));
                 } catch (IllegalArgumentException | IllegalStateException ex) {
-                    logger.warn("Skipping invalid form: {}", ex.getMessage());
+                    logger.trace("Skipping invalid form: {}", ex.getMessage());
                 }
             }
         }
