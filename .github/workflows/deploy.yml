@@ -1,10 +1,10 @@
 name: Deploy LexiconMeum Backend
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
-      - add-cicd
 
 jobs:
   deploy:
