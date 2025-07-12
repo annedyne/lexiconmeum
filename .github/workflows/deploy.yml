@@ -1,0 +1,52 @@
+name: Deploy LexiconMeum Backend
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_KEY }}
+
+      - name: Add server to known hosts
+        run: |
+          ssh-keyscan -H 5.161.82.186 >> ~/.ssh/known_hosts
+
+      - name: Build JAR with Maven
+        run: |
+          mvn -B clean package -DskipTests
+
+      - name: Get JAR path
+        id: jar
+        run: |
+          JAR_PATH=$(find target -type f -name "*.jar" | grep -v 'original-' | head -n 1)
+          echo "jar_path=$JAR_PATH" >> $GITHUB_OUTPUT
+
+      - name: Deploy to VPS with rollback support
+        run: |
+          JAR_PATH=${{ steps.jar.outputs.jar_path }}
+          BASENAME=$(basename $JAR_PATH)
+          REMOTE_SERVER="admin@5.161.82.186"
+          REMOTE_HOME_DIR="~"
+          REMOTE_APP_DIR="/opt/lexiconmeum"
+
+          # Upload to home dir
+          rsync -avz -e "ssh" "$JAR_PATH" "$REMOTE_SERVER:$REMOTE_HOME_DIR/$BASENAME"
+
+          # Move to root-owned app dir and update symlink
+          ssh $REMOTE_SERVER << EOF
+            set -e
+            sudo mv $REMOTE_HOME_DIR/$BASENAME $REMOTE_APP_DIR/$BASENAME
+            sudo ln -sf $REMOTE_APP_DIR/$BASENAME $REMOTE_APP_DIR/app.jar
+            sudo systemctl restart lexiconmeum.service
+          EOF
