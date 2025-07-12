@@ -9,13 +9,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      MY_VAR: ${{ secrets.DEPLOY_KEY }}
 
     steps:
-      - name: Use environment variable
-        run: echo "My variable is $MY_VAR"
-
       - name: Checkout code
         uses: actions/checkout@v3
 
