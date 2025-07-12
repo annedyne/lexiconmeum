@@ -1,11 +1,9 @@
 package com.annepolis.lexiconmeum.web;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
-@Component
 @ConfigurationProperties(prefix = "api")
-public class ApiProperties {
+public class WebApiProperties {
 
     private String basePath;
 
