@@ -45,7 +45,7 @@ jobs:
           rsync -avz -e "ssh" "$JAR_PATH" "$REMOTE_SERVER:$REMOTE_HOME_DIR/$BASENAME"
 
           # Move to root-owned app dir and update symlink
-          ssh $REMOTE_SERVER << EOF
+          ssh -tt $REMOTE_SERVER << EOF
             set -e
             sudo mv $REMOTE_HOME_DIR/$BASENAME $REMOTE_APP_DIR/$BASENAME
             sudo ln -sf $REMOTE_APP_DIR/$BASENAME $REMOTE_APP_DIR/app.jar
