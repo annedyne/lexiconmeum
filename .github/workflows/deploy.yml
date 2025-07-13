@@ -43,7 +43,7 @@ jobs:
           REMOTE_APP_DIR="/opt/lexiconmeum"
 
           # Upload to home dir
-          rsync -avz -e "ssh" "$JAR_PATH" "$REMOTE_SERVER:$REMOTE_HOME_DIR/$BASENAME"
+          rsync -avz -e "ssh" "$JAR_PATH" "$REMOTE_USER@$REMOTE_SERVER:$REMOTE_HOME_DIR/$BASENAME"
 
           # Move to root-owned app dir and update symlink
           ssh $REMOTE_USER@$REMOTE_SERVER << EOF
