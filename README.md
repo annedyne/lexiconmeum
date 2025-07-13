@@ -1,7 +1,20 @@
-# LexiconMeum App
+# LexiconMeum Backend ![Status](https://img.shields.io/badge/status-in--development-yellow)
+> 🌐 Live at: [https://lexicon.annedyne.net](https://lexicon.annedyne.net)
+
+This is the backend service for **LexiconMeum**, a Latin vocabulary search and grammar tool.  
+It provides a RESTful API for querying word definitions, grammatical forms, and lexical data.
+
+Built with **Spring Boot**, it loads pre-parsed data from Wiktionary and serves search results in real time.  
+Designed for fast lookup, flexible querying, and integration with a React-based frontend.
+
+## Features
+
+- REST API for querying Latin words by prefix or suffix
+- Declension/conjugation info per lexeme
+- JSONL-based data loader with batch processing
+- CORS-enabled for frontend integration
 
 ### 🔄 API Contract
-
 
 ##### word search endpoint:
 
