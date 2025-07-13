@@ -47,7 +47,7 @@ jobs:
           # Move to root-owned app dir and update symlink
           ssh -tt $REMOTE_SERVER << EOF
             set -e
-            mv $REMOTE_HOME_DIR/$BASENAME $REMOTE_APP_DIR/$BASENAME
+            sudo mv $REMOTE_HOME_DIR/$BASENAME $REMOTE_APP_DIR/$BASENAME
             sudo ln -s $REMOTE_APP_DIR/$BASENAME $REMOTE_APP_DIR/lexiconmeum.jar
             sudo systemctl restart lexiconmeum.service
           EOF
