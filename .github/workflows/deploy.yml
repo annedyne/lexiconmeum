@@ -21,7 +21,7 @@ jobs:
 
       - name: Add server to known hosts
         run: |
-          ssh-keyscan -H 5.161.82.186 >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.VPS_IP_PROD }} >> ~/.ssh/known_hosts
 
       - name: Build JAR with Maven
         run: |
@@ -37,7 +37,8 @@ jobs:
         run: |
           JAR_PATH=${{ steps.jar.outputs.jar_path }}
           BASENAME=$(basename $JAR_PATH)
-          REMOTE_SERVER="admin@5.161.82.186"
+          REMOTE_USER=admin
+          REMOTE_SERVER=${{ secrets.VPS_IP_PROD }}
           REMOTE_HOME_DIR="~"
           REMOTE_APP_DIR="/opt/lexiconmeum"
 
@@ -45,7 +46,7 @@ jobs:
           rsync -avz -e "ssh" "$JAR_PATH" "$REMOTE_SERVER:$REMOTE_HOME_DIR/$BASENAME"
 
           # Move to root-owned app dir and update symlink
-          ssh $REMOTE_SERVER << EOF
+          ssh $REMOTE_USER@$REMOTE_SERVER << EOF
             sudo mv $REMOTE_HOME_DIR/$BASENAME $REMOTE_APP_DIR/$BASENAME
             sudo ln -sf $REMOTE_APP_DIR/$BASENAME $REMOTE_APP_DIR/lexiconmeum.jar
             sudo systemctl restart lexiconmeum.service
