@@ -1,2 +1,6 @@
 test:
   base-url: http://localhost
+
+app:
+  load:
+    data-file: classpath:lexicalDataPartial.jsonl

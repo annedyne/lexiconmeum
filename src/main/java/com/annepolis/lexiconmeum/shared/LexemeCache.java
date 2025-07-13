@@ -27,10 +27,10 @@ public class LexemeCache implements LexemeSink, LexemeProvider {
 
     void addLexeme(Lexeme lexeme){
         if(logger.isDebugEnabled()) {
-            logger.debug("accepting lexeme: {}", lexeme);
+            logger.trace("accepting lexeme: {}", lexeme);
         }
         if(lexemeIdToLexemeLookup.containsKey(lexeme.getId())){
-            logger.error( "there are two versions of {} ", lexeme.getId());
+            logger.trace( "there are two versions of {} ", lexeme.getId());
         }
         lexemeIdToLexemeLookup.put(lexeme.getId(), lexeme);
     }
