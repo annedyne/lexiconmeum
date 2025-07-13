@@ -7,11 +7,14 @@ It provides a RESTful API for querying word definitions, grammatical forms, and 
 Built with **Spring Boot**, it loads pre-parsed data from Wiktionary and serves search results in real time.  
 Designed for fast lookup, flexible querying, and integration with a React-based frontend.
 
+Lexical data is sourced from [Wiktionary](https://www.wiktionary.org/) and parsed into a searchable format.
+
+
 ## Features
 
 - REST API for querying Latin words by prefix or suffix
 - Declension/conjugation info per lexeme
-- JSONL-based data loader with batch processing
+- JSONL-based data loader 
 - CORS-enabled for frontend integration
 
 ### 🔄 API Contract
@@ -78,7 +81,6 @@ git commit -am "Start 0.1.2-SNAPSHOT"
 git push origin develop
 ```
 
-
 ## MVP Functional Requirements
 - [X] User should be able to search for a lexeme and get a real-time drop down of suggestions (autocompleted) based on what they’ve typed so far.
 - User should be able to view a detail of the lexeme showing it’s
@@ -129,3 +131,9 @@ Scale
 
 ### Front-End:
 - Current: Javascript Future: React 
+
+## Data Source
+
+This project uses data extracted from [Wiktionary](https://www.wiktionary.org/),  
+which is available under the [Creative Commons Attribution-ShareAlike 3.0 Unported License (CC BY-SA 3.0)](https://creativecommons.org/licenses/by-sa/3.0/).  
+LexiconMeum is not affiliated with or endorsed by Wiktionary or the Wikimedia Foundation.
