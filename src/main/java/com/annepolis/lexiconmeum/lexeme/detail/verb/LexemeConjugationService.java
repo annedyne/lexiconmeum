@@ -10,17 +10,18 @@ import java.util.UUID;
 @Service
 public class LexemeConjugationService {
 
-    private final LexemeConjugationMapper lexemeConjugationMapper;
+    private final LexemeConjugationDetailMapper lexemeConjugationDetailMapper;
     private final LexemeProvider lexemeProvider;
 
-    public LexemeConjugationService(LexemeProvider lexemeProvider, LexemeConjugationMapper lexemeConjugationMapper){
-        this.lexemeConjugationMapper = lexemeConjugationMapper;
+    public LexemeConjugationService(LexemeProvider lexemeProvider, LexemeConjugationDetailMapper lexemeConjugationDetailMapper){
+        this.lexemeConjugationDetailMapper = lexemeConjugationDetailMapper;
         this.lexemeProvider = lexemeProvider;
     }
 
-    public ConjugationGroupDTO getLexemeDetail(UUID lexemeId) {
+    public LexemeConjugationDetailDTO getLexemeDetail(UUID lexemeId) {
         Lexeme lexeme = lexemeProvider.getLexeme(lexemeId);
-        return lexemeConjugationMapper.toInflectionTableDTO(lexeme);
+        return lexemeConjugationDetailMapper.toLexemeDetailDTO(lexeme);
+
     }
 
 }

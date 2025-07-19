@@ -6,5 +6,6 @@ public interface InflectionBuilder<T extends Inflection> {
     T build();
 
     InflectionBuilder<T> setNumber(GrammaticalNumber grammaticalNumber);
+    InflectionBuilder<T> setAlternativeForm(String form);
 }
 

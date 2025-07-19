@@ -1,22 +1,22 @@
 package com.annepolis.lexiconmeum.shared;
 
 import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
+import com.annepolis.lexiconmeum.lexeme.detail.InflectionBuilder;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalGender;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.lexeme.detail.verb.InflectionKey;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
-public class LexemeBuilder {
+public class LexemeBuilder<T extends Inflection> {
 
     private final UUID id;
     private final String lemma;
     private final GrammaticalPosition position;
     private GrammaticalGender gender;
     private final List<Sense> senses = new ArrayList<>();
-    private List<Inflection> inflections = new ArrayList<>();
+    private Map<String, T> inflectionIndex = new HashMap<>();
 
     public LexemeBuilder(String lemma, GrammaticalPosition position){
         this.lemma = lemma;
@@ -62,19 +62,23 @@ public class LexemeBuilder {
         return senses;
     }
 
-    public LexemeBuilder setInflectionList(List<Inflection> inflectionList){
-        this.inflections = inflectionList;
+    public LexemeBuilder<T> addInflection(T inflection){
+        String key = InflectionKey.of(inflection);
+        if (inflectionIndex.containsKey(key)) {
+            T existing = inflectionIndex.get(key);
+            InflectionBuilder<T>  builder = existing.toBuilder();
+            T updated = builder.setAlternativeForm(inflection.getForm()).build();
+            inflectionIndex.put(key, updated);
+        } else {
+            inflectionIndex.put(key, inflection);
+        }
         return this;
     }
 
-    public LexemeBuilder addInflection(Inflection inflection){
-        this.inflections.add(inflection);
-        return this;
+    public Map<String,T> getInflections() {
+        return inflectionIndex;
     }
 
-    public List<Inflection> getInflections() {
-        return inflections;
-    }
 
     public Lexeme build(){
 

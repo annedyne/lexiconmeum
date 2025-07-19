@@ -2,7 +2,7 @@ package com.annepolis.lexiconmeum.web;
 
 import com.annepolis.lexiconmeum.lexeme.detail.noun.DeclensionTableDTO;
 import com.annepolis.lexiconmeum.lexeme.detail.noun.LexemeDeclensionService;
-import com.annepolis.lexiconmeum.lexeme.detail.verb.ConjugationGroupDTO;
+import com.annepolis.lexiconmeum.lexeme.detail.verb.LexemeConjugationDetailDTO;
 import com.annepolis.lexiconmeum.lexeme.detail.verb.LexemeConjugationService;
 import com.annepolis.lexiconmeum.shared.util.JsonDTOLogger;
 import org.apache.logging.log4j.LogManager;
@@ -43,11 +43,11 @@ public class LexemeDetailController {
 
 
     @GetMapping(CONJUGATION)
-    public ConjugationGroupDTO getConjugations(@RequestParam String lexemeId){
+    public LexemeConjugationDetailDTO getConjugations(@RequestParam String lexemeId){
         logger.debug("fetching lexeme: {}", lexemeId);
-        ConjugationGroupDTO tables = lexemeConjugationService.getLexemeDetail(UUID.fromString(lexemeId));
-        jsonDTOLogger.logAsJson(tables);
-        return tables;
+        LexemeConjugationDetailDTO lexemeConjugationDetailDTO = lexemeConjugationService.getLexemeDetail(UUID.fromString(lexemeId));
+        jsonDTOLogger.logAsJson(lexemeConjugationDetailDTO);
+        return lexemeConjugationDetailDTO;
     }
 
 }

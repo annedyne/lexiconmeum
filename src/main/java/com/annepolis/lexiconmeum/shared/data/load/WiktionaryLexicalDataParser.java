@@ -78,32 +78,38 @@ class WiktionaryLexicalDataParser {
         if (optionalPosition.isEmpty()) {
             return Optional.empty();
         }
-
         GrammaticalPosition position = optionalPosition.get();
 
-        LexemeBuilder lexemeBuilder = new LexemeBuilder(lemma, position);
-
-        addSenses(root.path(SENSES.get()), lexemeBuilder);
-        addForms(root.path(FORMS.get()), lexemeBuilder);
-
-
-        return new SafeBuilder<>("LexemeBuilder", lexemeBuilder::build).build(logger, getParseMode());
-
-    }
-
-    private void addForms(JsonNode formsNode, LexemeBuilder lexemeBuilder) {
-        if (!formsNode.isArray()) return;
-
-        String pos = lexemeBuilder.getPosition().name();
-
-        if (NOUN.get().equalsIgnoreCase(pos)) {
-            addDeclensionForms(formsNode, lexemeBuilder);
-        } else if (VERB.get().equalsIgnoreCase(pos)) {
-            addConjugationForms(formsNode, lexemeBuilder);
+        switch (position) {
+            case NOUN:
+                return buildNounLexeme(root, lemma, position);
+            case VERB:
+                return buildVerbLexeme(root, lemma, position);
+            default:
+                logger.debug("Unsupported position: {}", position);
+                return Optional.empty();
         }
     }
 
-    private void addDeclensionForms(JsonNode formsNode, LexemeBuilder lexemeBuilder) {
+    private Optional<Lexeme> buildNounLexeme(JsonNode root, String lemma, GrammaticalPosition position) {
+        LexemeBuilder<Declension> builder = new LexemeBuilder<>(lemma, position);
+        addSenses(root.path(SENSES.get()), builder);
+        addDeclensionForms(root.path(FORMS.get()), builder);
+
+        return new SafeBuilder<>("LexemeBuilder", builder::build)
+                .build(logger, getParseMode());
+    }
+
+    private Optional<Lexeme> buildVerbLexeme(JsonNode root, String lemma, GrammaticalPosition position) {
+        LexemeBuilder<Conjugation> builder = new LexemeBuilder<>(lemma, position);
+        addSenses(root.path(SENSES.get()), builder);
+        addConjugationForms(root.path(FORMS.get()), builder);
+
+        return new SafeBuilder<>("LexemeBuilder", builder::build)
+                .build(logger, getParseMode());
+    }
+
+    private void addDeclensionForms(JsonNode formsNode, LexemeBuilder<Declension> lexemeBuilder) {
         for (JsonNode formNode : formsNode) {
             if (isDeclensionForm(formNode)) {
                 buildDeclension(formNode, getParseMode()).ifPresent(lexemeBuilder::addInflection);
@@ -140,7 +146,7 @@ class WiktionaryLexicalDataParser {
         return Optional.empty();
     }
 
-    private void addSenses(JsonNode sensesNode, LexemeBuilder lexemeBuilder) {
+    private <T extends Inflection> void addSenses(JsonNode sensesNode, LexemeBuilder<T> lexemeBuilder) {
         if (sensesNode.isArray()) {
             for (JsonNode senseNode : sensesNode) {
                 lexemeBuilder.addSense(buildSense(senseNode));
@@ -171,7 +177,7 @@ class WiktionaryLexicalDataParser {
 
         return new SafeBuilder<>("Declension", builder::build).build(logger, mode);
     }
-    private void addConjugationForms(JsonNode formsNode, LexemeBuilder lexemeBuilder) {
+    private void addConjugationForms(JsonNode formsNode, LexemeBuilder<Conjugation> lexemeBuilder) {
         for (JsonNode formNode : formsNode) {
             if (isConjugationForm(formNode)) {
                 try {
@@ -182,8 +188,7 @@ class WiktionaryLexicalDataParser {
             }
         }
     }
-
-    Inflection buildConjugation(JsonNode formNode){
+    Conjugation buildConjugation(JsonNode formNode){
         Conjugation.Builder builder = new Conjugation.Builder(formNode.path(FORM.get()).asText());
         List<String> tags = new ArrayList<>();
         for (JsonNode tag : formNode.path(TAGS.get())) {

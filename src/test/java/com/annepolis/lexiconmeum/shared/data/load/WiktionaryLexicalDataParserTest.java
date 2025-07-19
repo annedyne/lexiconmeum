@@ -4,7 +4,9 @@ import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalTense;
 import com.annepolis.lexiconmeum.lexeme.detail.verb.Conjugation;
+import com.annepolis.lexiconmeum.lexeme.detail.verb.InflectionKey;
 import com.annepolis.lexiconmeum.shared.Lexeme;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,6 +15,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
@@ -29,6 +32,23 @@ class WiktionaryLexicalDataParserTest {
 
     @Autowired
     private WiktionaryLexicalDataParser parser;
+
+    private List<Lexeme> verbLexemes;
+    private List<Lexeme> nounLexemes;
+
+    public List<Lexeme> getVerbLexemes() throws IOException {
+        if(verbLexemes == null) {
+            parseVerbLexemes();
+        }
+        return verbLexemes;
+    }
+
+    public List<Lexeme> getNounLexemes() throws IOException {
+        if(nounLexemes == null) {
+            parseNounLexemes();
+        }
+        return nounLexemes;
+    }
 
     @Test
     void resourceExists() {
@@ -48,7 +68,7 @@ class WiktionaryLexicalDataParserTest {
      * Using the parser to test the json file
      */
     @Test
-    void JsonlFileParsesWithoutError()  {
+    void JsonlFileParsesWithoutError() {
         Resource resource = resourceLoader.getResource("classpath:testDataRaw.jsonl");
         assertDoesNotThrow(() -> {
             try (Reader reader = new InputStreamReader(resource.getInputStream())) {
@@ -83,41 +103,71 @@ class WiktionaryLexicalDataParserTest {
     }
 
     @Test
-    void testLoadNoun() throws Exception {
+    void DeclensionsInflectionsLoaded() throws Exception {
+      Lexeme lexeme = getNounLexemes().stream()
+           .filter(g -> g.getLemma().equals("poculum"))
+           .findFirst()
+           .orElseThrow(() -> new AssertionError("Missing noun lemma 'poculum'"));
+
+        lexeme.getInflections().stream()
+            .filter(i -> i.getForm().equals("pōculī"))
+            .findFirst()
+            .orElseThrow(() -> new AssertionError("Missing genitive form of noun 'poculum"));
+    }
+
+    @Test
+    void glossesAreParsedAndPopulated() throws Exception {
+        getVerbLexemes().get(0).getSenses().stream()
+                .filter(s -> s.getGloss().contains("to love"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Missing gloss 'to love'"));
+    }
+
+    @Test
+    void parserMapsFutureAndPerfectTagsToFuturePerfectTense() throws Exception {
+        Inflection tenseTag = getVerbLexemes().get(0).getInflections().stream()
+                .filter(g -> g.getForm().equals("amāverō"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Missing future-perfect test form"));
+
+        assertEquals(GrammaticalTense.FUTURE_PERFECT, ((Conjugation) tenseTag).getTense());
+    }
+
+    @Test
+    void InflectionsWithDuplicateTagsAreSetAsAlternativeForms() throws IOException {
+        getVerbLexemes().get(0).getInflections().stream()
+                .filter(g -> "amārō".equals(g.getAlternativeForm()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Missing future-perfect test form"));
+    }
+
+    @Test
+    void verbPrinciplePartsAreParsedAndLoadedIntoModel() throws IOException {
+        InflectionKey builder = new InflectionKey();
+        String key = builder.buildFirstPrincipalPartKey();
+        Inflection inflection  = getVerbLexemes().stream()
+                .filter(l -> l.getLemma().equals("amo")) //note the lemma in wikt data doesn't have a macron
+                .findFirst()
+                .map(l -> l.getInflectionIndex().get(key))
+                .orElse(null);
+        Assertions.assertNotNull(inflection);
+    }
+
+    private void parseNounLexemes() throws IOException {
         Resource resource = resourceLoader.getResource("classpath:testDataNoun.jsonl");
         try (Reader reader = new InputStreamReader(resource.getInputStream())) {
             List<Lexeme> lexemes = new ArrayList<>();
             parser.parseJsonl(reader, lexemes::add);
-            assertEquals("poculum", lexemes.get(0).getLemma());
-
+            nounLexemes = lexemes;
         }
     }
 
-    @Test
-    void inflectionsAreLoaded() throws Exception {
-        Resource resource = resourceLoader.getResource("classpath:testDataNoun.jsonl");
-        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
-            List<Lexeme> lexemes = new ArrayList<>();
-            parser.parseJsonl(reader, lexemes::add);
-            assertEquals("pōculum", lexemes.get(0).getInflections().get(0).toString());
-
-        }
-    }
-
-    @Test
-    void parserMapsFutureAndPerfectTagsToFuturePerfectTense() throws Exception{
+    private void parseVerbLexemes() throws IOException {
         Resource resource = resourceLoader.getResource("classpath:testDataVerb.jsonl");
         try (Reader reader = new InputStreamReader(resource.getInputStream())) {
             List<Lexeme> lexemes = new ArrayList<>();
             parser.parseJsonl(reader, lexemes::add);
-            Inflection tenseTag = lexemes.get(0).getInflections().stream()
-                    .filter(g -> g.getForm().equals("amāverō"))
-                    .findFirst()
-                    .orElseThrow(() -> new AssertionError("Missing future-perfect test form"));
-
-            assertEquals(GrammaticalTense.FUTURE_PERFECT,  ((Conjugation)tenseTag).getTense());
+            verbLexemes = lexemes;
         }
     }
-
-
 }

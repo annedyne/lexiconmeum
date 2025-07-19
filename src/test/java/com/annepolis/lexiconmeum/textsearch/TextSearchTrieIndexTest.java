@@ -51,7 +51,7 @@ class TextSearchTrieIndexTest {
             underTest.insert(inflection.getForm(), lexeme.getId());
         }
         List<String> results = underTest.search("amico", 20);
-        assertEquals(2, results.size());
+        assertEquals(4, results.size());
     }
 
     @Test
@@ -64,7 +64,7 @@ class TextSearchTrieIndexTest {
             }
         }
         List<String> results = underTest.search(new StringBuilder("is").reverse().toString(), 20);
-        assertEquals(6, results.size());
+        assertEquals(7, results.size());
     }
 
 

@@ -5,6 +5,7 @@ import com.annepolis.lexiconmeum.lexeme.detail.noun.Declension;
 import com.annepolis.lexiconmeum.lexeme.detail.verb.Conjugation;
 import com.annepolis.lexiconmeum.shared.Lexeme;
 import com.annepolis.lexiconmeum.shared.LexemeBuilder;
+import com.annepolis.lexiconmeum.shared.Sense;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,7 @@ import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalNumber.
 import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalNumber.SINGULAR;
 import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPerson.*;
 import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition.VERB;
+import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalTense.PERFECT;
 import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalTense.PRESENT;
 import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalVoice.ACTIVE;
 import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalVoice.PASSIVE;
@@ -30,9 +32,8 @@ public class TestUtil {
         lexBuilder.addInflection(getNewTestDeclension( SINGULAR, ACCUSATIVE, "amīcum"));
         lexBuilder.addInflection(getNewTestDeclension( SINGULAR, VOCATIVE, "amīce"));
         lexBuilder.addInflection(getNewTestDeclension( SINGULAR, GENITIVE, "amīcī"));
-        lexBuilder.addInflection(getNewTestDeclension( SINGULAR, ABLATIVE, "amīce"));
-        lexBuilder.addInflection(getNewTestDeclension( SINGULAR, DATIVE, "amīce"));
-        lexBuilder.addInflection(getNewTestDeclension( SINGULAR, VOCATIVE, "amīce"));
+        lexBuilder.addInflection(getNewTestDeclension( SINGULAR, ABLATIVE, "amīcō"));
+        lexBuilder.addInflection(getNewTestDeclension( SINGULAR, DATIVE, "amīcō"));
 
         lexBuilder.addInflection(getNewTestDeclension( PLURAL, NOMINATIVE, "amīcī"));
         lexBuilder.addInflection(getNewTestDeclension( PLURAL, ACCUSATIVE, "amīcōs"));
@@ -45,8 +46,10 @@ public class TestUtil {
 
     }
 
+
+
     private static Declension getNewTestDeclension(GrammaticalNumber number, GrammaticalCase gramCase, String form) {
-        return new Declension.Builder( form).setGrammaticalCase(gramCase).setNumber(number).build();
+        return new Declension.Builder(form).setGrammaticalCase(gramCase).setNumber(number).build();
     }
     public static Lexeme getNewTestVerbLexeme(){
         LexemeBuilder builder = new LexemeBuilder("amo", VERB);
@@ -84,8 +87,19 @@ public class TestUtil {
         buildConjugation(builder, "amēmini", PASSIVE, SUBJUNCTIVE, SECOND, PRESENT, PLURAL);
         buildConjugation(builder, "amentur", PASSIVE, SUBJUNCTIVE, THIRD, PRESENT, PLURAL);
 
-        builder.addInflection(conjugationBuilder.build());
+        buildConjugation(builder, "amāvī", ACTIVE, INDICATIVE, FIRST, PERFECT, SINGULAR);
+        buildConjugation(builder, "amāvīsti", ACTIVE, INDICATIVE, SECOND, PERFECT, SINGULAR);
+        buildConjugation(builder, "amāvit", ACTIVE, INDICATIVE, THIRD, PERFECT, SINGULAR);
+        buildConjugation(builder, "amāvīmus", ACTIVE, INDICATIVE, FIRST, PERFECT, PLURAL);
+        buildConjugation(builder, "amāvītis", ACTIVE, INDICATIVE, SECOND, PERFECT, PLURAL);
+        buildConjugation(builder, "amāverunt", ACTIVE, INDICATIVE, THIRD, PERFECT, PLURAL);
 
+        buildConjugation(builder, "amātus", PASSIVE, INDICATIVE, FIRST, PERFECT, SINGULAR);
+
+
+
+        builder.addInflection(conjugationBuilder.build());
+        builder.addSense(getNewTestSense());
         return builder.build();
 
     }
@@ -96,6 +110,12 @@ public class TestUtil {
             Conjugation.Builder conjugationBuilder = new Conjugation.Builder(form);
             conjugationBuilder.setVoice(voice).setMood(mood).setPerson(person).setTense(tense).setNumber(number);
             builder.addInflection(conjugationBuilder.build());
+    }
+
+    private static Sense getNewTestSense(){
+        Sense.Builder builder = new Sense.Builder();
+        builder.addGloss("to love");
+        return builder.build();
     }
 
     public static List<Lexeme> getMixedPositionTestLexemes(){
