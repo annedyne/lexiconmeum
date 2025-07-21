@@ -18,7 +18,7 @@ public class LexemeDeclensionService {
     }
 
     public DeclensionTableDTO getLexemeDetail(UUID lexemeId) {
-        Lexeme lexeme = lexemeProvider.getLexeme(lexemeId);
+        Lexeme<Declension> lexeme = lexemeProvider.getLexemeOfType(lexemeId, Declension.class);
         return lexemeDeclensionMapper.toInflectionTableDTO(lexeme);
     }
 }

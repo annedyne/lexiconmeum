@@ -3,6 +3,8 @@ package com.annepolis.lexiconmeum.textsearch;
 import com.annepolis.lexiconmeum.TestUtil;
 import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.lexeme.detail.noun.Declension;
+import com.annepolis.lexiconmeum.lexeme.detail.verb.Conjugation;
 import com.annepolis.lexiconmeum.shared.Lexeme;
 import com.annepolis.lexiconmeum.shared.LexemeBuilder;
 import org.junit.jupiter.api.Test;
@@ -27,11 +29,11 @@ class TextSearchTrieIndexTest {
     void trieReturnsAllMatchingWordsGivenPrefix(){
         String prefix = "test";
         String word = prefix + "word";
-        LexemeBuilder lexemeBuilder = new LexemeBuilder(word, GrammaticalPosition.NOUN);
-        Lexeme lexeme = lexemeBuilder.build();
+        LexemeBuilder<Declension> dLexemeBuilder = new LexemeBuilder(word, GrammaticalPosition.NOUN);
+        Lexeme lexeme = dLexemeBuilder.build();
 
-        lexemeBuilder = new LexemeBuilder( word, GrammaticalPosition.VERB);
-        Lexeme lexeme2 = lexemeBuilder.build();
+        LexemeBuilder<Conjugation> cLexemeBuilder = new LexemeBuilder( word, GrammaticalPosition.VERB);
+        Lexeme lexeme2 = cLexemeBuilder.build();
 
         TextSearchTrieIndex underTest = new TextSearchTrieIndex(new TextSearchSuggestionMapper());
         underTest.insert(lexeme.getLemma(), lexeme.getId());
@@ -46,7 +48,7 @@ class TextSearchTrieIndexTest {
     @Test
     void givenPrefixReturnsAllMatches(){
         TextSearchTrieIndex underTest = new TextSearchTrieIndex(new TextSearchSuggestionMapper());
-        Lexeme lexeme = TestUtil.getNewTestNounLexeme();
+        Lexeme<?> lexeme = TestUtil.getNewTestNounLexeme();
         for (Inflection inflection : lexeme.getInflections()){
             underTest.insert(inflection.getForm(), lexeme.getId());
         }
@@ -57,8 +59,8 @@ class TextSearchTrieIndexTest {
     @Test
     void givenSuffixReturnsAllMatches(){
         TextSearchTrieIndex underTest = new TextSearchTrieIndex(new TextSearchSuggestionMapper());
-        List<Lexeme> lexemes = TestUtil.getMixedPositionTestLexemes();
-        for(Lexeme lexeme : lexemes) {
+        List<Lexeme<?>> lexemes = TestUtil.getMixedPositionTestLexemes();
+        for(Lexeme<?> lexeme : lexemes) {
             for (String word : lexeme.getInflections().stream().map( inflection -> new StringBuilder(inflection.getForm()).reverse().toString()).toList()){
                     underTest.insert(word, lexeme.getId());
             }

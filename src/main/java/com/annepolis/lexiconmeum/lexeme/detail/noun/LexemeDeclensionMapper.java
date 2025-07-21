@@ -1,6 +1,5 @@
 package com.annepolis.lexiconmeum.lexeme.detail.noun;
 
-import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
 import com.annepolis.lexiconmeum.lexeme.detail.LexemeInflectionMapper;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalNumber;
@@ -11,22 +10,17 @@ import java.util.EnumMap;
 import java.util.Map;
 
 @Component
-class LexemeDeclensionMapper implements LexemeInflectionMapper {
+class LexemeDeclensionMapper implements LexemeInflectionMapper<Declension> {
 
     @Override
-    public DeclensionTableDTO toInflectionTableDTO(Lexeme lexeme) {
+    public DeclensionTableDTO toInflectionTableDTO(Lexeme<Declension> lexeme) {
 
         Map<GrammaticalNumber, Map<GrammaticalCase, String>> table = new EnumMap<>(GrammaticalNumber.class);
         if(lexeme != null) {
-            for (Inflection inflection : lexeme.getInflections()) {
-                if(inflection instanceof Declension declension){
-                    GrammaticalNumber number = declension.getNumber();
-                    GrammaticalCase grammaticalCase = declension.getGrammaticalCase();
-                    String form = declension.getForm();
+            for (Declension declension : lexeme.getInflections()) {
 
-                    table.computeIfAbsent(number, numberKey -> new EnumMap<>(GrammaticalCase.class))
-                            .put(grammaticalCase, form);
-                }
+                table.computeIfAbsent(declension.getNumber(), numberKey -> new EnumMap<>(GrammaticalCase.class))
+                        .put(declension.getGrammaticalCase(), declension.getForm());
             }
         }
         DeclensionTableDTO dto = new DeclensionTableDTO();

@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-class LexemeConjugationMapper implements LexemeInflectionMapper {
+class LexemeConjugationMapper implements LexemeInflectionMapper<Conjugation> {
 
     static Comparator<ConjugationTableDTO> conjugationTableDTOComparator =
             Comparator.comparing(LexemeConjugationMapper::resolveVoiceOrder)
@@ -74,7 +74,7 @@ class LexemeConjugationMapper implements LexemeInflectionMapper {
         return dto;
     }
 
-    List<Conjugation> extractConjugations(Lexeme lexeme){
+    List<Conjugation> extractConjugations(Lexeme<Conjugation> lexeme){
         List<Conjugation> conjugations = lexeme.getInflections().stream()
                .filter(Conjugation.class::isInstance)
                .map(Conjugation.class::cast)

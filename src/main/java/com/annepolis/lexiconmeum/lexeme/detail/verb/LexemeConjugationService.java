@@ -19,7 +19,7 @@ public class LexemeConjugationService {
     }
 
     public LexemeConjugationDetailDTO getLexemeDetail(UUID lexemeId) {
-        Lexeme lexeme = lexemeProvider.getLexeme(lexemeId);
+        Lexeme<Conjugation> lexeme = lexemeProvider.getLexemeOfType(lexemeId, Conjugation.class);
         return lexemeConjugationDetailMapper.toLexemeDetailDTO(lexeme);
 
     }

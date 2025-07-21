@@ -23,26 +23,26 @@ import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalVoice.P
 
 public class TestUtil {
 
-    public static Lexeme getNewTestNounLexeme(){
+    public static Lexeme<Declension> getNewTestNounLexeme(){
 
-        LexemeBuilder lexBuilder = new LexemeBuilder("amīcus", GrammaticalPosition.NOUN);
+        return new LexemeBuilder<Declension>("amīcus", GrammaticalPosition.NOUN)
 
 
-        lexBuilder.addInflection(getNewTestDeclension( SINGULAR, NOMINATIVE,  "amīcus"));
-        lexBuilder.addInflection(getNewTestDeclension( SINGULAR, ACCUSATIVE, "amīcum"));
-        lexBuilder.addInflection(getNewTestDeclension( SINGULAR, VOCATIVE, "amīce"));
-        lexBuilder.addInflection(getNewTestDeclension( SINGULAR, GENITIVE, "amīcī"));
-        lexBuilder.addInflection(getNewTestDeclension( SINGULAR, ABLATIVE, "amīcō"));
-        lexBuilder.addInflection(getNewTestDeclension( SINGULAR, DATIVE, "amīcō"));
+        .addInflection(getNewTestDeclension( SINGULAR, NOMINATIVE,  "amīcus"))
+        .addInflection(getNewTestDeclension( SINGULAR, ACCUSATIVE, "amīcum"))
+        .addInflection(getNewTestDeclension( SINGULAR, VOCATIVE, "amīce"))
+        .addInflection(getNewTestDeclension( SINGULAR, GENITIVE, "amīcī"))
+        .addInflection(getNewTestDeclension( SINGULAR, ABLATIVE, "amīcō"))
+        .addInflection(getNewTestDeclension( SINGULAR, DATIVE, "amīcō"))
 
-        lexBuilder.addInflection(getNewTestDeclension( PLURAL, NOMINATIVE, "amīcī"));
-        lexBuilder.addInflection(getNewTestDeclension( PLURAL, ACCUSATIVE, "amīcōs"));
-        lexBuilder.addInflection(getNewTestDeclension( PLURAL, VOCATIVE,  "amīcī"));
-        lexBuilder.addInflection(getNewTestDeclension( PLURAL, GENITIVE,  "amīcōrum"));
-        lexBuilder.addInflection(getNewTestDeclension( PLURAL, ABLATIVE, "amīcīs"));
-        lexBuilder.addInflection(getNewTestDeclension( PLURAL, DATIVE, "amīcīs"));
+        .addInflection(getNewTestDeclension( PLURAL, NOMINATIVE, "amīcī"))
+        .addInflection(getNewTestDeclension( PLURAL, ACCUSATIVE, "amīcōs"))
+        .addInflection(getNewTestDeclension( PLURAL, VOCATIVE,  "amīcī"))
+        .addInflection(getNewTestDeclension( PLURAL, GENITIVE,  "amīcōrum"))
+        .addInflection(getNewTestDeclension( PLURAL, ABLATIVE, "amīcīs"))
+        .addInflection(getNewTestDeclension( PLURAL, DATIVE, "amīcīs"))
 
-        return lexBuilder.setGender(GrammaticalGender.MASCULINE).build();
+         .setGender(GrammaticalGender.MASCULINE).build();
 
     }
 
@@ -51,13 +51,9 @@ public class TestUtil {
     private static Declension getNewTestDeclension(GrammaticalNumber number, GrammaticalCase gramCase, String form) {
         return new Declension.Builder(form).setGrammaticalCase(gramCase).setNumber(number).build();
     }
-    public static Lexeme getNewTestVerbLexeme(){
-        LexemeBuilder builder = new LexemeBuilder("amo", VERB);
+    public static Lexeme<Conjugation> getNewTestVerbLexeme(){
 
-        Conjugation.Builder conjugationBuilder = new Conjugation.Builder("amāre");
-        conjugationBuilder.setVoice(ACTIVE).setMood(INFINITIVE).setTense(PRESENT);
-        builder.addInflection(conjugationBuilder.build());
-
+        LexemeBuilder<Conjugation> builder = new LexemeBuilder<>("amo", VERB);
 
         buildConjugation(builder, "amō", ACTIVE, INDICATIVE, FIRST, PRESENT, SINGULAR);
         buildConjugation(builder, "amās", ACTIVE, INDICATIVE, SECOND, PRESENT, SINGULAR);
@@ -96,30 +92,32 @@ public class TestUtil {
 
         buildConjugation(builder, "amātus", PASSIVE, INDICATIVE, FIRST, PERFECT, SINGULAR);
 
+        Conjugation conjugation = new Conjugation.Builder("amāre")
+                .setVoice(ACTIVE).setMood(INFINITIVE).setTense(PRESENT).build();
 
-
-        builder.addInflection(conjugationBuilder.build());
-        builder.addSense(getNewTestSense());
-        return builder.build();
+        return  builder.addInflection(conjugation)
+                .addSense(getNewTestSense())
+                .build();
 
     }
 
-    private static void buildConjugation(LexemeBuilder builder, String form, GrammaticalVoice voice, GrammaticalMood mood,
+    private static void buildConjugation(LexemeBuilder<Conjugation> lexemeBuilder, String form, GrammaticalVoice voice, GrammaticalMood mood,
                                   GrammaticalPerson person, GrammaticalTense tense, GrammaticalNumber number){
 
-            Conjugation.Builder conjugationBuilder = new Conjugation.Builder(form);
-            conjugationBuilder.setVoice(voice).setMood(mood).setPerson(person).setTense(tense).setNumber(number);
-            builder.addInflection(conjugationBuilder.build());
+            Conjugation conjugation = new Conjugation.Builder(form)
+            .setVoice(voice).setMood(mood).setPerson(person).setTense(tense).setNumber(number).build();
+
+            lexemeBuilder.addInflection(conjugation);
     }
 
     private static Sense getNewTestSense(){
-        Sense.Builder builder = new Sense.Builder();
-        builder.addGloss("to love");
-        return builder.build();
+        return new Sense.Builder()
+        .addGloss("to love")
+        .build();
     }
 
-    public static List<Lexeme> getMixedPositionTestLexemes(){
-        List<Lexeme> lexemes = new ArrayList<>();
+    public static List<Lexeme<?>> getMixedPositionTestLexemes(){
+        List<Lexeme<?>> lexemes = new ArrayList<>();
 
         lexemes.add(getNewTestVerbLexeme());
         lexemes.add(getNewTestNounLexeme());

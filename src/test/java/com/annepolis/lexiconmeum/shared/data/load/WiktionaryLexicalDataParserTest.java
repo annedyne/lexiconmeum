@@ -3,6 +3,7 @@ package com.annepolis.lexiconmeum.shared.data.load;
 import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalTense;
+import com.annepolis.lexiconmeum.lexeme.detail.noun.Declension;
 import com.annepolis.lexiconmeum.lexeme.detail.verb.Conjugation;
 import com.annepolis.lexiconmeum.lexeme.detail.verb.InflectionKey;
 import com.annepolis.lexiconmeum.shared.Lexeme;
@@ -20,6 +21,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -33,17 +35,17 @@ class WiktionaryLexicalDataParserTest {
     @Autowired
     private WiktionaryLexicalDataParser parser;
 
-    private List<Lexeme> verbLexemes;
-    private List<Lexeme> nounLexemes;
+    private List<Lexeme<Conjugation>> verbLexemes;
+    private List<Lexeme<Declension>> nounLexemes;
 
-    public List<Lexeme> getVerbLexemes() throws IOException {
+    public List<Lexeme<Conjugation>> getVerbLexemes() throws IOException {
         if(verbLexemes == null) {
             parseVerbLexemes();
         }
         return verbLexemes;
     }
 
-    public List<Lexeme> getNounLexemes() throws IOException {
+    public List<Lexeme<Declension>> getNounLexemes() throws IOException {
         if(nounLexemes == null) {
             parseNounLexemes();
         }
@@ -103,18 +105,18 @@ class WiktionaryLexicalDataParserTest {
     }
 
     @Test
-    void DeclensionsInflectionsLoaded() throws Exception {
-      Lexeme lexeme = getNounLexemes().stream()
+    void declensionsInflectionsLoaded() throws Exception {
+        Optional<Inflection> genitive = getNounLexemes().stream()
            .filter(g -> g.getLemma().equals("poculum"))
            .findFirst()
-           .orElseThrow(() -> new AssertionError("Missing noun lemma 'poculum'"));
+              .flatMap(l -> l.getInflections().stream()
+                .filter(i -> i.getForm().equals("pōculī"))
+                .findFirst());
 
-        lexeme.getInflections().stream()
-            .filter(i -> i.getForm().equals("pōculī"))
-            .findFirst()
-            .orElseThrow(() -> new AssertionError("Missing genitive form of noun 'poculum"));
+        assertTrue(genitive.isPresent());
     }
 
+    @SuppressWarnings("java:S2699") // Yes this does have an assertion
     @Test
     void glossesAreParsedAndPopulated() throws Exception {
         getVerbLexemes().get(0).getSenses().stream()
@@ -135,10 +137,10 @@ class WiktionaryLexicalDataParserTest {
 
     @Test
     void InflectionsWithDuplicateTagsAreSetAsAlternativeForms() throws IOException {
-        getVerbLexemes().get(0).getInflections().stream()
+        Optional<Conjugation> maybeConjugation = getVerbLexemes().get(0).getInflections().stream()
                 .filter(g -> "amārō".equals(g.getAlternativeForm()))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Missing future-perfect test form"));
+                .findFirst();
+        assertTrue(maybeConjugation.isPresent());
     }
 
     @Test
@@ -156,18 +158,29 @@ class WiktionaryLexicalDataParserTest {
     private void parseNounLexemes() throws IOException {
         Resource resource = resourceLoader.getResource("classpath:testDataNoun.jsonl");
         try (Reader reader = new InputStreamReader(resource.getInputStream())) {
-            List<Lexeme> lexemes = new ArrayList<>();
-            parser.parseJsonl(reader, lexemes::add);
-            nounLexemes = lexemes;
+            nounLexemes = new ArrayList<>();
+            parser.parseJsonl(reader, lexeme -> {
+                if (lexeme.getInflections().get(0) instanceof Declension) {
+                    @SuppressWarnings("unchecked")
+                    Lexeme<Declension> declined = (Lexeme<Declension>) lexeme;
+                    nounLexemes.add(declined);
+                }
+            });
         }
     }
 
     private void parseVerbLexemes() throws IOException {
         Resource resource = resourceLoader.getResource("classpath:testDataVerb.jsonl");
         try (Reader reader = new InputStreamReader(resource.getInputStream())) {
-            List<Lexeme> lexemes = new ArrayList<>();
-            parser.parseJsonl(reader, lexemes::add);
-            verbLexemes = lexemes;
+            verbLexemes = new ArrayList<>();
+            parser.parseJsonl(reader, lexeme -> {
+                if (lexeme.getInflections().get(0) instanceof Conjugation) {
+                    @SuppressWarnings("unchecked")
+                    Lexeme<Conjugation> conjugated = (Lexeme<Conjugation>) lexeme;
+                    verbLexemes.add(conjugated);
+                }
+            });
+
         }
     }
 }

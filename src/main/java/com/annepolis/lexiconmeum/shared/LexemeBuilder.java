@@ -16,7 +16,7 @@ public class LexemeBuilder<T extends Inflection> {
     private final GrammaticalPosition position;
     private GrammaticalGender gender;
     private final List<Sense> senses = new ArrayList<>();
-    private Map<String, T> inflectionIndex = new HashMap<>();
+    private final Map<String, T> inflectionIndex = new HashMap<>();
 
     public LexemeBuilder(String lemma, GrammaticalPosition position){
         this.lemma = lemma;
@@ -44,7 +44,7 @@ public class LexemeBuilder<T extends Inflection> {
         return this.position;
     }
 
-    public LexemeBuilder setGender(GrammaticalGender gender){
+    public LexemeBuilder<T> setGender(GrammaticalGender gender){
         this.gender = gender;
         return this;
     }
@@ -53,7 +53,7 @@ public class LexemeBuilder<T extends Inflection> {
         return gender;
     }
 
-    public LexemeBuilder addSense(Sense sense){
+    public LexemeBuilder<T> addSense(Sense sense){
         this.senses.add(sense);
         return this;
     }
@@ -80,7 +80,7 @@ public class LexemeBuilder<T extends Inflection> {
     }
 
 
-    public Lexeme build(){
+    public Lexeme<T> build(){
 
         if (lemma == null || position == null) {
             throw new IllegalStateException("Missing required fields: " +
@@ -88,7 +88,7 @@ public class LexemeBuilder<T extends Inflection> {
                     (position == null ? "position " : ""));
         }
 
-        return new Lexeme(this);
+        return new Lexeme<>(this);
     }
 
 

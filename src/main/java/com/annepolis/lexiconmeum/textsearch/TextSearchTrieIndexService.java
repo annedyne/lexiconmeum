@@ -19,23 +19,25 @@ class TextSearchTrieIndexService implements TextSearchService<String>, LexemeSin
         this.cache = cache;
     }
 
+    @Override
     public List<String> getWordsStartingWith(String prefix, int limit) {
         return cache.get(prefix, k -> prefixTextSearchIndex.search(prefix, limit));
     }
 
+    @Override
     public List<String> getWordsEndingWith(String suffix, int limit) {
         return cache.get("_" + suffix, k -> suffixTextSearchIndex.search(suffix, limit));
     }
 
-    public void populateIndex(Lexeme lexeme) {
-        for(Inflection inflection: lexeme.getInflections()){
+    public void populateIndex(Lexeme<? extends Inflection> lexeme) {
+        for(Inflection<?> inflection: lexeme.getInflections()){
             prefixTextSearchIndex.insert(inflection.getForm(), lexeme.getId());
             suffixTextSearchIndex.insert(new StringBuilder(inflection.getForm()).reverse().toString(), lexeme.getId());
         }
     }
 
     @Override
-    public void accept(Lexeme lexeme) {
+    public void accept(Lexeme<?> lexeme) {
         populateIndex(lexeme);
     }
 

@@ -1,6 +1,5 @@
 package com.annepolis.lexiconmeum.textsearch;
 
-import com.annepolis.lexiconmeum.shared.Lexeme;
 import com.annepolis.lexiconmeum.shared.LexemeProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,12 +36,12 @@ public class TextSearchSuggestionService implements TextSearchService<TextSearch
     List<TextSearchSuggestionDTO> enrichRawWords(List<String> rawWords) {
         return rawWords.stream()
                 .map(rawWord -> {
-
                     UUID lexemeId = extractLexemeId(rawWord);
                     String word = extractForm(rawWord);
-                    Optional<Lexeme> maybeLexeme = lexemeProvider.getLexemeIfPresent(lexemeId);
-                    return maybeLexeme.map(lexeme -> textSearchSuggestionMapper.toTextSearchDTO(word, lexemeId, lexeme.getPosition()));
-
+                    return lexemeProvider.getLexemeIfPresent(lexemeId)
+                            .map(lexeme ->
+                                textSearchSuggestionMapper.toTextSearchDTO(word, lexemeId, lexeme.getPosition())
+                            );
                 })
                 .flatMap(Optional::stream)
                 .toList();
