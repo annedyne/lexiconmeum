@@ -1,5 +1,6 @@
 package com.annepolis.lexiconmeum.lexeme.detail.verb;
 
+import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
 import com.annepolis.lexiconmeum.lexeme.detail.InflectionTableDTO;
 import com.annepolis.lexiconmeum.lexeme.detail.LexemeInflectionMapper;
 import com.annepolis.lexiconmeum.shared.Lexeme;
@@ -14,14 +15,14 @@ import java.util.Optional;
 public class LexemeConjugationDetailMapper {
 
     InflectionKey inflectionKey;
-    LexemeInflectionMapper<Conjugation> lexemeConjugationMapper;
+    LexemeInflectionMapper lexemeConjugationMapper;
 
-    LexemeConjugationDetailMapper(LexemeInflectionMapper<Conjugation> lexemeConjugationMapper, InflectionKey inflectionKey){
+    LexemeConjugationDetailMapper(LexemeInflectionMapper lexemeConjugationMapper, InflectionKey inflectionKey){
         this.inflectionKey = inflectionKey;
         this.lexemeConjugationMapper = lexemeConjugationMapper;
     }
 
-    LexemeConjugationDetailDTO toLexemeDetailDTO(Lexeme<Conjugation> lexeme){
+    LexemeConjugationDetailDTO toLexemeDetailDTO(Lexeme lexeme){
         LexemeConjugationDetailDTO dto = new LexemeConjugationDetailDTO();
         populateDefinitions(dto, lexeme.getSenses());
 
@@ -35,24 +36,24 @@ public class LexemeConjugationDetailMapper {
                 .toList().forEach(dto::addDefinition);
     }
 
-    void populatePrincipleParts(LexemeConjugationDetailDTO dto, Map<String, Conjugation> inflectionIndex) {
+    void populatePrincipleParts(LexemeConjugationDetailDTO dto, Map<String, Inflection> inflectionIndex) {
         Optional.ofNullable(inflectionIndex.get(inflectionKey.buildFirstPrincipalPartKey()))
-                .map(Conjugation::getForm)
+                .map(Inflection::getForm)
                 .filter(form -> !form.isBlank())
                 .ifPresent(dto::addPrinciplePart);
 
         Optional.ofNullable(inflectionIndex.get(inflectionKey.buildSecondPrincipalPartKey()))
-                .map(Conjugation::getForm)
+                .map(Inflection::getForm)
                 .filter(form -> !form.isBlank()) // Optional: skip blank forms
                 .ifPresent(dto::addPrinciplePart);
 
         Optional.ofNullable(inflectionIndex.get(inflectionKey.buildThirdPrincipalPartKey()))
-                .map(Conjugation::getForm)
+                .map(Inflection::getForm)
                 .filter(form -> !form.isBlank()) // Optional: skip blank forms
                 .ifPresent(dto::addPrinciplePart);
     }
 
-    void populateInflectionTable(LexemeConjugationDetailDTO dto, Lexeme<Conjugation> lexeme){
+    void populateInflectionTable(LexemeConjugationDetailDTO dto, Lexeme lexeme){
         InflectionTableDTO tableDTO = lexemeConjugationMapper.toInflectionTableDTO(lexeme);
         dto.setInflectionTableDTO(tableDTO);
     }

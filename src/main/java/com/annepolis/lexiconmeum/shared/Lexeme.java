@@ -8,15 +8,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-public class Lexeme<T extends Inflection> {
+public class Lexeme {
 
     private final UUID id;
     private final String lemma;
     private final GrammaticalPosition position;
     private final List<Sense> senses;
-    private final Map<String, T> inflections;
+    private final Map<String, Inflection> inflections;
 
-    Lexeme(LexemeBuilder<T> builder ) {
+    Lexeme(LexemeBuilder builder ) {
         this.lemma = builder.getLemma();
         this.position = builder.getPosition();
         this.id = builder.getId();
@@ -34,11 +34,11 @@ public class Lexeme<T extends Inflection> {
         return position;
     }
 
-    public List<T> getInflections(){
+    public List<Inflection> getInflections(){
         return inflections.values().stream().toList();
     }
 
-    public Map<String, T> getInflectionIndex(){
+    public Map<String, Inflection> getInflectionIndex(){
         return inflections;
     }
 
@@ -48,7 +48,7 @@ public class Lexeme<T extends Inflection> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Lexeme<T> lexeme = (Lexeme) o;
+        Lexeme lexeme = (Lexeme) o;
         return Objects.equals(lemma, lexeme.lemma) && Objects.equals(position, lexeme.position);
     }
 

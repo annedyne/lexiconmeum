@@ -1,6 +1,5 @@
 package com.annepolis.lexiconmeum.shared.data.load;
 
-import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalGender;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalTense;
@@ -51,7 +50,7 @@ class WiktionaryLexicalDataParser {
         this.parseMode = parseMode;
     }
 
-    public void parseJsonl(Reader reader, Consumer<Lexeme<? extends Inflection>> consumer) throws IOException {
+    public void parseJsonl(Reader reader, Consumer<Lexeme> consumer) throws IOException {
         BufferedReader br = new BufferedReader(reader);
         String line;
         while ((line = readJsonLine(br)) != null) {
@@ -69,7 +68,7 @@ class WiktionaryLexicalDataParser {
         return br.readLine();
     }
 
-    private Optional<Lexeme<?>> buildLexeme(JsonNode root) {
+    private Optional<Lexeme> buildLexeme(JsonNode root) {
         String lemma = root.path(WORD.get()).asText();
         String posTag = root.path(POSITION.get()).asText();
 
@@ -80,38 +79,41 @@ class WiktionaryLexicalDataParser {
         }
         GrammaticalPosition position = optionalPosition.get();
 
-        switch (position) {
-            case NOUN:
-                Optional<Lexeme<Declension>> declensionLexeme = buildNounLexeme(root, lemma, position);
-                return declensionLexeme.map(lexeme -> (Lexeme<?>) lexeme);
-            case VERB:
-                Optional<Lexeme<Conjugation>> conjugationLexeme = buildVerbLexeme(root, lemma, position);
-                return conjugationLexeme.map(lexeme -> (Lexeme<?>) lexeme);
-            default:
+        return switch (position) {
+            case NOUN -> buildNounLexeme(root, lemma, position);
+            case VERB -> buildVerbLexeme(root, lemma, position);
+            default -> {
                 logger.trace("Unsupported position: {}", position);
-                return Optional.empty();
+                yield Optional.empty();
+            }
+        };
+    }
+
+    private Optional<Lexeme> buildNounLexeme(JsonNode root, String lemma, GrammaticalPosition position) {
+        LexemeBuilder builder = new LexemeBuilder(lemma, position);
+        addSenses(root.path(SENSES.get()), builder);
+        addDeclensionForms(root.path(FORMS.get()), builder);
+        try {
+            return Optional.of(builder.build());
+        } catch (Exception ex) {
+            logger.warn("Failed to build lexeme: {}", ex.getMessage());
+            return Optional.empty();
         }
     }
 
-    private Optional<Lexeme<Declension>> buildNounLexeme(JsonNode root, String lemma, GrammaticalPosition position) {
-        LexemeBuilder<Declension> builder = new LexemeBuilder<>(lemma, position);
-        addSenses(root.path(SENSES.get()), builder);
-        addDeclensionForms(root.path(FORMS.get()), builder);
-
-        return new SafeBuilder<>("LexemeBuilder", builder::build)
-                .build(logger, getParseMode());
-    }
-
-    private Optional<Lexeme<Conjugation>> buildVerbLexeme(JsonNode root, String lemma, GrammaticalPosition position) {
-        LexemeBuilder<Conjugation> builder = new LexemeBuilder<>(lemma, position);
+    private Optional<Lexeme> buildVerbLexeme(JsonNode root, String lemma, GrammaticalPosition position) {
+        LexemeBuilder builder = new LexemeBuilder(lemma, position);
         addSenses(root.path(SENSES.get()), builder);
         addConjugationForms(root.path(FORMS.get()), builder);
-
-        return new SafeBuilder<>("LexemeBuilder", builder::build)
-                .build(logger, getParseMode());
+        try {
+            return Optional.of(builder.build());
+        } catch (Exception ex) {
+            logger.warn("Failed to build lexeme: {}", ex.getMessage());
+            return Optional.empty();
+        }
     }
 
-    private void addDeclensionForms(JsonNode formsNode, LexemeBuilder<Declension> lexemeBuilder) {
+    private void addDeclensionForms(JsonNode formsNode, LexemeBuilder lexemeBuilder) {
         for (JsonNode formNode : formsNode) {
             if (isDeclensionForm(formNode)) {
                 buildDeclension(formNode, getParseMode()).ifPresent(lexemeBuilder::addInflection);
@@ -148,7 +150,7 @@ class WiktionaryLexicalDataParser {
         return Optional.empty();
     }
 
-    private <T extends Inflection> void addSenses(JsonNode sensesNode, LexemeBuilder<T> lexemeBuilder) {
+    private void addSenses(JsonNode sensesNode, LexemeBuilder lexemeBuilder) {
         if (sensesNode.isArray()) {
             for (JsonNode senseNode : sensesNode) {
                 lexemeBuilder.addSense(buildSense(senseNode));
@@ -179,7 +181,7 @@ class WiktionaryLexicalDataParser {
 
         return new SafeBuilder<>("Declension", builder::build).build(logger, mode);
     }
-    private void addConjugationForms(JsonNode formsNode, LexemeBuilder<Conjugation> lexemeBuilder) {
+    private void addConjugationForms(JsonNode formsNode, LexemeBuilder lexemeBuilder) {
         for (JsonNode formNode : formsNode) {
             if (isConjugationForm(formNode)) {
                 try {

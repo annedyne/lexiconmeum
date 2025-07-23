@@ -19,7 +19,7 @@ class TextSearchServiceConfig {
     }
     @SuppressWarnings("java:S1452")
     @Bean
-    public Consumer<Lexeme<?>> wordConsumer(TextSearchTrieIndexService textSearchTrieIndexService){
+    public Consumer<Lexeme> wordConsumer(TextSearchTrieIndexService textSearchTrieIndexService){
         return textSearchTrieIndexService;
     }
 

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public final class InflectionKey {
 
-    public static String of(Inflection<?> inflection){
+    public static String of(Inflection inflection){
         if (inflection instanceof Conjugation c) {
             return buildConjugationKey(c);
         } else if (inflection instanceof Declension d ){
@@ -34,13 +34,11 @@ public final class InflectionKey {
             GrammaticalPerson person,
             GrammaticalNumber number
     ){
-        StringBuilder builder = new StringBuilder();
-        builder.append(buildKeyPart(voice, true));
-        builder.append(buildKeyPart(mood));
-        builder.append(buildKeyPart(tense));
-        builder.append(buildKeyPart(person));
-        builder.append(buildKeyPart(number));
-        return builder.toString();
+        return buildKeyPart(voice, true)
+        + buildKeyPart(mood)
+        + buildKeyPart(tense)
+        + buildKeyPart(person)
+        + buildKeyPart(number);
     }
 
     private static String buildKeyPart(Enum<?>  part){
@@ -112,9 +110,7 @@ public final class InflectionKey {
     public static String joinDeclensionParts(
             GrammaticalCase grammaticalCase, GrammaticalNumber number ) {
 
-        StringBuilder builder = new StringBuilder();
-        builder.append(buildKeyPart(grammaticalCase, true));
-        builder.append(buildKeyPart(number));
-        return builder.toString();
+        return buildKeyPart(grammaticalCase, true)
+        + buildKeyPart(number);
     }
 }

@@ -15,31 +15,29 @@ public class LexemeCache implements LexemeSink, LexemeProvider {
 
     static final Logger logger = LogManager.getLogger(LexemeCache.class);
 
-    private final HashMap<UUID, Lexeme<?>> lexemeIdToLexemeLookup = new HashMap<>();
+    private final HashMap<UUID, Lexeme> lexemeIdToLexemeLookup = new HashMap<>();
 
 
     @Override
-    public Optional<Lexeme<?>> getLexemeIfPresent(UUID lexemeId) {
+    public Optional<Lexeme> getLexemeIfPresent(UUID lexemeId) {
         return Optional.ofNullable(lexemeIdToLexemeLookup.get(lexemeId));
     }
 
     @Override
-    public <T extends Inflection> Lexeme<T> getLexemeOfType(UUID lexemeId, Class<T> expectedType) {
-        Lexeme<?> lexeme = lexemeIdToLexemeLookup.get(lexemeId);
+    public <T extends Inflection> Lexeme getLexemeOfType(UUID lexemeId, Class<T> expectedType) {
+        Lexeme lexeme = lexemeIdToLexemeLookup.get(lexemeId);
 
         boolean matches = lexeme.getInflections().stream().allMatch(expectedType::isInstance);
         if (!matches) {
             throw new LexemeTypeMismatchException("Expected lexeme of type " + expectedType.getSimpleName());
         }
 
-        @SuppressWarnings("unchecked")
-        Lexeme<T> typedLexeme = (Lexeme<T>) lexeme;
-        return typedLexeme;
+        return lexeme;
     }
 
 
 
-    void addLexeme(Lexeme<?> lexeme){
+    void addLexeme(Lexeme lexeme){
         if(logger.isDebugEnabled()) {
             logger.trace("accepting lexeme: {}", lexeme);
         }

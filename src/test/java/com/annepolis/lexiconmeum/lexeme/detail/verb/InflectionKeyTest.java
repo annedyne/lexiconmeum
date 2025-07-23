@@ -12,14 +12,16 @@ class InflectionKeyTest {
 
     @Test
     void buildsValidInflectionKeyFromConjugation(){
-        Lexeme<Conjugation> lexeme = TestUtil.getNewTestVerbLexeme();
+        Lexeme lexeme = TestUtil.getNewTestVerbLexeme();
         String key = lexeme.getInflections().stream()
-                .filter(c ->
-                        GrammaticalPerson.FIRST == c.getPerson() &&
-                        GrammaticalTense.PRESENT == c.getTense() &&
-                        GrammaticalVoice.ACTIVE == c.getVoice() &&
-                        GrammaticalMood.INDICATIVE == c.getMood() &&
-                        GrammaticalNumber.SINGULAR == c.getNumber())
+                .filter(Conjugation.class::isInstance)
+                .map(i -> (Conjugation) i)
+                .filter(i ->
+                        GrammaticalPerson.FIRST == i.getPerson() &&
+                        GrammaticalTense.PRESENT == i.getTense() &&
+                        GrammaticalVoice.ACTIVE == i.getVoice() &&
+                        GrammaticalMood.INDICATIVE == i.getMood() &&
+                        GrammaticalNumber.SINGULAR == i.getNumber())
                 .findFirst()
                 .map(InflectionKey::of)
                 .orElse(null);

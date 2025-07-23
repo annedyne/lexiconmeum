@@ -5,7 +5,7 @@ import com.annepolis.lexiconmeum.lexeme.detail.InflectionBuilder;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalNumber;
 
-public class Declension implements Inflection<Declension> {
+public class Declension implements Inflection {
 
 
     private final String form;
@@ -37,8 +37,8 @@ public class Declension implements Inflection<Declension> {
     }
 
     @Override
-    public InflectionBuilder<Declension> toBuilder() {
-        return new Builder(form)
+    public InflectionBuilder toBuilder() {
+        return new Declension.Builder(form)
                 .setNumber(number)
                 .setGrammaticalCase(grammaticalCase);
     }
@@ -49,7 +49,7 @@ public class Declension implements Inflection<Declension> {
     }
 
 
-    public static class Builder implements InflectionBuilder<Declension> {
+    public static class Builder implements InflectionBuilder {
 
         private GrammaticalNumber number;
         private GrammaticalCase grammaticalCase;
@@ -69,7 +69,7 @@ public class Declension implements Inflection<Declension> {
         }
 
         @Override
-        public InflectionBuilder<Declension> setAlternativeForm(String form) {
+        public InflectionBuilder setAlternativeForm(String form) {
             return this;
         }
 

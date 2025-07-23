@@ -35,17 +35,17 @@ class WiktionaryLexicalDataParserTest {
     @Autowired
     private WiktionaryLexicalDataParser parser;
 
-    private List<Lexeme<Conjugation>> verbLexemes;
-    private List<Lexeme<Declension>> nounLexemes;
+    private List<Lexeme> verbLexemes;
+    private List<Lexeme> nounLexemes;
 
-    public List<Lexeme<Conjugation>> getVerbLexemes() throws IOException {
+    public List<Lexeme> getVerbLexemes() throws IOException {
         if(verbLexemes == null) {
             parseVerbLexemes();
         }
         return verbLexemes;
     }
 
-    public List<Lexeme<Declension>> getNounLexemes() throws IOException {
+    public List<Lexeme> getNounLexemes() throws IOException {
         if(nounLexemes == null) {
             parseNounLexemes();
         }
@@ -137,7 +137,7 @@ class WiktionaryLexicalDataParserTest {
 
     @Test
     void InflectionsWithDuplicateTagsAreSetAsAlternativeForms() throws IOException {
-        Optional<Conjugation> maybeConjugation = getVerbLexemes().get(0).getInflections().stream()
+        Optional<Inflection> maybeConjugation = getVerbLexemes().get(0).getInflections().stream()
                 .filter(g -> "amārō".equals(g.getAlternativeForm()))
                 .findFirst();
         assertTrue(maybeConjugation.isPresent());
@@ -161,9 +161,7 @@ class WiktionaryLexicalDataParserTest {
             nounLexemes = new ArrayList<>();
             parser.parseJsonl(reader, lexeme -> {
                 if (lexeme.getInflections().get(0) instanceof Declension) {
-                    @SuppressWarnings("unchecked")
-                    Lexeme<Declension> declined = (Lexeme<Declension>) lexeme;
-                    nounLexemes.add(declined);
+                    nounLexemes.add(lexeme);
                 }
             });
         }
@@ -175,9 +173,7 @@ class WiktionaryLexicalDataParserTest {
             verbLexemes = new ArrayList<>();
             parser.parseJsonl(reader, lexeme -> {
                 if (lexeme.getInflections().get(0) instanceof Conjugation) {
-                    @SuppressWarnings("unchecked")
-                    Lexeme<Conjugation> conjugated = (Lexeme<Conjugation>) lexeme;
-                    verbLexemes.add(conjugated);
+                    verbLexemes.add(lexeme);
                 }
             });
 

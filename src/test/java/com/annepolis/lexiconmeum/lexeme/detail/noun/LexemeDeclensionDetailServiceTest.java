@@ -20,23 +20,20 @@ class LexemeDeclensionDetailServiceTest {
         LexemeProvider lexemeProviderStub = new LexemeProvider() {
 
             @Override
-            public Optional<Lexeme<?>> getLexemeIfPresent(UUID lemmaId) {
+            public Optional<Lexeme> getLexemeIfPresent(UUID lemmaId) {
 
                 return Optional.empty();
             }
 
             @Override
-            public <T extends Inflection> Lexeme<T> getLexemeOfType(UUID lemmaId, Class<T> expectedType) {
+            public <T extends Inflection> Lexeme getLexemeOfType(UUID lemmaId, Class<T> expectedType) {
 
                 Lexeme lexeme = TestUtil.getNewTestNounLexeme();
                 boolean matches = lexeme.getInflections().stream().allMatch(expectedType::isInstance);
                 if (!matches) {
                     throw new LexemeTypeMismatchException("Expected lexeme of type " + expectedType.getSimpleName());
                 }
-
-                @SuppressWarnings("unchecked")
-                Lexeme<T> typedLexeme = (Lexeme<T>) lexeme;
-                return typedLexeme;
+                return lexeme;
             }
         };
         LexemeDeclensionService service = new LexemeDeclensionService(lexemeProviderStub, new LexemeDeclensionMapper());

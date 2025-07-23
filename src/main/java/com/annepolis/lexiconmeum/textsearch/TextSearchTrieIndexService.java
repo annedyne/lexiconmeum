@@ -29,15 +29,15 @@ class TextSearchTrieIndexService implements TextSearchService<String>, LexemeSin
         return cache.get("_" + suffix, k -> suffixTextSearchIndex.search(suffix, limit));
     }
 
-    public void populateIndex(Lexeme<? extends Inflection> lexeme) {
-        for(Inflection<?> inflection: lexeme.getInflections()){
+    public void populateIndex(Lexeme lexeme) {
+        for(Inflection inflection: lexeme.getInflections()){
             prefixTextSearchIndex.insert(inflection.getForm(), lexeme.getId());
             suffixTextSearchIndex.insert(new StringBuilder(inflection.getForm()).reverse().toString(), lexeme.getId());
         }
     }
 
     @Override
-    public void accept(Lexeme<?> lexeme) {
+    public void accept(Lexeme lexeme) {
         populateIndex(lexeme);
     }
 

@@ -1,7 +1,6 @@
 package com.annepolis.lexiconmeum.shared;
 
 import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
-import com.annepolis.lexiconmeum.lexeme.detail.InflectionBuilder;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalGender;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.lexeme.detail.verb.InflectionKey;
@@ -9,14 +8,14 @@ import com.annepolis.lexiconmeum.lexeme.detail.verb.InflectionKey;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class LexemeBuilder<T extends Inflection> {
+public class LexemeBuilder {
 
     private final UUID id;
     private final String lemma;
     private final GrammaticalPosition position;
     private GrammaticalGender gender;
     private final List<Sense> senses = new ArrayList<>();
-    private final Map<String, T> inflectionIndex = new HashMap<>();
+    private final Map<String, Inflection> inflectionIndex = new HashMap<>();
 
     public LexemeBuilder(String lemma, GrammaticalPosition position){
         this.lemma = lemma;
@@ -44,7 +43,7 @@ public class LexemeBuilder<T extends Inflection> {
         return this.position;
     }
 
-    public LexemeBuilder<T> setGender(GrammaticalGender gender){
+    public LexemeBuilder setGender(GrammaticalGender gender){
         this.gender = gender;
         return this;
     }
@@ -53,7 +52,7 @@ public class LexemeBuilder<T extends Inflection> {
         return gender;
     }
 
-    public LexemeBuilder<T> addSense(Sense sense){
+    public LexemeBuilder addSense(Sense sense){
         this.senses.add(sense);
         return this;
     }
@@ -62,12 +61,15 @@ public class LexemeBuilder<T extends Inflection> {
         return senses;
     }
 
-    public LexemeBuilder<T> addInflection(T inflection){
+    public LexemeBuilder addInflection(Inflection inflection){
         String key = InflectionKey.of(inflection);
         if (inflectionIndex.containsKey(key)) {
-            T existing = inflectionIndex.get(key);
-            InflectionBuilder<T>  builder = existing.toBuilder();
-            T updated = builder.setAlternativeForm(inflection.getForm()).build();
+            Inflection existing = inflectionIndex.get(key);
+            Inflection updated = existing
+                    .toBuilder()
+                    .setAlternativeForm(inflection.getForm())
+                    .build();
+
             inflectionIndex.put(key, updated);
         } else {
             inflectionIndex.put(key, inflection);
@@ -75,12 +77,12 @@ public class LexemeBuilder<T extends Inflection> {
         return this;
     }
 
-    public Map<String,T> getInflections() {
+    public Map<String,Inflection> getInflections() {
         return inflectionIndex;
     }
 
 
-    public Lexeme<T> build(){
+    public Lexeme build(){
 
         if (lemma == null || position == null) {
             throw new IllegalStateException("Missing required fields: " +
@@ -88,7 +90,7 @@ public class LexemeBuilder<T extends Inflection> {
                     (position == null ? "position " : ""));
         }
 
-        return new Lexeme<>(this);
+        return new Lexeme(this);
     }
 
 

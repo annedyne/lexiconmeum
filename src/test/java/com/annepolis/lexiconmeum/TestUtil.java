@@ -23,9 +23,9 @@ import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalVoice.P
 
 public class TestUtil {
 
-    public static Lexeme<Declension> getNewTestNounLexeme(){
+    public static Lexeme getNewTestNounLexeme(){
 
-        return new LexemeBuilder<Declension>("amīcus", GrammaticalPosition.NOUN)
+        return new LexemeBuilder("amīcus", GrammaticalPosition.NOUN)
 
 
         .addInflection(getNewTestDeclension( SINGULAR, NOMINATIVE,  "amīcus"))
@@ -51,9 +51,9 @@ public class TestUtil {
     private static Declension getNewTestDeclension(GrammaticalNumber number, GrammaticalCase gramCase, String form) {
         return new Declension.Builder(form).setGrammaticalCase(gramCase).setNumber(number).build();
     }
-    public static Lexeme<Conjugation> getNewTestVerbLexeme(){
+    public static Lexeme getNewTestVerbLexeme(){
 
-        LexemeBuilder<Conjugation> builder = new LexemeBuilder<>("amo", VERB);
+        LexemeBuilder builder = new LexemeBuilder("amo", VERB);
 
         buildConjugation(builder, "amō", ACTIVE, INDICATIVE, FIRST, PRESENT, SINGULAR);
         buildConjugation(builder, "amās", ACTIVE, INDICATIVE, SECOND, PRESENT, SINGULAR);
@@ -101,7 +101,7 @@ public class TestUtil {
 
     }
 
-    private static void buildConjugation(LexemeBuilder<Conjugation> lexemeBuilder, String form, GrammaticalVoice voice, GrammaticalMood mood,
+    private static void buildConjugation(LexemeBuilder lexemeBuilder, String form, GrammaticalVoice voice, GrammaticalMood mood,
                                   GrammaticalPerson person, GrammaticalTense tense, GrammaticalNumber number){
 
             Conjugation conjugation = new Conjugation.Builder(form)
@@ -116,8 +116,8 @@ public class TestUtil {
         .build();
     }
 
-    public static List<Lexeme<?>> getMixedPositionTestLexemes(){
-        List<Lexeme<?>> lexemes = new ArrayList<>();
+    public static List<Lexeme> getMixedPositionTestLexemes(){
+        List<Lexeme> lexemes = new ArrayList<>();
 
         lexemes.add(getNewTestVerbLexeme());
         lexemes.add(getNewTestNounLexeme());

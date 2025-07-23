@@ -7,7 +7,7 @@ import com.annepolis.lexiconmeum.lexeme.detail.grammar.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Conjugation implements Inflection<Conjugation> {
+public class Conjugation implements Inflection {
 
     private final String form;
     private final String alternativeForm;
@@ -39,7 +39,7 @@ public class Conjugation implements Inflection<Conjugation> {
     }
 
     @Override
-    public InflectionBuilder<Conjugation> toBuilder() {
+    public InflectionBuilder toBuilder() {
         return new Builder(form)
                 .setVoice(voice)
                 .setTense(tense)
@@ -55,7 +55,7 @@ public class Conjugation implements Inflection<Conjugation> {
     public GrammaticalNumber getNumber() { return number; }
     public GrammaticalMood getMood() { return mood; }
 
-    public static class Builder implements InflectionBuilder<Conjugation> {
+    public static class Builder implements InflectionBuilder {
 
         private GrammaticalVoice voice;
         private GrammaticalMood mood;
@@ -137,15 +137,12 @@ public class Conjugation implements Inflection<Conjugation> {
         private void validateFields() {
             List<String> missing = new ArrayList<>();
 
-            if (mood == GrammaticalMood.INFINITIVE) {
-                if (tense == null) missing.add("tense");
-                if (form == null) missing.add("form");
-            } else {
+            if (mood != GrammaticalMood.INFINITIVE) {
                 if (person == null) missing.add("person");
                 if (number == null) missing.add("number");
-                if (tense == null) missing.add("tense");
-                if (form == null) missing.add("form");
             }
+            if (tense == null) missing.add("tense");
+            if (form == null) missing.add("form");
 
             if (!missing.isEmpty()) {
                 throw new IllegalStateException("Missing required fields: " + String.join(", ", missing));

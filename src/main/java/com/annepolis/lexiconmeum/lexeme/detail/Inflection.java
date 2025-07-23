@@ -1,9 +1,9 @@
 package com.annepolis.lexiconmeum.lexeme.detail;
 
-public interface Inflection <T extends Inflection<T>>{
+public interface Inflection {
 
     String getForm();
     String getAlternativeForm();
-    InflectionBuilder<T> toBuilder();
+    InflectionBuilder toBuilder();
 
 }

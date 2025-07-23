@@ -8,7 +8,7 @@ import java.util.UUID;
 public interface LexemeProvider {
 
     @SuppressWarnings("java:S1452")
-    Optional<Lexeme<?>> getLexemeIfPresent(UUID lemmaId);
-    <T extends Inflection> Lexeme<T> getLexemeOfType(UUID lemmaId, Class<T> expectedType);
+    Optional<Lexeme> getLexemeIfPresent(UUID lemmaId);
+    <T extends Inflection> Lexeme getLexemeOfType(UUID lemmaId, Class<T> expectedType);
 
 }
