@@ -7,17 +7,17 @@ import java.util.List;
 
 public class LexemeConjugationDetailDTO {
 
-    List<String> principleParts = new ArrayList<>();
+    List<String> principalParts = new ArrayList<>();
     List<String> definitions = new ArrayList<>();
 
     InflectionTableDTO inflectionTableDTO;
 
     public List<String> getPrincipleParts() {
-        return principleParts;
+        return principalParts;
     }
 
-    public void addPrinciplePart(String principlePart) {
-        this.getPrincipleParts().add(principlePart);
+    public void addPrinciplePart(String principalPart) {
+        this.getPrincipleParts().add(principalPart);
     }
 
     public List<String> getDefinitions() {
