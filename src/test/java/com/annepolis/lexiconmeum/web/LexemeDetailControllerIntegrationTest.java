@@ -1,6 +1,8 @@
 package com.annepolis.lexiconmeum.web;
 
 import com.annepolis.lexiconmeum.TestUtil;
+import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.shared.LexemeBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
@@ -46,9 +48,9 @@ class LexemeDetailControllerIntegrationTest {
 
     @Test
     void testDeclensionDetailEndpoint() throws JsonProcessingException {
-        UUID lexemeId = TestUtil.getNewTestNounLexeme().getId();
+        LexemeBuilder lexemeBuilder = new LexemeBuilder("poculum", GrammaticalPosition.NOUN);
+        UUID lexemeId = lexemeBuilder.build().getId();
         String url = getFullBaseUrl() + DECLENSION + "?lexemeId=" + lexemeId.toString();
-
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
         ObjectMapper objectMapper = new ObjectMapper();
         Object jsonObject = objectMapper.readValue(response.getBody(), Object.class);

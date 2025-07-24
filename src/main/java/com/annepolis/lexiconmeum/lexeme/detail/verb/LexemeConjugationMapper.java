@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-public class LexemeConjugationMapper implements LexemeInflectionMapper {
+class LexemeConjugationMapper implements LexemeInflectionMapper {
 
     static Comparator<ConjugationTableDTO> conjugationTableDTOComparator =
             Comparator.comparing(LexemeConjugationMapper::resolveVoiceOrder)

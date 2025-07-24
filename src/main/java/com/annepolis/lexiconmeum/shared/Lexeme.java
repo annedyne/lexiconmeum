@@ -4,6 +4,7 @@ import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -13,7 +14,7 @@ public class Lexeme {
     private final String lemma;
     private final GrammaticalPosition position;
     private final List<Sense> senses;
-    private final List<Inflection> inflections;
+    private final Map<String, Inflection> inflections;
 
     Lexeme(LexemeBuilder builder ) {
         this.lemma = builder.getLemma();
@@ -34,6 +35,10 @@ public class Lexeme {
     }
 
     public List<Inflection> getInflections(){
+        return inflections.values().stream().toList();
+    }
+
+    public Map<String, Inflection> getInflectionIndex(){
         return inflections;
     }
 

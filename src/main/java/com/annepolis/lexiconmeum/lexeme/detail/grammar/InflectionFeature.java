@@ -154,14 +154,14 @@ public enum InflectionFeature {
 
 
     private final String tag;
-    private final Consumer<InflectionBuilder<?>> setter;
+    private final Consumer<InflectionBuilder> setter;
 
-    InflectionFeature(String tag, Consumer<InflectionBuilder<?>> setter) {
+    InflectionFeature(String tag, Consumer<InflectionBuilder> setter) {
         this.tag = tag;
         this.setter = setter;
     }
 
-    public void applyTo(InflectionBuilder<?> d) {
+    public void applyTo(InflectionBuilder d) {
         setter.accept(d);
     }
 

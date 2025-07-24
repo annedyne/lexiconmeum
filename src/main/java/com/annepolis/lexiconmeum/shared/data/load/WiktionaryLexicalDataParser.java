@@ -1,6 +1,5 @@
 package com.annepolis.lexiconmeum.shared.data.load;
 
-import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalGender;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalTense;
@@ -78,28 +77,39 @@ class WiktionaryLexicalDataParser {
         if (optionalPosition.isEmpty()) {
             return Optional.empty();
         }
-
         GrammaticalPosition position = optionalPosition.get();
 
-        LexemeBuilder lexemeBuilder = new LexemeBuilder(lemma, position);
-
-        addSenses(root.path(SENSES.get()), lexemeBuilder);
-        addForms(root.path(FORMS.get()), lexemeBuilder);
-
-
-        return new SafeBuilder<>("LexemeBuilder", lexemeBuilder::build).build(logger, getParseMode());
-
+        return switch (position) {
+            case NOUN -> buildNounLexeme(root, lemma, position);
+            case VERB -> buildVerbLexeme(root, lemma, position);
+            default -> {
+                logger.trace("Unsupported position: {}", position);
+                yield Optional.empty();
+            }
+        };
     }
 
-    private void addForms(JsonNode formsNode, LexemeBuilder lexemeBuilder) {
-        if (!formsNode.isArray()) return;
+    private Optional<Lexeme> buildNounLexeme(JsonNode root, String lemma, GrammaticalPosition position) {
+        LexemeBuilder builder = new LexemeBuilder(lemma, position);
+        addSenses(root.path(SENSES.get()), builder);
+        addDeclensionForms(root.path(FORMS.get()), builder);
+        try {
+            return Optional.of(builder.build());
+        } catch (Exception ex) {
+            logger.warn("Failed to build lexeme: {}", ex.getMessage());
+            return Optional.empty();
+        }
+    }
 
-        String pos = lexemeBuilder.getPosition().name();
-
-        if (NOUN.get().equalsIgnoreCase(pos)) {
-            addDeclensionForms(formsNode, lexemeBuilder);
-        } else if (VERB.get().equalsIgnoreCase(pos)) {
-            addConjugationForms(formsNode, lexemeBuilder);
+    private Optional<Lexeme> buildVerbLexeme(JsonNode root, String lemma, GrammaticalPosition position) {
+        LexemeBuilder builder = new LexemeBuilder(lemma, position);
+        addSenses(root.path(SENSES.get()), builder);
+        addConjugationForms(root.path(FORMS.get()), builder);
+        try {
+            return Optional.of(builder.build());
+        } catch (Exception ex) {
+            logger.warn("Failed to build lexeme: {}", ex.getMessage());
+            return Optional.empty();
         }
     }
 
@@ -182,8 +192,7 @@ class WiktionaryLexicalDataParser {
             }
         }
     }
-
-    Inflection buildConjugation(JsonNode formNode){
+    Conjugation buildConjugation(JsonNode formNode){
         Conjugation.Builder builder = new Conjugation.Builder(formNode.path(FORM.get()).asText());
         List<String> tags = new ArrayList<>();
         for (JsonNode tag : formNode.path(TAGS.get())) {

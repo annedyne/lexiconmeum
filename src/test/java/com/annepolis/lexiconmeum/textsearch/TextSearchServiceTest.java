@@ -1,6 +1,6 @@
 package com.annepolis.lexiconmeum.textsearch;
 
-import com.annepolis.lexiconmeum.TestUtil;
+import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
 import com.annepolis.lexiconmeum.shared.Lexeme;
 import com.annepolis.lexiconmeum.shared.LexemeProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,14 +41,16 @@ class TextSearchServiceTest {
 
     LexemeProvider getLexemeProvider(){
         return  new LexemeProvider() {
-            @Override
-            public Lexeme getLexeme(UUID lemma) {
-                return TestUtil.getNewTestVerbLexeme();
-            }
 
             @Override
             public Optional<Lexeme> getLexemeIfPresent(UUID lemmaId) {
                 return Optional.empty();
+            }
+
+            @Override
+            public <T extends Inflection> Lexeme getLexemeOfType(UUID lemmaId, Class<T> expectedType) {
+
+                return null;
             }
         };
     }

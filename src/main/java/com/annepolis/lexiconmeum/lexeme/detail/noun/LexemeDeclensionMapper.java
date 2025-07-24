@@ -1,6 +1,5 @@
 package com.annepolis.lexiconmeum.lexeme.detail.noun;
 
-import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
 import com.annepolis.lexiconmeum.lexeme.detail.LexemeInflectionMapper;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalNumber;
@@ -18,16 +17,12 @@ class LexemeDeclensionMapper implements LexemeInflectionMapper {
 
         Map<GrammaticalNumber, Map<GrammaticalCase, String>> table = new EnumMap<>(GrammaticalNumber.class);
         if(lexeme != null) {
-            for (Inflection inflection : lexeme.getInflections()) {
-                if(inflection instanceof Declension declension){
-                    GrammaticalNumber number = declension.getNumber();
-                    GrammaticalCase grammaticalCase = declension.getGrammaticalCase();
-                    String form = declension.getForm();
-
-                    table.computeIfAbsent(number, numberKey -> new EnumMap<>(GrammaticalCase.class))
-                            .put(grammaticalCase, form);
-                }
-            }
+            lexeme.getInflections().stream()
+                    .filter(Declension.class::isInstance)
+                    .map(i -> (Declension) i)
+                    .forEach(declension ->
+                        table.computeIfAbsent(declension.getNumber(), n -> new EnumMap<>(GrammaticalCase.class))
+                                .put(declension.getGrammaticalCase(), declension.getForm()));
         }
         DeclensionTableDTO dto = new DeclensionTableDTO();
         dto.setTable(table);
