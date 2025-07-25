@@ -25,7 +25,7 @@ class LexemeDeclensionMapper implements LexemeInflectionMapper {
                                 .put(declension.getGrammaticalCase(), declension.getForm()));
         }
         DeclensionTableDTO dto = new DeclensionTableDTO();
-        dto.setTable(table);
+        dto.setInflectionTable(table);
 
         return dto;
     }
