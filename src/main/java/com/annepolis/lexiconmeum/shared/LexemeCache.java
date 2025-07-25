@@ -1,6 +1,6 @@
 package com.annepolis.lexiconmeum.shared;
 
-import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
+import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.shared.exception.LexemeTypeMismatchException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,12 +24,12 @@ public class LexemeCache implements LexemeSink, LexemeProvider {
     }
 
     @Override
-    public <T extends Inflection> Lexeme getLexemeOfType(UUID lexemeId, Class<T> expectedType) {
+    public Lexeme getLexemeOfType(UUID lexemeId, GrammaticalPosition expectedType) {
         Lexeme lexeme = lexemeIdToLexemeLookup.get(lexemeId);
 
-        boolean matches = lexeme.getInflections().stream().allMatch(expectedType::isInstance);
+        boolean matches = expectedType.equals(lexeme.getPosition());
         if (!matches) {
-            throw new LexemeTypeMismatchException("Expected lexeme of type " + expectedType.getSimpleName());
+            throw new LexemeTypeMismatchException("Expected lexeme of type " + expectedType.name());
         }
 
         return lexeme;

@@ -144,7 +144,7 @@ class WiktionaryLexicalDataParserTest {
     }
 
     @Test
-    void verbPrinciplePartsAreParsedAndLoadedIntoModel() throws IOException {
+    void verbPrincipalPartsAreParsedAndLoadedIntoModel() throws IOException {
         InflectionKey builder = new InflectionKey();
         String key = builder.buildFirstPrincipalPartKey();
         Inflection inflection  = getVerbLexemes().stream()

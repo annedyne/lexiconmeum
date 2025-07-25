@@ -1,9 +1,10 @@
-package com.annepolis.lexiconmeum.lexeme.detail.verb;
+package com.annepolis.lexiconmeum.lexeme.detail.noun;
 
 import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
 import com.annepolis.lexiconmeum.lexeme.detail.InflectionTableDTO;
 import com.annepolis.lexiconmeum.lexeme.detail.LexemeDetailResponse;
 import com.annepolis.lexiconmeum.lexeme.detail.LexemeInflectionMapper;
+import com.annepolis.lexiconmeum.lexeme.detail.verb.InflectionKey;
 import com.annepolis.lexiconmeum.shared.Lexeme;
 import com.annepolis.lexiconmeum.shared.Sense;
 import org.springframework.stereotype.Component;
@@ -13,18 +14,18 @@ import java.util.Map;
 import java.util.Optional;
 
 @Component
-public class LexemeConjugationDetailMapper {
+public class LexemeDeclensionDetailMapper {
 
     InflectionKey inflectionKey;
-    LexemeInflectionMapper lexemeConjugationMapper;
+    LexemeInflectionMapper lexemeDeclensionMapper;
 
-    LexemeConjugationDetailMapper(LexemeInflectionMapper lexemeConjugationMapper, InflectionKey inflectionKey){
+    LexemeDeclensionDetailMapper(LexemeInflectionMapper lexemeDeclensionMapper, InflectionKey inflectionKey){
         this.inflectionKey = inflectionKey;
-        this.lexemeConjugationMapper = lexemeConjugationMapper;
+        this.lexemeDeclensionMapper = lexemeDeclensionMapper;
     }
 
-     LexemeDetailResponse toLexemeDetailDTO(Lexeme lexeme){
-         LexemeDetailResponse dto = new LexemeDetailResponse();
+    LexemeDetailResponse toLexemeDetailDTO(Lexeme lexeme){
+        LexemeDetailResponse dto = new LexemeDetailResponse();
         populateDefinitions(dto, lexeme.getSenses());
 
         populatePrincipalParts(dto, lexeme.getInflectionIndex());
@@ -38,26 +39,19 @@ public class LexemeConjugationDetailMapper {
     }
 
     void populatePrincipalParts(LexemeDetailResponse dto, Map<String, Inflection> inflectionIndex) {
-        Optional.ofNullable(inflectionIndex.get(inflectionKey.buildFirstPrincipalPartKey()))
+        Optional.ofNullable(inflectionIndex.get(inflectionKey.buildFirstDeclensionPrincipalPartKey()))
                 .map(Inflection::getForm)
                 .filter(form -> !form.isBlank())
                 .ifPresent(dto::addPrincipalPart);
 
-        Optional.ofNullable(inflectionIndex.get(inflectionKey.buildSecondPrincipalPartKey()))
-                .map(Inflection::getForm)
-                .filter(form -> !form.isBlank()) // Optional: skip blank forms
-                .ifPresent(dto::addPrincipalPart);
-
-        Optional.ofNullable(inflectionIndex.get(inflectionKey.buildThirdPrincipalPartKey()))
+        Optional.ofNullable(inflectionIndex.get(inflectionKey.buildSecondDeclensionPrincipalPartKey()))
                 .map(Inflection::getForm)
                 .filter(form -> !form.isBlank()) // Optional: skip blank forms
                 .ifPresent(dto::addPrincipalPart);
     }
 
     void populateInflectionTable(LexemeDetailResponse dto, Lexeme lexeme){
-        InflectionTableDTO tableDTO = lexemeConjugationMapper.toInflectionTableDTO(lexeme);
+        InflectionTableDTO tableDTO = lexemeDeclensionMapper.toInflectionTableDTO(lexeme);
         dto.setInflectionTableDTO(tableDTO);
     }
-
-
 }

@@ -50,7 +50,7 @@ public final class InflectionKey {
        return part != null ? delimiter + part.name() : "";
     }
 
-    private static String buildPrinciplePartKey(
+    private static String buildPrincipalPartKey(
             GrammaticalVoice voice,
             GrammaticalMood mood,
             GrammaticalTense tense,
@@ -61,7 +61,7 @@ public final class InflectionKey {
     }
 
     public String buildFirstPrincipalPartKey() {
-        return buildPrinciplePartKey(
+        return buildPrincipalPartKey(
                 GrammaticalVoice.ACTIVE,
                 GrammaticalMood.INDICATIVE,
                 GrammaticalTense.PRESENT,
@@ -71,7 +71,7 @@ public final class InflectionKey {
     }
 
     public String buildSecondPrincipalPartKey() {
-        return buildPrinciplePartKey(
+        return buildPrincipalPartKey(
                 GrammaticalVoice.ACTIVE,
                 GrammaticalMood.INFINITIVE,
                 GrammaticalTense.PRESENT,
@@ -81,7 +81,7 @@ public final class InflectionKey {
     }
 
     public String buildThirdPrincipalPartKey() {
-        return buildPrinciplePartKey(
+        return buildPrincipalPartKey(
                 GrammaticalVoice.ACTIVE,
                 GrammaticalMood.INDICATIVE,
                 GrammaticalTense.PERFECT,
@@ -92,17 +92,17 @@ public final class InflectionKey {
 
 
     public static String buildDeclensionKey(Declension declension) {
-        return buildPrinciplePartKey(declension.getGrammaticalCase(), declension.getNumber());
+        return buildPrincipalPartKey(declension.getGrammaticalCase(), declension.getNumber());
     }
 
-    public String buildFirstDeclensionPrinciplePartKey(){
-        return buildPrinciplePartKey(GrammaticalCase.NOMINATIVE, GrammaticalNumber.SINGULAR);
+    public String buildFirstDeclensionPrincipalPartKey(){
+        return buildPrincipalPartKey(GrammaticalCase.NOMINATIVE, GrammaticalNumber.SINGULAR);
     }
-    public String buildSecondDeclensionPrinciplePartKey(){
-        return buildPrinciplePartKey(GrammaticalCase.GENITIVE, GrammaticalNumber.SINGULAR);
+    public String buildSecondDeclensionPrincipalPartKey(){
+        return buildPrincipalPartKey(GrammaticalCase.GENITIVE, GrammaticalNumber.SINGULAR);
     }
 
-    private static String buildPrinciplePartKey(
+    private static String buildPrincipalPartKey(
             GrammaticalCase grammaticalCase,GrammaticalNumber number) {
         return joinDeclensionParts( grammaticalCase, number  );
     }

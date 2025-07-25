@@ -31,21 +31,21 @@ class InflectionKeyTest {
     }
 
     @Test
-    void buildsValidFirstPrinciplePartKey(){
+    void buildsValidFirstPrincipalPartKey(){
         InflectionKey builder = new InflectionKey();
         String key = builder.buildFirstPrincipalPartKey();
         assertEquals("ACTIVE|INDICATIVE|PRESENT|FIRST|SINGULAR", key);
     }
 
     @Test
-    void buildsValidSecondPrinciplePartKey(){
+    void buildsValidSecondPrincipalPartKey(){
         InflectionKey builder = new InflectionKey();
         String key = builder.buildSecondPrincipalPartKey();
         assertEquals("ACTIVE|INFINITIVE|PRESENT", key);
     }
 
     @Test
-    void buildsValidThirdPrinciplePartKey(){
+    void buildsValidThirdPrincipalPartKey(){
         InflectionKey builder = new InflectionKey();
         String key = builder.buildThirdPrincipalPartKey();
         assertEquals("ACTIVE|INDICATIVE|PERFECT|FIRST|SINGULAR", key);

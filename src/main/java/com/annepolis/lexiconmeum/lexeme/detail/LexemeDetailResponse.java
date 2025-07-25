@@ -1,23 +1,24 @@
-package com.annepolis.lexiconmeum.lexeme.detail.verb;
+package com.annepolis.lexiconmeum.lexeme.detail;
 
-import com.annepolis.lexiconmeum.lexeme.detail.InflectionTableDTO;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class LexemeConjugationDetailDTO {
+public class LexemeDetailResponse {
 
     List<String> principalParts = new ArrayList<>();
     List<String> definitions = new ArrayList<>();
 
+    @JsonProperty("inflectionTable")
     InflectionTableDTO inflectionTableDTO;
 
-    public List<String> getPrincipleParts() {
+    public List<String> getPrincipalParts() {
         return principalParts;
     }
 
-    public void addPrinciplePart(String principalPart) {
-        this.getPrincipleParts().add(principalPart);
+    public void addPrincipalPart(String principalPart) {
+        this.getPrincipalParts().add(principalPart);
     }
 
     public List<String> getDefinitions() {
