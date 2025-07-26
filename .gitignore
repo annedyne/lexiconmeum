@@ -33,3 +33,6 @@ build/
 .vscode/
 HELP.md
 ../../../Library/Application Support/JetBrains/IntelliJIdea2023.2/scratches/jsonExample.jsonl
+
+*.log
+*.versionsBackup

@@ -30,8 +30,8 @@ class TextSearchServiceSpringTest {
         List<TextSearchSuggestionDTO> result = underTest.getWordsStartingWith("am", 10);
         assertEquals(10, result.size());
 
-        result = underTest.getWordsStartingWith("amara", 10);
-        assertEquals(6, result.size());
+        result = underTest.getWordsStartingWith("amarem", 10);
+        assertEquals(4, result.size());
 
     }
 

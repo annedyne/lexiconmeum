@@ -1,6 +1,8 @@
 package com.annepolis.lexiconmeum.web;
 
 import com.annepolis.lexiconmeum.TestUtil;
+import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.shared.LexemeBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
@@ -14,11 +16,10 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.UUID;
 
-import static com.annepolis.lexiconmeum.web.ApiRoutes.CONJUGATION;
-import static com.annepolis.lexiconmeum.web.ApiRoutes.DECLENSION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -43,11 +44,16 @@ class LexemeDetailControllerIntegrationTest {
         return baseUrl + ":" + port + path;
     }
 
-
     @Test
-    void testDeclensionDetailEndpoint() throws JsonProcessingException {
-        UUID lexemeId = TestUtil.getNewTestNounLexeme().getId();
-        String url = getFullBaseUrl() + DECLENSION + "?lexemeId=" + lexemeId.toString();
+    void testLexemeEndpoint() throws JsonProcessingException {
+        LexemeBuilder lexemeBuilder = new LexemeBuilder("amo", GrammaticalPosition.VERB);
+        UUID lexemeId = lexemeBuilder.build().getId();
+
+        String url = UriComponentsBuilder
+                .fromUriString(getFullBaseUrl())
+                .path(ApiRoutes.LEXEMES)
+                .queryParam("lexemeId", lexemeId.toString())
+                .toUriString();
 
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -59,11 +65,16 @@ class LexemeDetailControllerIntegrationTest {
     }
 
     @Test
-    void testConjugationDetailEndpoint() throws JsonProcessingException {
-        UUID lexemeId = TestUtil.getNewTestVerbLexeme().getId();
-        String url = getFullBaseUrl() + CONJUGATION + "?lexemeId=" + lexemeId.toString();
-        //4d6a2666-22a4-3a18-8a56-0c0e6a8ae404
-        //ffa9e2b1-6694-3436-8f24-b40ae10caeb3
+    void testDetailEndpoint() throws JsonProcessingException {
+        LexemeBuilder lexemeBuilder = new LexemeBuilder("poculum", GrammaticalPosition.NOUN);
+        UUID lexemeId = lexemeBuilder.build().getId();
+
+        String url = UriComponentsBuilder
+                .fromUriString(getFullBaseUrl()) // full base, e.g., https://lexicon.annedyne.net/api/v1
+                .path(ApiRoutes.LEXEME_DETAIL)   // path must start with a slash
+                .buildAndExpand(lexemeId)
+                .toUriString();
+
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
         ObjectMapper objectMapper = new ObjectMapper();
         Object jsonObject = objectMapper.readValue(response.getBody(), Object.class);
@@ -71,5 +82,59 @@ class LexemeDetailControllerIntegrationTest {
 
         logger.info("Pretty printed DTO:\n{}", prettyJson);
         assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void testGetDetailWithIdAndTypeEndpoint() throws JsonProcessingException {
+        UUID lexemeId = TestUtil.getNewTestVerbLexeme().getId();
+
+        String url = UriComponentsBuilder
+                .fromUriString(getFullBaseUrl())
+                .path(ApiRoutes.LEXEME_DETAIL)
+                .queryParam("type", "VERB")
+                .buildAndExpand(lexemeId)
+                .toUriString();
+
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        Object jsonObject = objectMapper.readValue(response.getBody(), Object.class);
+        String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
+
+        logger.info("Pretty printed DTO:\n{}", prettyJson);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void testTypeMismatchReturnsConflict() {
+        LexemeBuilder lexemeBuilder = new LexemeBuilder("poculum", GrammaticalPosition.NOUN);
+        UUID lexemeId = lexemeBuilder.build().getId();
+
+        String url = UriComponentsBuilder
+                .fromUriString(getFullBaseUrl())
+                .path(ApiRoutes.LEXEME_DETAIL)
+                .queryParam("type", "VERB")
+                .buildAndExpand(lexemeId)
+                .toUriString();
+
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        logger.info("Type mismatch error message: {}", response.getBody());
+    }
+
+    @Test
+    void testMissingLexemeReturnsNotFound() {
+        UUID nonExistentId = UUID.randomUUID();
+
+        String url = UriComponentsBuilder
+                .fromUriString(getFullBaseUrl())
+                .path(ApiRoutes.LEXEME_DETAIL)
+                .buildAndExpand(nonExistentId)
+                .toUriString();
+
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("Lexeme not found", response.getBody());
     }
 }

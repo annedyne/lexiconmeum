@@ -27,11 +27,11 @@ class TextSearchTrieIndexTest {
     void trieReturnsAllMatchingWordsGivenPrefix(){
         String prefix = "test";
         String word = prefix + "word";
-        LexemeBuilder lexemeBuilder = new LexemeBuilder(word, GrammaticalPosition.NOUN);
-        Lexeme lexeme = lexemeBuilder.build();
+        LexemeBuilder dLexemeBuilder = new LexemeBuilder(word, GrammaticalPosition.NOUN);
+        Lexeme lexeme = dLexemeBuilder.build();
 
-        lexemeBuilder = new LexemeBuilder( word, GrammaticalPosition.VERB);
-        Lexeme lexeme2 = lexemeBuilder.build();
+        LexemeBuilder cLexemeBuilder = new LexemeBuilder( word, GrammaticalPosition.VERB);
+        Lexeme lexeme2 = cLexemeBuilder.build();
 
         TextSearchTrieIndex underTest = new TextSearchTrieIndex(new TextSearchSuggestionMapper());
         underTest.insert(lexeme.getLemma(), lexeme.getId());
@@ -51,7 +51,7 @@ class TextSearchTrieIndexTest {
             underTest.insert(inflection.getForm(), lexeme.getId());
         }
         List<String> results = underTest.search("amico", 20);
-        assertEquals(2, results.size());
+        assertEquals(4, results.size());
     }
 
     @Test
@@ -64,7 +64,7 @@ class TextSearchTrieIndexTest {
             }
         }
         List<String> results = underTest.search(new StringBuilder("is").reverse().toString(), 20);
-        assertEquals(6, results.size());
+        assertEquals(7, results.size());
     }
 
 

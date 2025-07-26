@@ -10,7 +10,7 @@ import java.util.List;
 public class Conjugation implements Inflection {
 
     private final String form;
-    private final String alternateForm;
+    private final String alternativeForm;
     private final GrammaticalVoice voice;
     private final GrammaticalMood mood;
     private final GrammaticalTense tense;
@@ -25,7 +25,7 @@ public class Conjugation implements Inflection {
         this.person = builder.getPerson();
         this.number = builder.getNumber();
         this.form = builder.getForm();
-        this.alternateForm = builder.getForm();
+        this.alternativeForm = builder.getAlternativeForm();
     }
 
     @Override
@@ -33,23 +33,29 @@ public class Conjugation implements Inflection {
         return form;
     }
 
-    public String getAlternateForm() { return alternateForm; }
-    public GrammaticalVoice getVoice() { return voice; }
-    public GrammaticalTense getTense() { return tense; }
-    public GrammaticalPerson getPerson() { return person;}
-    public GrammaticalNumber getNumber() { return number; }
-    public GrammaticalMood getMood() { return mood; }
+    @Override
+    public String getAlternativeForm() {
+        return alternativeForm;
+    }
 
-    public Builder toBuilder() {
+    @Override
+    public InflectionBuilder toBuilder() {
         return new Builder(form)
                 .setVoice(voice)
                 .setTense(tense)
                 .setPerson(person)
                 .setNumber(number)
                 .setMood(mood)
-                .setAlternateForm(alternateForm);
+                .setAlternativeForm(alternativeForm);
     }
-    public static class Builder implements InflectionBuilder<Conjugation> {
+
+    public GrammaticalVoice getVoice() { return voice; }
+    public GrammaticalTense getTense() { return tense; }
+    public GrammaticalPerson getPerson() { return person;}
+    public GrammaticalNumber getNumber() { return number; }
+    public GrammaticalMood getMood() { return mood; }
+
+    public static class Builder implements InflectionBuilder {
 
         private GrammaticalVoice voice;
         private GrammaticalMood mood;
@@ -58,7 +64,7 @@ public class Conjugation implements Inflection {
         private GrammaticalNumber number;
 
         private final String form;
-        private String alternateForm;
+        private String alternativeForm;
 
         public Builder(String form) {
             this.form = form;
@@ -113,12 +119,12 @@ public class Conjugation implements Inflection {
             return form;
         }
 
-        public String getAlternateForm() {
-            return alternateForm;
+        public String getAlternativeForm() {
+            return alternativeForm;
         }
 
-        public Conjugation.Builder setAlternateForm(String alternateForm) {
-            this.alternateForm = alternateForm;
+        public Conjugation.Builder setAlternativeForm(String alternativeForm) {
+            this.alternativeForm = alternativeForm;
             return this;
         }
 
@@ -131,15 +137,12 @@ public class Conjugation implements Inflection {
         private void validateFields() {
             List<String> missing = new ArrayList<>();
 
-            if (mood == GrammaticalMood.INFINITIVE) {
-                if (tense == null) missing.add("tense");
-                if (form == null) missing.add("form");
-            } else {
+            if (mood != GrammaticalMood.INFINITIVE) {
                 if (person == null) missing.add("person");
                 if (number == null) missing.add("number");
-                if (tense == null) missing.add("tense");
-                if (form == null) missing.add("form");
             }
+            if (tense == null) missing.add("tense");
+            if (form == null) missing.add("form");
 
             if (!missing.isEmpty()) {
                 throw new IllegalStateException("Missing required fields: " + String.join(", ", missing));

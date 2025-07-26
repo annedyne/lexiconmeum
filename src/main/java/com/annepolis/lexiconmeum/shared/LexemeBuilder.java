@@ -3,11 +3,10 @@ package com.annepolis.lexiconmeum.shared;
 import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalGender;
 import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.lexeme.detail.verb.InflectionKey;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class LexemeBuilder {
 
@@ -16,7 +15,7 @@ public class LexemeBuilder {
     private final GrammaticalPosition position;
     private GrammaticalGender gender;
     private final List<Sense> senses = new ArrayList<>();
-    private List<Inflection> inflections = new ArrayList<>();
+    private final Map<String, Inflection> inflectionIndex = new HashMap<>();
 
     public LexemeBuilder(String lemma, GrammaticalPosition position){
         this.lemma = lemma;
@@ -62,19 +61,26 @@ public class LexemeBuilder {
         return senses;
     }
 
-    public LexemeBuilder setInflectionList(List<Inflection> inflectionList){
-        this.inflections = inflectionList;
-        return this;
-    }
-
     public LexemeBuilder addInflection(Inflection inflection){
-        this.inflections.add(inflection);
+        String key = InflectionKey.of(inflection);
+        if (inflectionIndex.containsKey(key)) {
+            Inflection existing = inflectionIndex.get(key);
+            Inflection updated = existing
+                    .toBuilder()
+                    .setAlternativeForm(inflection.getForm())
+                    .build();
+
+            inflectionIndex.put(key, updated);
+        } else {
+            inflectionIndex.put(key, inflection);
+        }
         return this;
     }
 
-    public List<Inflection> getInflections() {
-        return inflections;
+    public Map<String,Inflection> getInflections() {
+        return inflectionIndex;
     }
+
 
     public Lexeme build(){
 

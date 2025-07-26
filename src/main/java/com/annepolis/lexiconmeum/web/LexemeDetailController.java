@@ -1,21 +1,25 @@
 package com.annepolis.lexiconmeum.web;
 
-import com.annepolis.lexiconmeum.lexeme.detail.noun.DeclensionTableDTO;
+import com.annepolis.lexiconmeum.lexeme.detail.LexemeDetailResponse;
+import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.lexeme.detail.noun.LexemeDeclensionService;
-import com.annepolis.lexiconmeum.lexeme.detail.verb.ConjugationGroupDTO;
 import com.annepolis.lexiconmeum.lexeme.detail.verb.LexemeConjugationService;
+import com.annepolis.lexiconmeum.shared.Lexeme;
+import com.annepolis.lexiconmeum.shared.LexemeProvider;
+import com.annepolis.lexiconmeum.shared.exception.LexemeTypeMismatchException;
 import com.annepolis.lexiconmeum.shared.util.JsonDTOLogger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
-import static com.annepolis.lexiconmeum.web.ApiRoutes.CONJUGATION;
-import static com.annepolis.lexiconmeum.web.ApiRoutes.DECLENSION;
+import static com.annepolis.lexiconmeum.web.ApiRoutes.LEXEMES;
+import static com.annepolis.lexiconmeum.web.ApiRoutes.LEXEME_DETAIL;
 
 @RestController
 @RequestMapping("${api.base-path}")
@@ -25,29 +29,52 @@ public class LexemeDetailController {
     private final LexemeConjugationService lexemeConjugationService;
     private final LexemeDeclensionService lexemeDeclensionService;
     private final JsonDTOLogger jsonDTOLogger;
+    private final LexemeProvider lexemeProvider;
 
     public LexemeDetailController(LexemeConjugationService lexemeConjugationService,
-                                  LexemeDeclensionService lexemeDeclensionService, JsonDTOLogger jsonDTOLogger){
+                                  LexemeDeclensionService lexemeDeclensionService, LexemeProvider lexemeProvider, JsonDTOLogger jsonDTOLogger){
         this.lexemeConjugationService = lexemeConjugationService;
         this.lexemeDeclensionService = lexemeDeclensionService;
+        this.lexemeProvider = lexemeProvider;
         this.jsonDTOLogger = jsonDTOLogger;
     }
 
-    @GetMapping(DECLENSION)
-    public DeclensionTableDTO getDeclensions(@RequestParam String lexemeId){
-        logger.debug("fetching lexeme: {}", lexemeId);
-        DeclensionTableDTO table = lexemeDeclensionService.getLexemeDetail(UUID.fromString(lexemeId));
-        jsonDTOLogger.logAsJson(table);
-        return table;
+    @GetMapping(LEXEME_DETAIL)
+    public ResponseEntity<LexemeDetailResponse> getLexemeDetail(
+            @PathVariable UUID id,
+            @RequestParam(name = "type", required = false) GrammaticalPosition expectedType
+    ) {
+
+        Lexeme lexeme = lexemeProvider.getLexemeIfPresent(id)
+                .orElseThrow(() -> new NoSuchElementException("Lexeme not found"));
+
+        // Validate type if requested
+        if (expectedType != null && lexeme.getPosition() != expectedType) {
+            throw new LexemeTypeMismatchException("Expected " + expectedType + " but got " + lexeme.getPosition());
+        }
+
+        // Route to appropriate service (you could also do this via a strategy map)
+        LexemeDetailResponse response = switch (lexeme.getPosition()) {
+            case NOUN -> lexemeDeclensionService.getLexemeDetail(id);
+            case VERB -> lexemeConjugationService.getLexemeDetail(id);
+            default -> throw new UnsupportedOperationException("Detail not implemented for: " + lexeme.getPosition());
+        };
+
+        return ResponseEntity.ok(response);
     }
 
-
-    @GetMapping(CONJUGATION)
-    public ConjugationGroupDTO getConjugations(@RequestParam String lexemeId){
+    @GetMapping(LEXEMES)
+    public Lexeme getLexeme(@RequestParam String lexemeId){
         logger.debug("fetching lexeme: {}", lexemeId);
-        ConjugationGroupDTO tables = lexemeConjugationService.getLexemeDetail(UUID.fromString(lexemeId));
-        jsonDTOLogger.logAsJson(tables);
-        return tables;
+        UUID uuid = UUID.fromString(lexemeId);
+        Lexeme lexeme = lexemeProvider.getLexemeIfPresent(uuid)
+                .orElseThrow(() -> {
+                    logger.warn("Lexeme not found: {}", uuid);
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "Lexeme not found: " + uuid);
+                });
+
+        jsonDTOLogger.logAsJson(lexeme);
+        return lexeme;
     }
 
 }

@@ -14,7 +14,7 @@ public class Declension implements Inflection {
 
     public Declension(Builder builder){
         this.number = builder.getNumber();
-        this.grammaticalCase = builder.grammaticalCase;
+        this.grammaticalCase = builder.getGrammaticalCase();
         this.form = builder.form;
     }
 
@@ -32,12 +32,24 @@ public class Declension implements Inflection {
     }
 
     @Override
+    public String getAlternativeForm() {
+        return null;
+    }
+
+    @Override
+    public InflectionBuilder toBuilder() {
+        return new Declension.Builder(form)
+                .setNumber(number)
+                .setGrammaticalCase(grammaticalCase);
+    }
+
+    @Override
     public String toString(){
         return getForm();
     }
 
 
-    public static class Builder implements InflectionBuilder<Declension> {
+    public static class Builder implements InflectionBuilder {
 
         private GrammaticalNumber number;
         private GrammaticalCase grammaticalCase;
@@ -56,6 +68,11 @@ public class Declension implements Inflection {
             return this;
         }
 
+        @Override
+        public InflectionBuilder setAlternativeForm(String form) {
+            return this;
+        }
+
         public GrammaticalCase getGrammaticalCase() {
             return grammaticalCase;
         }
@@ -69,7 +86,6 @@ public class Declension implements Inflection {
         public String getForm() {
             return form;
         }
-
 
         @Override
         public Declension build() {

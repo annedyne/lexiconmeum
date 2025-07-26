@@ -1,5 +1,7 @@
 package com.annepolis.lexiconmeum.shared;
 
+import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.shared.exception.LexemeTypeMismatchException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -15,15 +17,25 @@ public class LexemeCache implements LexemeSink, LexemeProvider {
 
     private final HashMap<UUID, Lexeme> lexemeIdToLexemeLookup = new HashMap<>();
 
-    @Override
-    public Lexeme getLexeme(UUID lexemeId){
-        return lexemeIdToLexemeLookup.get(lexemeId);
-    }
 
     @Override
     public Optional<Lexeme> getLexemeIfPresent(UUID lexemeId) {
         return Optional.ofNullable(lexemeIdToLexemeLookup.get(lexemeId));
     }
+
+    @Override
+    public Lexeme getLexemeOfType(UUID lexemeId, GrammaticalPosition expectedType) {
+        Lexeme lexeme = lexemeIdToLexemeLookup.get(lexemeId);
+
+        boolean matches = expectedType.equals(lexeme.getPosition());
+        if (!matches) {
+            throw new LexemeTypeMismatchException("Expected lexeme of type " + expectedType.name());
+        }
+
+        return lexeme;
+    }
+
+
 
     void addLexeme(Lexeme lexeme){
         if(logger.isDebugEnabled()) {

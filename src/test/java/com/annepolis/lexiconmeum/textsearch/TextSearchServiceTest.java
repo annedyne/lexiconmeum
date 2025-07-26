@@ -1,6 +1,6 @@
 package com.annepolis.lexiconmeum.textsearch;
 
-import com.annepolis.lexiconmeum.TestUtil;
+import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.shared.Lexeme;
 import com.annepolis.lexiconmeum.shared.LexemeProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +23,7 @@ class TextSearchServiceTest {
 
     @BeforeEach
     void init(@Mock  TextSearchTrieIndexService textSearchTrieIndexService ){
-        underTest = new TextSearchSuggestionService(textSearchTrieIndexService, new TextSearchSuggestionMapper(), getLexemeProvider());
+        underTest = new TextSearchSuggestionService(textSearchTrieIndexService, new TextSearchSuggestionMapper(), getLexemeProviderStub());
     }
 
     @Test
@@ -39,16 +39,15 @@ class TextSearchServiceTest {
         assertNotNull(result);
     }
 
-    LexemeProvider getLexemeProvider(){
+    LexemeProvider getLexemeProviderStub(){
         return  new LexemeProvider() {
-            @Override
-            public Lexeme getLexeme(UUID lemma) {
-                return TestUtil.getNewTestVerbLexeme();
-            }
-
             @Override
             public Optional<Lexeme> getLexemeIfPresent(UUID lemmaId) {
                 return Optional.empty();
+            }
+            @Override
+            public Lexeme getLexemeOfType(UUID lemmaId, GrammaticalPosition expectedType) {
+                return null;
             }
         };
     }
