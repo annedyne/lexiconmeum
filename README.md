@@ -23,7 +23,7 @@ Lexical data is sourced from [Wiktionary](https://www.wiktionary.org/) and parse
 
 given prefix (match beginning of word)
 ```bash
-GET /api/search/prefix?prefix=<string>
+GET /api/v1/autocomplete/prefix?prefix=<string>
 
 Response: JSON array of matching words (e.g.,
 ["amare", "amatus"])
@@ -31,14 +31,14 @@ Response: JSON array of matching words (e.g.,
 given suffix (match end of word)
 
 ```bash
-GET /api/search/suffix?suffix=<string>
+GET /api/v1/autocomplete/suffix?suffix=<string>
 Response: JSON array of matching words (e.g.,
 ["amaturus", "amonibus, "]
 ```
 ##### word detail endpoints
 ```bash
-GET /api/v1/lexeme/detail/declension?lexemeId=<string>
-GET /api/v1/lexeme/detail/conjugation?lexemeId=<string>
+GET /api/v1/lexemes/123/detail?type=<string>  #type is optional
+GET /api/v1/lexemes?lexemeId=<string>
 Response: JSON object (e.g.,
 ["amare", "amatus"])
 ```
