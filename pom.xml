@@ -11,7 +11,7 @@
 
     <groupId>com.annepolis</groupId>
     <artifactId>lexiconmeum</artifactId>
-    <version>0.2.1-SNAPSHOT</version>
+    <version>0.2.1</version>
     <name>lexiconmeum</name>
     <description>lexiconmeum</description>
 
