@@ -1,9 +1,9 @@
 package com.annepolis.lexiconmeum.lexeme.detail.verb;
 
 import com.annepolis.lexiconmeum.TestUtil;
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalMood;
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalVoice;
-import com.annepolis.lexiconmeum.shared.Lexeme;
+import com.annepolis.lexiconmeum.shared.model.Lexeme;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalMood;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

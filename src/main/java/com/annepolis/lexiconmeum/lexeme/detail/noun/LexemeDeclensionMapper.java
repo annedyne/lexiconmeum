@@ -1,16 +1,16 @@
 package com.annepolis.lexiconmeum.lexeme.detail.noun;
 
 import com.annepolis.lexiconmeum.lexeme.detail.LexemeInflectionMapper;
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalCase;
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalNumber;
-import com.annepolis.lexiconmeum.shared.Lexeme;
+import com.annepolis.lexiconmeum.shared.model.Lexeme;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
 import org.springframework.stereotype.Component;
 
 import java.util.EnumMap;
 import java.util.Map;
 
 @Component
-class LexemeDeclensionMapper implements LexemeInflectionMapper {
+public class LexemeDeclensionMapper implements LexemeInflectionMapper {
 
     @Override
     public DeclensionTableDTO toInflectionTableDTO(Lexeme lexeme) {

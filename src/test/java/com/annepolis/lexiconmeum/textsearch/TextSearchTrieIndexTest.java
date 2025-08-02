@@ -2,9 +2,9 @@ package com.annepolis.lexiconmeum.textsearch;
 
 import com.annepolis.lexiconmeum.TestUtil;
 import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
-import com.annepolis.lexiconmeum.shared.Lexeme;
-import com.annepolis.lexiconmeum.shared.LexemeBuilder;
+import com.annepolis.lexiconmeum.shared.model.Lexeme;
+import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

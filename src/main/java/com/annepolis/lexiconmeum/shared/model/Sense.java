@@ -1,37 +1,35 @@
-package com.annepolis.lexiconmeum.shared;
+package com.annepolis.lexiconmeum.shared.model;
+
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class Sense {
 
     private final List<String> glosses;
-    private final List<String> tags;
 
-    private Sense(Builder builder){
+    private Sense(Builder builder ){
         this.glosses = builder.glosses;
-        this.tags = builder.tags;
     }
 
     public List<String> getGloss(){
         return glosses;
     }
 
-    public List<String> getTags(){
-        return tags;
-    }
-
     public static class Builder {
         final List<String> glosses = new ArrayList<>();
-        final List<String> tags= new ArrayList<>();
+        final Set<GrammaticalGender> genders = new TreeSet<>();
 
         public Builder addGloss(String gloss){
             this.glosses.add(gloss);
             return this;
         }
 
-        public Builder addTag(String tag){
-            this.tags.add(tag);
+        public Builder addGender(GrammaticalGender gender){
+            this.genders.add(gender);
             return this;
         }
 

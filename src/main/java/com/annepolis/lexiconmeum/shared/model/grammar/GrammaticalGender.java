@@ -1,4 +1,4 @@
-package com.annepolis.lexiconmeum.lexeme.detail.grammar;
+package com.annepolis.lexiconmeum.shared.model.grammar;
 
 import java.util.Arrays;
 import java.util.Optional;

@@ -1,18 +1,26 @@
-package com.annepolis.lexiconmeum.lexeme.detail.verb;
+package com.annepolis.lexiconmeum.lexeme.detail;
 
-import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.*;
+import com.annepolis.lexiconmeum.lexeme.detail.adjective.Agreement;
 import com.annepolis.lexiconmeum.lexeme.detail.noun.Declension;
+import com.annepolis.lexiconmeum.lexeme.detail.verb.Conjugation;
+import com.annepolis.lexiconmeum.shared.model.grammar.*;
 import org.springframework.stereotype.Component;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public final class InflectionKey {
+
+    public static final String KEY_DELIMITER = "|";
 
     public static String of(Inflection inflection){
         if (inflection instanceof Conjugation c) {
             return buildConjugationKey(c);
         } else if (inflection instanceof Declension d ){
             return buildDeclensionKey(d);
+        } else if (inflection instanceof Agreement a ){
+            return buildAgreementKey(a);
         } else {
             throw new IllegalArgumentException("Unsupported inflection type: " + inflection.getClass());
         }
@@ -25,6 +33,14 @@ public final class InflectionKey {
                 conjugation.getPerson(),
                 conjugation.getNumber()
                 );
+    }
+
+    public static String buildDeclensionKey(Declension declension) {
+        return joinDeclensionParts(declension.getGrammaticalCase(), declension.getNumber());
+    }
+
+    public static String buildAgreementKey(Agreement agreement) {
+        return joinAgreementParts(agreement.getGrammaticalCase(), agreement.getNumber(), agreement.getGenders(), agreement.getDegree());
     }
 
     public static String joinParts(
@@ -46,22 +62,12 @@ public final class InflectionKey {
     }
 
     private static String buildKeyPart(Enum<?>  part, boolean firstOne){
-        String delimiter = firstOne ? "" : "|";
+        String delimiter = firstOne ? "" : KEY_DELIMITER;
        return part != null ? delimiter + part.name() : "";
     }
 
-    private static String buildPrincipalPartKey(
-            GrammaticalVoice voice,
-            GrammaticalMood mood,
-            GrammaticalTense tense,
-            GrammaticalPerson person,
-            GrammaticalNumber number
-    ) {
-        return joinParts( voice, mood, tense, person, number );
-    }
-
     public String buildFirstPrincipalPartKey() {
-        return buildPrincipalPartKey(
+        return buildConjugationPrincipalPartKey(
                 GrammaticalVoice.ACTIVE,
                 GrammaticalMood.INDICATIVE,
                 GrammaticalTense.PRESENT,
@@ -71,7 +77,7 @@ public final class InflectionKey {
     }
 
     public String buildSecondPrincipalPartKey() {
-        return buildPrincipalPartKey(
+        return buildConjugationPrincipalPartKey(
                 GrammaticalVoice.ACTIVE,
                 GrammaticalMood.INFINITIVE,
                 GrammaticalTense.PRESENT,
@@ -81,7 +87,7 @@ public final class InflectionKey {
     }
 
     public String buildThirdPrincipalPartKey() {
-        return buildPrincipalPartKey(
+        return buildConjugationPrincipalPartKey(
                 GrammaticalVoice.ACTIVE,
                 GrammaticalMood.INDICATIVE,
                 GrammaticalTense.PERFECT,
@@ -90,21 +96,21 @@ public final class InflectionKey {
         );
     }
 
-
-    public static String buildDeclensionKey(Declension declension) {
-        return buildPrincipalPartKey(declension.getGrammaticalCase(), declension.getNumber());
+    private static String buildConjugationPrincipalPartKey(
+            GrammaticalVoice voice,
+            GrammaticalMood mood,
+            GrammaticalTense tense,
+            GrammaticalPerson person,
+            GrammaticalNumber number
+    ) {
+        return joinParts( voice, mood, tense, person, number );
     }
 
     public String buildFirstDeclensionPrincipalPartKey(){
-        return buildPrincipalPartKey(GrammaticalCase.NOMINATIVE, GrammaticalNumber.SINGULAR);
+        return joinDeclensionParts(GrammaticalCase.NOMINATIVE, GrammaticalNumber.SINGULAR);
     }
     public String buildSecondDeclensionPrincipalPartKey(){
-        return buildPrincipalPartKey(GrammaticalCase.GENITIVE, GrammaticalNumber.SINGULAR);
-    }
-
-    private static String buildPrincipalPartKey(
-            GrammaticalCase grammaticalCase,GrammaticalNumber number) {
-        return joinDeclensionParts( grammaticalCase, number  );
+        return joinDeclensionParts(GrammaticalCase.GENITIVE, GrammaticalNumber.SINGULAR);
     }
 
     public static String joinDeclensionParts(
@@ -112,5 +118,17 @@ public final class InflectionKey {
 
         return buildKeyPart(grammaticalCase, true)
         + buildKeyPart(number);
+    }
+
+    public static String joinAgreementParts(
+            GrammaticalCase grammaticalCase, GrammaticalNumber number, Set<GrammaticalGender> genders, GrammaticalDegree degree ) {
+        String genderPart = genders.stream()
+                .sorted()
+                .map(g -> buildKeyPart(g))
+                .collect(Collectors.joining());
+        return buildKeyPart(grammaticalCase, true)
+                + buildKeyPart(number)
+                + genderPart
+                + buildKeyPart(degree);
     }
 }

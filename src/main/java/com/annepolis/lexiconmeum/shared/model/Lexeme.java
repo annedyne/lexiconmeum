@@ -1,7 +1,8 @@
-package com.annepolis.lexiconmeum.shared;
+package com.annepolis.lexiconmeum.shared.model;
 
 import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass;
 
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ public class Lexeme {
     private final UUID id;
     private final String lemma;
     private final GrammaticalPosition position;
+    private final InflectionClass inflectionClass;
     private final List<Sense> senses;
     private final Map<String, Inflection> inflections;
 
@@ -22,6 +24,7 @@ public class Lexeme {
         this.id = builder.getId();
         this.inflections = builder.getInflections();
         this.senses = builder.getSenses();
+        this.inflectionClass = builder.getInflectionClass();
     }
 
     public UUID getId() {
@@ -32,6 +35,10 @@ public class Lexeme {
 
     public GrammaticalPosition getPosition() {
         return position;
+    }
+
+    public InflectionClass getInflectionClass() {
+        return inflectionClass;
     }
 
     public List<Inflection> getInflections(){
