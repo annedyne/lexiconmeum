@@ -1,10 +1,10 @@
 package com.annepolis.lexiconmeum.lexeme.detail.verb;
 
 import com.annepolis.lexiconmeum.lexeme.detail.LexemeInflectionMapper;
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalMood;
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalTense;
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalVoice;
-import com.annepolis.lexiconmeum.shared.Lexeme;
+import com.annepolis.lexiconmeum.shared.model.Lexeme;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalMood;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice;
 import org.springframework.stereotype.Component;
 
 import java.util.*;

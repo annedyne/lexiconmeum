@@ -1,6 +1,6 @@
-package com.annepolis.lexiconmeum.shared;
+package com.annepolis.lexiconmeum.shared.model;
 
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
 
 import java.util.Optional;
 import java.util.UUID;

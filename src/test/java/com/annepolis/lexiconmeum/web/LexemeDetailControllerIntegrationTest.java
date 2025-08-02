@@ -1,8 +1,8 @@
 package com.annepolis.lexiconmeum.web;
 
 import com.annepolis.lexiconmeum.TestUtil;
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
-import com.annepolis.lexiconmeum.shared.LexemeBuilder;
+import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
@@ -83,6 +83,25 @@ class LexemeDetailControllerIntegrationTest {
         logger.info("Pretty printed DTO:\n{}", prettyJson);
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
+    @Test
+    void testDetailEndpointWitAdjectiveId() throws JsonProcessingException {
+        LexemeBuilder lexemeBuilder = new LexemeBuilder("brevis", GrammaticalPosition.ADJECTIVE);
+        UUID lexemeId = lexemeBuilder.build().getId();
+
+        String url = UriComponentsBuilder
+                .fromUriString(getFullBaseUrl()) // full base, e.g., https://lexicon.annedyne.net/api/v1
+                .path(ApiRoutes.LEXEME_DETAIL)   // path must start with a slash
+                .buildAndExpand(lexemeId)
+                .toUriString();
+
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        Object jsonObject = objectMapper.readValue(response.getBody(), Object.class);
+        String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
+
+        logger.info("Pretty printed DTO:\n{}", prettyJson);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
 
     @Test
     void testGetDetailWithIdAndTypeEndpoint() throws JsonProcessingException {
@@ -103,6 +122,7 @@ class LexemeDetailControllerIntegrationTest {
         logger.info("Pretty printed DTO:\n{}", prettyJson);
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
+
 
     @Test
     void testTypeMismatchReturnsConflict() {

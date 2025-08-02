@@ -1,9 +1,9 @@
 package com.annepolis.lexiconmeum.lexeme.detail.verb;
 
 import com.annepolis.lexiconmeum.lexeme.detail.LexemeDetailResponse;
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
-import com.annepolis.lexiconmeum.shared.Lexeme;
-import com.annepolis.lexiconmeum.shared.LexemeProvider;
+import com.annepolis.lexiconmeum.shared.model.Lexeme;
+import com.annepolis.lexiconmeum.shared.model.LexemeProvider;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -23,7 +23,6 @@ public class LexemeConjugationService {
     public LexemeDetailResponse getLexemeDetail(UUID lexemeId) {
         Lexeme lexeme = lexemeProvider.getLexemeOfType(lexemeId, GrammaticalPosition.VERB);
         return lexemeConjugationDetailMapper.toLexemeDetailDTO(lexeme);
-
     }
 
 }

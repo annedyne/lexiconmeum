@@ -1,3 +1,8 @@
 logging:
   level:
     com.annepolis.lexiconmeum: DEBUG
+    com.annepolis.lexiconmeum.shared.data.load.WiktionaryLexicalDataParser: DEBUG
+app:
+  load:
+    data-file: file:/opt/lexiconmeum/data/lexicalData.jsonl
+    parse-mode: LENIENT

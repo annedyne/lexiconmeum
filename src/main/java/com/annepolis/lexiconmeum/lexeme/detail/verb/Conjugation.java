@@ -2,7 +2,7 @@ package com.annepolis.lexiconmeum.lexeme.detail.verb;
 
 import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
 import com.annepolis.lexiconmeum.lexeme.detail.InflectionBuilder;
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.*;
+import com.annepolis.lexiconmeum.shared.model.grammar.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +39,7 @@ public class Conjugation implements Inflection {
     }
 
     @Override
-    public InflectionBuilder toBuilder() {
+    public Conjugation.Builder toBuilder() {
         return new Builder(form)
                 .setVoice(voice)
                 .setTense(tense)

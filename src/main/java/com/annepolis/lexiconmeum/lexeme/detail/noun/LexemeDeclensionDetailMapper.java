@@ -1,12 +1,8 @@
 package com.annepolis.lexiconmeum.lexeme.detail.noun;
 
-import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
-import com.annepolis.lexiconmeum.lexeme.detail.InflectionTableDTO;
-import com.annepolis.lexiconmeum.lexeme.detail.LexemeDetailResponse;
-import com.annepolis.lexiconmeum.lexeme.detail.LexemeInflectionMapper;
-import com.annepolis.lexiconmeum.lexeme.detail.verb.InflectionKey;
-import com.annepolis.lexiconmeum.shared.Lexeme;
-import com.annepolis.lexiconmeum.shared.Sense;
+import com.annepolis.lexiconmeum.lexeme.detail.*;
+import com.annepolis.lexiconmeum.shared.model.Lexeme;
+import com.annepolis.lexiconmeum.shared.model.Sense;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

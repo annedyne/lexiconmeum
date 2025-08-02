@@ -1,12 +1,13 @@
 package com.annepolis.lexiconmeum.web;
 
 import com.annepolis.lexiconmeum.lexeme.detail.LexemeDetailResponse;
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.lexeme.detail.adjective.LexemeAgreementService;
 import com.annepolis.lexiconmeum.lexeme.detail.noun.LexemeDeclensionService;
 import com.annepolis.lexiconmeum.lexeme.detail.verb.LexemeConjugationService;
-import com.annepolis.lexiconmeum.shared.Lexeme;
-import com.annepolis.lexiconmeum.shared.LexemeProvider;
 import com.annepolis.lexiconmeum.shared.exception.LexemeTypeMismatchException;
+import com.annepolis.lexiconmeum.shared.model.Lexeme;
+import com.annepolis.lexiconmeum.shared.model.LexemeProvider;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.shared.util.JsonDTOLogger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,13 +29,18 @@ public class LexemeDetailController {
     static final Logger logger = LogManager.getLogger(LexemeDetailController.class);
     private final LexemeConjugationService lexemeConjugationService;
     private final LexemeDeclensionService lexemeDeclensionService;
+    private final LexemeAgreementService lexemeAgreementService;
     private final JsonDTOLogger jsonDTOLogger;
     private final LexemeProvider lexemeProvider;
 
     public LexemeDetailController(LexemeConjugationService lexemeConjugationService,
-                                  LexemeDeclensionService lexemeDeclensionService, LexemeProvider lexemeProvider, JsonDTOLogger jsonDTOLogger){
+                                  LexemeDeclensionService lexemeDeclensionService,
+                                  LexemeAgreementService lexemeAgreementService,
+                                  LexemeProvider lexemeProvider,
+                                  JsonDTOLogger jsonDTOLogger ){
         this.lexemeConjugationService = lexemeConjugationService;
         this.lexemeDeclensionService = lexemeDeclensionService;
+        this.lexemeAgreementService = lexemeAgreementService;
         this.lexemeProvider = lexemeProvider;
         this.jsonDTOLogger = jsonDTOLogger;
     }
@@ -57,6 +63,7 @@ public class LexemeDetailController {
         LexemeDetailResponse response = switch (lexeme.getPosition()) {
             case NOUN -> lexemeDeclensionService.getLexemeDetail(id);
             case VERB -> lexemeConjugationService.getLexemeDetail(id);
+            case ADJECTIVE -> lexemeAgreementService.getLexemeDetail(id);
             default -> throw new UnsupportedOperationException("Detail not implemented for: " + lexeme.getPosition());
         };
 

@@ -1,6 +1,6 @@
 package com.annepolis.lexiconmeum.shared.data.load;
 
-import com.annepolis.lexiconmeum.shared.LexemeSink;
+import com.annepolis.lexiconmeum.shared.model.LexemeSink;
 import jakarta.annotation.PostConstruct;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

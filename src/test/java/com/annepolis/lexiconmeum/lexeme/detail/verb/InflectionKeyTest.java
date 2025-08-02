@@ -1,8 +1,9 @@
 package com.annepolis.lexiconmeum.lexeme.detail.verb;
 
 import com.annepolis.lexiconmeum.TestUtil;
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.*;
-import com.annepolis.lexiconmeum.shared.Lexeme;
+import com.annepolis.lexiconmeum.lexeme.detail.InflectionKey;
+import com.annepolis.lexiconmeum.shared.model.Lexeme;
+import com.annepolis.lexiconmeum.shared.model.grammar.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -29,6 +30,7 @@ class InflectionKeyTest {
         assertEquals("ACTIVE|INDICATIVE|PRESENT|FIRST|SINGULAR", key);
 
     }
+
 
     @Test
     void buildsValidFirstPrincipalPartKey(){

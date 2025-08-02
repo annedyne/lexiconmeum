@@ -1,9 +1,10 @@
 package com.annepolis.lexiconmeum.lexeme.detail.noun;
 
+import com.annepolis.lexiconmeum.lexeme.detail.BuilderHasGrammaticalCase;
 import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
 import com.annepolis.lexiconmeum.lexeme.detail.InflectionBuilder;
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalCase;
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalNumber;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
 
 public class Declension implements Inflection {
 
@@ -13,8 +14,8 @@ public class Declension implements Inflection {
     private final GrammaticalNumber number;
 
     public Declension(Builder builder){
-        this.number = builder.getNumber();
-        this.grammaticalCase = builder.getGrammaticalCase();
+        this.number = builder.number;
+        this.grammaticalCase = builder.grammaticalCase;
         this.form = builder.form;
     }
 
@@ -37,7 +38,7 @@ public class Declension implements Inflection {
     }
 
     @Override
-    public InflectionBuilder toBuilder() {
+    public Declension.Builder toBuilder() {
         return new Declension.Builder(form)
                 .setNumber(number)
                 .setGrammaticalCase(grammaticalCase);
@@ -49,7 +50,7 @@ public class Declension implements Inflection {
     }
 
 
-    public static class Builder implements InflectionBuilder {
+    public static class Builder implements InflectionBuilder, BuilderHasGrammaticalCase {
 
         private GrammaticalNumber number;
         private GrammaticalCase grammaticalCase;
@@ -59,32 +60,20 @@ public class Declension implements Inflection {
             this.form = form;
         }
 
-        public GrammaticalNumber getNumber() {
-            return number;
-        }
-
         public Declension.Builder setNumber(GrammaticalNumber number) {
             this.number = number;
             return this;
         }
 
         @Override
-        public InflectionBuilder setAlternativeForm(String form) {
+        public Declension.Builder setAlternativeForm(String form) {
             return this;
         }
 
-        public GrammaticalCase getGrammaticalCase() {
-            return grammaticalCase;
-        }
-
-
+        @Override
         public Declension.Builder setGrammaticalCase(GrammaticalCase grammaticalCase) {
             this.grammaticalCase = grammaticalCase;
             return this;
-        }
-
-        public String getForm() {
-            return form;
         }
 
         @Override

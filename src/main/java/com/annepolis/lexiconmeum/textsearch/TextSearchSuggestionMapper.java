@@ -1,6 +1,6 @@
 package com.annepolis.lexiconmeum.textsearch;
 
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
