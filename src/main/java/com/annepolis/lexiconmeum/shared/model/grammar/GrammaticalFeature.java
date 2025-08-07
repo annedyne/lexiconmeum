@@ -11,19 +11,19 @@ import java.util.function.Consumer;
 public enum GrammaticalFeature {
 
     FIRST(Set.of("declension-1", "conjugation-1"), builder ->
-        builder.setInflectionClass(InflectionClass.FIRST)),
+        builder.addInflectionClass(InflectionClass.FIRST)),
 
     SECOND(Set.of("declension-2", "conjugation-2"), builder ->
-        builder.setInflectionClass(InflectionClass.SECOND)),
+        builder.addInflectionClass(InflectionClass.SECOND)),
 
     THIRD(Set.of("declension-3", "conjugation-3"), builder ->
-        builder.setInflectionClass(InflectionClass.THIRD)),
+        builder.addInflectionClass(InflectionClass.THIRD)),
 
     FOURTH(Set.of("declension-4", "conjugation-4"), builder ->
-        builder.setInflectionClass(InflectionClass.FOURTH)),
+        builder.addInflectionClass(InflectionClass.FOURTH)),
 
     FIFTH(Set.of("declension-5"), builder ->
-        builder.setInflectionClass(InflectionClass.FOURTH));
+        builder.addInflectionClass(InflectionClass.FIFTH));
 
     private final Set<String> tags;
     private final Consumer<LexemeBuilder> setter;

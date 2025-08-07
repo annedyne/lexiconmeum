@@ -4,17 +4,14 @@ import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class Lexeme {
 
     private final UUID id;
     private final String lemma;
     private final GrammaticalPosition position;
-    private final InflectionClass inflectionClass;
+    private final Set<InflectionClass> inflectionClasses;
     private final List<Sense> senses;
     private final Map<String, Inflection> inflections;
 
@@ -24,7 +21,7 @@ public class Lexeme {
         this.id = builder.getId();
         this.inflections = builder.getInflections();
         this.senses = builder.getSenses();
-        this.inflectionClass = builder.getInflectionClass();
+        this.inflectionClasses = builder.getInflectionClasses();
     }
 
     public UUID getId() {
@@ -37,8 +34,8 @@ public class Lexeme {
         return position;
     }
 
-    public InflectionClass getInflectionClass() {
-        return inflectionClass;
+    public Set<InflectionClass> getInflectionClasses() {
+        return inflectionClasses;
     }
 
     public List<Inflection> getInflections(){

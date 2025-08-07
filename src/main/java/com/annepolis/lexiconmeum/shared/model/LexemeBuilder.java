@@ -17,7 +17,7 @@ public class LexemeBuilder {
     private GrammaticalGender gender;
     private final List<Sense> senses = new ArrayList<>();
     private final Map<String, Inflection> inflectionIndex = new HashMap<>();
-    private InflectionClass inflectionClass;
+    private final Set<InflectionClass> inflectionClasses = new TreeSet<>();
 
     public LexemeBuilder(String lemma, GrammaticalPosition position){
         this.lemma = lemma;
@@ -83,12 +83,12 @@ public class LexemeBuilder {
         return inflectionIndex;
     }
 
-    public InflectionClass getInflectionClass() {
-        return inflectionClass;
+    public Set<InflectionClass> getInflectionClasses() {
+        return inflectionClasses;
     }
 
-    public LexemeBuilder setInflectionClass(InflectionClass inflectionClass) {
-        this.inflectionClass = inflectionClass;
+    public LexemeBuilder addInflectionClass(InflectionClass inflectionClass) {
+        this.inflectionClasses.add(inflectionClass);
         return this;
     }
 

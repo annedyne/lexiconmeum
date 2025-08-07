@@ -1,6 +1,6 @@
 package com.annepolis.lexiconmeum.textsearch;
 
-import com.annepolis.lexiconmeum.shared.model.LexemeProvider;
+import com.annepolis.lexiconmeum.shared.LexemeProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;

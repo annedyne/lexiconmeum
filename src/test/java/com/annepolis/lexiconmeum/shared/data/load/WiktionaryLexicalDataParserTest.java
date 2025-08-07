@@ -26,6 +26,7 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass.THIRD;
@@ -127,7 +128,7 @@ class WiktionaryLexicalDataParserTest {
                 .anyMatch(i -> i.getForm().equals(expectedForm)
                         || expectedForm.equals("pulcherrimē")); //no superlative adverb in data
 
-        pulcher.get().getInflections().stream()
+        pulcher.get().getInflections()
                 .forEach(i -> {
                     if (i instanceof Agreement ag) {
                         assert ag.getNumber() != null : "GrammaticalNumber is null in Agreement: " + ag;
@@ -146,7 +147,7 @@ class WiktionaryLexicalDataParserTest {
                 .filter(l -> l.getLemma().equals("brevis"))
                 .findFirst();
         assertTrue(brevis.isPresent(), "Brevis lexeme not found");
-        assertEquals(THIRD, brevis.get().getInflectionClass());
+        assertEquals(Set.of(THIRD), brevis.get().getInflectionClasses());
 
         brevis.get().getInflections().stream()
                 .forEach(i -> {

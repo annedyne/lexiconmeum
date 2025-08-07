@@ -1,5 +1,6 @@
 package com.annepolis.lexiconmeum;
 
+import com.annepolis.lexiconmeum.lexeme.detail.adjective.Agreement;
 import com.annepolis.lexiconmeum.lexeme.detail.noun.Declension;
 import com.annepolis.lexiconmeum.lexeme.detail.verb.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
@@ -211,5 +212,37 @@ public class TestUtil {
                 };
             }
         }
+    }
+
+    public static Lexeme getNewTestAdjectiveLexeme(){
+        LexemeBuilder builder = new LexemeBuilder("pulcher", GrammaticalPosition.ADJECTIVE);
+        builder.addInflectionClass(InflectionClass.FIRST);
+        builder.addInflectionClass(InflectionClass.SECOND);
+        for(Agreement agreement : generateAgreements()){
+            builder.addInflection(agreement);
+        }
+        return builder.build();
+    }
+
+    public static List<Agreement> generateAgreements() {
+        List<Agreement> agreements = new ArrayList<>();
+
+        for (GrammaticalDegree degree : GrammaticalDegree.values()) {
+            for (GrammaticalGender gender : GrammaticalGender.values()) {
+                for (GrammaticalNumber number : GrammaticalNumber.values()) {
+                    for (GrammaticalCase grammaticalCase : GrammaticalCase.values()) {
+                        String form = generateForm( gender, number, grammaticalCase);
+                        if (form != null) {
+                            agreements.add(buildAgreement(form, gender, number, grammaticalCase));
+                        }
+                    }
+                }
+            }
+        }
+        return agreements;
+    }
+    private static Agreement buildAgreement(String form, GrammaticalGender gender , GrammaticalNumber number , GrammaticalCase grammaticalCase){
+        Agreement.Builder builder = new Agreement.Builder(form);
+        return builder.addGender(gender).setNumber(number).setGrammaticalCase(grammaticalCase).build();
     }
 }
