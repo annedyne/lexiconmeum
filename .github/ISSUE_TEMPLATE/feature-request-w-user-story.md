@@ -1,5 +1,5 @@
 ---
-name: "✨ Feature Request (User Story)"
+name: "Feature Request (User Story)"
 about: Suggest a new feature with a user-centered format
 title: "[Feature] <short title>"
 labels: enhancement
