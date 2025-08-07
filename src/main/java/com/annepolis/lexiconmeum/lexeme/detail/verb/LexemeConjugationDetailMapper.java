@@ -2,15 +2,15 @@ package com.annepolis.lexiconmeum.lexeme.detail.verb;
 
 import com.annepolis.lexiconmeum.lexeme.detail.*;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import com.annepolis.lexiconmeum.shared.model.Sense;
+import com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
-public class LexemeConjugationDetailMapper {
+public class LexemeConjugationDetailMapper extends AbstractLexemeDetailMapper {
 
     InflectionKey inflectionKey;
     LexemeInflectionMapper lexemeConjugationMapper;
@@ -20,21 +20,8 @@ public class LexemeConjugationDetailMapper {
         this.lexemeConjugationMapper = lexemeConjugationMapper;
     }
 
-     LexemeDetailResponse toLexemeDetailDTO(Lexeme lexeme){
-         LexemeDetailResponse dto = new LexemeDetailResponse();
-        populateDefinitions(dto, lexeme.getSenses());
-
-        populatePrincipalParts(dto, lexeme.getInflectionIndex());
-        populateInflectionTable(dto, lexeme);
-        return dto;
-    }
-
-    void populateDefinitions(LexemeDetailResponse dto, List<Sense> senses){
-        senses.stream().flatMap(s -> s.getGloss().stream())
-                .toList().forEach(dto::addDefinition);
-    }
-
-    void populatePrincipalParts(LexemeDetailResponse dto, Map<String, Inflection> inflectionIndex) {
+    @Override
+    protected void populatePrincipalParts(LexemeDetailResponse dto, Map<String, Inflection> inflectionIndex) {
         Optional.ofNullable(inflectionIndex.get(inflectionKey.buildFirstPrincipalPartKey()))
                 .map(Inflection::getForm)
                 .filter(form -> !form.isBlank())
@@ -51,10 +38,19 @@ public class LexemeConjugationDetailMapper {
                 .ifPresent(dto::addPrincipalPart);
     }
 
-    void populateInflectionTable(LexemeDetailResponse dto, Lexeme lexeme){
-        InflectionTableDTO tableDTO = lexemeConjugationMapper.toInflectionTableDTO(lexeme);
-        dto.setInflectionTableDTO(tableDTO);
+
+    @Override
+    protected void setInflectionClass(LexemeDetailResponse dto, Lexeme lexeme) {
+        String displayTag = lexeme.getInflectionClasses().stream()
+                .map(InflectionClass::getDisplayTag)
+                .collect(Collectors.joining(" & "));
+
+
+        dto.setInflectionClass(displayTag + " " + "conjugation");
     }
 
-
+    @Override
+    protected InflectionTableDTO buildTable(Lexeme lexeme) {
+        return lexemeConjugationMapper.toInflectionTableDTO(lexeme);
+    }
 }

@@ -1,7 +1,7 @@
 package com.annepolis.lexiconmeum.textsearch;
 
+import com.annepolis.lexiconmeum.shared.LexemeProvider;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import com.annepolis.lexiconmeum.shared.model.LexemeProvider;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

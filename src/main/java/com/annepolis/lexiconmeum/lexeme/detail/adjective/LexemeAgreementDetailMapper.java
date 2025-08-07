@@ -1,15 +1,17 @@
 package com.annepolis.lexiconmeum.lexeme.detail.adjective;
 
+import com.annepolis.lexiconmeum.lexeme.detail.AbstractLexemeDetailMapper;
 import com.annepolis.lexiconmeum.lexeme.detail.InflectionKey;
+import com.annepolis.lexiconmeum.lexeme.detail.InflectionTableDTO;
 import com.annepolis.lexiconmeum.lexeme.detail.LexemeDetailResponse;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import com.annepolis.lexiconmeum.shared.model.Sense;
+import com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
-public class LexemeAgreementDetailMapper {
+public class LexemeAgreementDetailMapper extends AbstractLexemeDetailMapper {
 
     InflectionKey inflectionKey;
     LexemeAgreementMapper lexemeAgreementMapper;
@@ -19,20 +21,18 @@ public class LexemeAgreementDetailMapper {
         this.lexemeAgreementMapper = lexemeAgreementMapper;
     }
 
-    public LexemeDetailResponse toLexemeDetailDTO(Lexeme lexeme){
-        LexemeDetailResponse dto = new LexemeDetailResponse();
-        populateDefinitions(dto, lexeme.getSenses());
+    @Override
+    protected void setInflectionClass(LexemeDetailResponse dto, Lexeme lexeme) {
+        String displayTag = lexeme.getInflectionClasses().stream()
+                .map(InflectionClass::getDisplayTag)
+                .collect(Collectors.joining(" & "));
 
-        populateInflectionTable(dto, lexeme);
-        return dto;
+
+        dto.setInflectionClass(displayTag + " " + "declension");
     }
 
-    void populateDefinitions(LexemeDetailResponse dto, List<Sense> senses){
-        senses.stream().flatMap(s -> s.getGloss().stream())
-            .toList().forEach(dto::addDefinition);
-    }
-
-    void populateInflectionTable(LexemeDetailResponse dto, Lexeme lexeme){
-        dto.setInflectionTableDTO(lexemeAgreementMapper.toInflectionTableDTO(lexeme));
+    @Override
+    protected InflectionTableDTO buildTable(Lexeme lexeme) {
+        return lexemeAgreementMapper.toInflectionTableDTO(lexeme);
     }
 }

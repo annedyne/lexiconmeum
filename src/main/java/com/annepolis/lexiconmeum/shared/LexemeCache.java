@@ -1,6 +1,7 @@
-package com.annepolis.lexiconmeum.shared.model;
+package com.annepolis.lexiconmeum.shared;
 
 import com.annepolis.lexiconmeum.shared.exception.LexemeTypeMismatchException;
+import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

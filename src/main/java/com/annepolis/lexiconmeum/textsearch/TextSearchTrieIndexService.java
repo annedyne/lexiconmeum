@@ -1,8 +1,8 @@
 package com.annepolis.lexiconmeum.textsearch;
 
 import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
+import com.annepolis.lexiconmeum.shared.LexemeSink;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import com.annepolis.lexiconmeum.shared.model.LexemeSink;
 import com.github.benmanes.caffeine.cache.Cache;
 
 import java.util.List;

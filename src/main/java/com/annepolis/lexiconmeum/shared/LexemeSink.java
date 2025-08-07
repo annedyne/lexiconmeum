@@ -1,4 +1,6 @@
-package com.annepolis.lexiconmeum.shared.model;
+package com.annepolis.lexiconmeum.shared;
+
+import com.annepolis.lexiconmeum.shared.model.Lexeme;
 
 import java.util.function.Consumer;
 

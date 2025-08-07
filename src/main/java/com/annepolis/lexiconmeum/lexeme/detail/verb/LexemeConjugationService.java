@@ -1,8 +1,8 @@
 package com.annepolis.lexiconmeum.lexeme.detail.verb;
 
 import com.annepolis.lexiconmeum.lexeme.detail.LexemeDetailResponse;
+import com.annepolis.lexiconmeum.shared.LexemeProvider;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import com.annepolis.lexiconmeum.shared.model.LexemeProvider;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
 import org.springframework.stereotype.Service;
 
