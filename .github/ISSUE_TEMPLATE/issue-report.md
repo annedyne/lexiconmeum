@@ -1,3 +1,12 @@
+---
+name: "🐞 Issue Report"
+about: Report a bug or unexpected behavior
+title: "[Bug] <short description>"
+labels: bug
+assignees:
+---
+
+
 ### Summary
 Describe the issue or feature request clearly.
 
