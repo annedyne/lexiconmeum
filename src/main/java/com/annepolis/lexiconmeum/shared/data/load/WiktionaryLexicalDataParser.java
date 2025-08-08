@@ -72,6 +72,7 @@ class WiktionaryLexicalDataParser {
     private Optional<Lexeme> buildLexeme(JsonNode root) {
         String lemma = root.path(WORD.get()).asText();
         String posTag = root.path(POSITION.get()).asText();
+        String etymologyNumber = normalizeEtymologyNumber(root.path(ETYMOLOGY_NUMBER.get()).asText());
 
         Optional<GrammaticalPosition> optionalPosition = GrammaticalPosition.resolveWithWarning(posTag, logger);
 
@@ -80,7 +81,8 @@ class WiktionaryLexicalDataParser {
         }
         GrammaticalPosition position = optionalPosition.get();
 
-        LexemeBuilder builder = new LexemeBuilder(lemma, position);
+        LexemeBuilder builder = new LexemeBuilder(lemma, position, etymologyNumber);
+
         addSenses(root.path(SENSES.get()), builder);
 
         return switch (position) {
@@ -92,6 +94,10 @@ class WiktionaryLexicalDataParser {
                 yield Optional.empty();
             }
         };
+    }
+
+    public static String normalizeEtymologyNumber(String ety) {
+        return ety == null || ety.isBlank() ? "1" : ety;
     }
 
     private Optional<Lexeme> buildLexemeWithForms(

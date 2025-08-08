@@ -4,5 +4,5 @@ import java.util.List;
 
 public interface TextSearchIndex {
 
-    List<String> search(String prefix, int limit);
+    List<String> searchForMatchingForms(String prefix, int limit);
 }

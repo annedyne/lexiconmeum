@@ -22,18 +22,20 @@ public abstract class AbstractLexemeDetailMapper {
         return dto;
     }
 
-    protected abstract void setInflectionClass(LexemeDetailResponse dto, Lexeme lexeme);
-
     private void populateDefinitions(LexemeDetailResponse dto, List<Sense> senses){
         senses.stream().flatMap(s -> s.getGloss().stream())
                 .toList().forEach(dto::addDefinition);
     }
-    protected abstract InflectionTableDTO buildTable(Lexeme lexeme);
 
-    /** Hook—default does nothing; override only where needed **/
+    protected abstract void setInflectionClass(LexemeDetailResponse dto, Lexeme lexeme);
+
+
+
     protected void populatePrincipalParts(LexemeDetailResponse dto,
                                           Map<String, Inflection> inflectionIndex) {
         // no-op
     }
+
+    protected abstract InflectionTableDTO buildTable(Lexeme lexeme);
 
 }

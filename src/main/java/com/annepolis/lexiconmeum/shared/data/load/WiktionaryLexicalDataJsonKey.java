@@ -14,7 +14,8 @@ public enum WiktionaryLexicalDataJsonKey {
     FORMS("forms"),
     FORM("form"),
     TAGS("tags"),
-    CANONICAL("canonical");
+    CANONICAL("canonical"),
+    ETYMOLOGY_NUMBER("etymology_number");
 
     private final String key;
 

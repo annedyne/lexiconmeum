@@ -21,12 +21,12 @@ class TextSearchTrieIndexService implements TextSearchService<String>, LexemeSin
 
     @Override
     public List<String> getWordsStartingWith(String prefix, int limit) {
-        return cache.get(prefix, k -> prefixTextSearchIndex.search(prefix, limit));
+        return cache.get(prefix, k -> prefixTextSearchIndex.searchForMatchingForms(prefix, limit));
     }
 
     @Override
     public List<String> getWordsEndingWith(String suffix, int limit) {
-        return cache.get("_" + suffix, k -> suffixTextSearchIndex.search(suffix, limit));
+        return cache.get("_" + suffix, k -> suffixTextSearchIndex.searchForMatchingForms(suffix, limit));
     }
 
     public void populateIndex(Lexeme lexeme) {
