@@ -72,7 +72,7 @@ public class Lexeme {
 
     @Override
     public String toString() {
-        return String.format("Lexeme{id='%s', lemma='%s', position='%s', etymology-number = }", id, lemma, position, etymologyNumber);
+        return String.format("Lexeme{id='%s', lemma='%s', position='%s', etymology-number='%s'}", id, lemma, position, etymologyNumber);
     }
 
 }
