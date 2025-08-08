@@ -46,7 +46,7 @@ class LexemeDetailControllerIntegrationTest {
 
     @Test
     void testLexemeEndpoint() throws JsonProcessingException {
-        LexemeBuilder lexemeBuilder = new LexemeBuilder("amo", GrammaticalPosition.VERB);
+        LexemeBuilder lexemeBuilder = new LexemeBuilder("amo", GrammaticalPosition.VERB, "1");
         UUID lexemeId = lexemeBuilder.build().getId();
 
         String url = UriComponentsBuilder
@@ -66,7 +66,7 @@ class LexemeDetailControllerIntegrationTest {
 
     @Test
     void testDetailEndpoint() throws JsonProcessingException {
-        LexemeBuilder lexemeBuilder = new LexemeBuilder("poculum", GrammaticalPosition.NOUN);
+        LexemeBuilder lexemeBuilder = new LexemeBuilder("poculum", GrammaticalPosition.NOUN, "1");
         UUID lexemeId = lexemeBuilder.build().getId();
 
         String url = UriComponentsBuilder
@@ -85,7 +85,7 @@ class LexemeDetailControllerIntegrationTest {
     }
     @Test
     void testDetailEndpointWitAdjectiveId() throws JsonProcessingException {
-        LexemeBuilder lexemeBuilder = new LexemeBuilder("brevis", GrammaticalPosition.ADJECTIVE);
+        LexemeBuilder lexemeBuilder = new LexemeBuilder("brevis", GrammaticalPosition.ADJECTIVE, "1");
         UUID lexemeId = lexemeBuilder.build().getId();
 
         String url = UriComponentsBuilder
@@ -126,7 +126,7 @@ class LexemeDetailControllerIntegrationTest {
 
     @Test
     void testTypeMismatchReturnsConflict() {
-        LexemeBuilder lexemeBuilder = new LexemeBuilder("poculum", GrammaticalPosition.NOUN);
+        LexemeBuilder lexemeBuilder = new LexemeBuilder("poculum", GrammaticalPosition.NOUN, "1");
         UUID lexemeId = lexemeBuilder.build().getId();
 
         String url = UriComponentsBuilder

@@ -27,17 +27,17 @@ class TextSearchTrieIndexTest {
     void trieReturnsAllMatchingWordsGivenPrefix(){
         String prefix = "test";
         String word = prefix + "word";
-        LexemeBuilder dLexemeBuilder = new LexemeBuilder(word, GrammaticalPosition.NOUN);
+        LexemeBuilder dLexemeBuilder = new LexemeBuilder(word, GrammaticalPosition.NOUN, "1");
         Lexeme lexeme = dLexemeBuilder.build();
 
-        LexemeBuilder cLexemeBuilder = new LexemeBuilder( word, GrammaticalPosition.VERB);
+        LexemeBuilder cLexemeBuilder = new LexemeBuilder( word, GrammaticalPosition.VERB, "1");
         Lexeme lexeme2 = cLexemeBuilder.build();
 
         TextSearchTrieIndex underTest = new TextSearchTrieIndex(new TextSearchSuggestionMapper());
         underTest.insert(lexeme.getLemma(), lexeme.getId());
         underTest.insert(lexeme2.getLemma(), lexeme2.getId());
 
-        List<String> results = underTest.search(prefix, 20);
+        List<String> results = underTest.searchForMatchingForms(prefix, 20);
         assertEquals(lexeme.getLemma() + ": " + lexeme.getId(), results.get(0));
 
         assertEquals(lexeme2.getLemma() + ": " + lexeme2.getId(), results.get(1));
@@ -50,7 +50,7 @@ class TextSearchTrieIndexTest {
         for (Inflection inflection : lexeme.getInflections()){
             underTest.insert(inflection.getForm(), lexeme.getId());
         }
-        List<String> results = underTest.search("amico", 20);
+        List<String> results = underTest.searchForMatchingForms("amico", 20);
         assertEquals(4, results.size());
     }
 
@@ -63,9 +63,8 @@ class TextSearchTrieIndexTest {
                     underTest.insert(word, lexeme.getId());
             }
         }
-        List<String> results = underTest.search(new StringBuilder("is").reverse().toString(), 20);
+        List<String> results = underTest.searchForMatchingForms(new StringBuilder("is").reverse().toString(), 20);
         assertEquals(7, results.size());
     }
-
 
 }
