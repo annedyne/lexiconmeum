@@ -1,6 +1,6 @@
 package com.annepolis.lexiconmeum.lexeme.detail;
 
-import com.annepolis.lexiconmeum.shared.Lexeme;
+import com.annepolis.lexiconmeum.shared.model.Lexeme;
 
 public interface LexemeInflectionMapper {
 

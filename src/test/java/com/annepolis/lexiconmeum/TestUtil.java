@@ -1,31 +1,34 @@
 package com.annepolis.lexiconmeum;
 
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.*;
+import com.annepolis.lexiconmeum.lexeme.detail.adjective.Agreement;
 import com.annepolis.lexiconmeum.lexeme.detail.noun.Declension;
 import com.annepolis.lexiconmeum.lexeme.detail.verb.Conjugation;
-import com.annepolis.lexiconmeum.shared.Lexeme;
-import com.annepolis.lexiconmeum.shared.LexemeBuilder;
-import com.annepolis.lexiconmeum.shared.Sense;
+import com.annepolis.lexiconmeum.shared.model.Lexeme;
+import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
+import com.annepolis.lexiconmeum.shared.model.Sense;
+import com.annepolis.lexiconmeum.shared.model.grammar.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
-import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalCase.*;
-import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalMood.*;
-import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalNumber.PLURAL;
-import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalNumber.SINGULAR;
-import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPerson.*;
-import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition.VERB;
-import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalTense.PERFECT;
-import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalTense.PRESENT;
-import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalVoice.ACTIVE;
-import static com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalVoice.PASSIVE;
+import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase.*;
+import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalMood.*;
+import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber.PLURAL;
+import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber.SINGULAR;
+import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPerson.*;
+import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition.VERB;
+import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense.PERFECT;
+import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense.PRESENT;
+import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice.ACTIVE;
+import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice.PASSIVE;
 
 public class TestUtil {
 
     public static Lexeme getNewTestNounLexeme(){
 
-        return new LexemeBuilder("amīcus", GrammaticalPosition.NOUN)
+        return new LexemeBuilder("amīcus", GrammaticalPosition.NOUN, "1")
 
 
         .addInflection(getNewTestDeclension( SINGULAR, NOMINATIVE,  "amīcus"))
@@ -53,7 +56,7 @@ public class TestUtil {
     }
     public static Lexeme getNewTestVerbLexeme(){
 
-        LexemeBuilder builder = new LexemeBuilder("amo", VERB);
+        LexemeBuilder builder = new LexemeBuilder("amo", VERB, "1");
 
         buildConjugation(builder, "amō", ACTIVE, INDICATIVE, FIRST, PRESENT, SINGULAR);
         buildConjugation(builder, "amās", ACTIVE, INDICATIVE, SECOND, PRESENT, SINGULAR);
@@ -102,7 +105,7 @@ public class TestUtil {
     }
 
     private static void buildConjugation(LexemeBuilder lexemeBuilder, String form, GrammaticalVoice voice, GrammaticalMood mood,
-                                  GrammaticalPerson person, GrammaticalTense tense, GrammaticalNumber number){
+                                         GrammaticalPerson person, GrammaticalTense tense, GrammaticalNumber number){
 
             Conjugation conjugation = new Conjugation.Builder(form)
             .setVoice(voice).setMood(mood).setPerson(person).setTense(tense).setNumber(number).build();
@@ -122,5 +125,124 @@ public class TestUtil {
         lexemes.add(getNewTestVerbLexeme());
         lexemes.add(getNewTestNounLexeme());
         return lexemes;
+    }
+
+    public static Stream<String> expectedPulcherForms() {
+        List<String> forms = new ArrayList<>();
+
+        for (GrammaticalDegree degree : GrammaticalDegree.values()) {
+            for (GrammaticalGender gender : GrammaticalGender.values()) {
+                for (GrammaticalNumber number : GrammaticalNumber.values()) {
+                    for (GrammaticalCase grammaticalCase : GrammaticalCase.values()) {
+                        String form = generateForm( gender, number, grammaticalCase);
+                        if (form != null) forms.add(form);
+                    }
+                }
+            }
+        }
+
+        return forms.stream().filter(Objects::nonNull);
+    }
+
+    static String generateForm(
+                               GrammaticalGender gender, GrammaticalNumber number,
+                               GrammaticalCase grammaticalCase) {
+        if (gender == GrammaticalGender.MASCULINE) {
+            if (number == GrammaticalNumber.SINGULAR) {
+                return switch (grammaticalCase) {
+                    case NOMINATIVE -> "pulcher";
+                    case GENITIVE -> "pulchrī";
+                    case DATIVE -> "pulchrō";
+                    case ABLATIVE -> "pulchrō";
+                    case ACCUSATIVE -> "pulchrum";
+                    case VOCATIVE -> "pulcher";
+                    default -> "pulcher";
+                };
+            } else {
+                return switch (grammaticalCase) {
+                    case NOMINATIVE -> "pulchrī";
+                    case GENITIVE -> "pulchrōrum";
+                    case DATIVE -> "pulchrīs";
+                    case ABLATIVE -> "pulchrīs";
+                    case ACCUSATIVE -> "pulchrōs";
+                    case VOCATIVE -> "pulchrī";
+                    default -> "pulchrī";
+                };
+            }
+        } else if (gender == GrammaticalGender.NEUTER) {
+            if (number == GrammaticalNumber.SINGULAR) {
+                return switch (grammaticalCase) {
+                    case NOMINATIVE -> "pulchrum";
+                    case GENITIVE -> "pulchrī";
+                    case DATIVE -> "pulchrō";
+                    case ABLATIVE -> "pulchrō";
+                    case ACCUSATIVE -> "pulchrum";
+                    case VOCATIVE -> "pulcher";
+                    default -> "pulcher";
+                };
+            } else {
+                return switch (grammaticalCase) {
+                    case NOMINATIVE -> "pulchra";
+                    case GENITIVE -> "pulchrōrum";
+                    case DATIVE -> "pulchrīs";
+                    case ABLATIVE -> "pulchrīs";
+                    case ACCUSATIVE -> "pulchra";
+                    case VOCATIVE -> "pulchra";
+                    default -> "pulchra";
+                };
+            }
+        } else {
+            if (number == GrammaticalNumber.SINGULAR) {
+                return switch (grammaticalCase) {
+                    case NOMINATIVE -> "pulchra";
+                    case GENITIVE -> "pulchrae";
+                    case DATIVE -> "pulchrae";
+                    case ABLATIVE -> "pulchrā";
+                    case ACCUSATIVE -> "pulchram";
+                    default -> "pulchra";
+                };
+            } else {
+                return switch (grammaticalCase) {
+                    case NOMINATIVE -> "pulchrae";
+                    case GENITIVE -> "pulchrārum";
+                    case DATIVE -> "pulchrīs";
+                    case ABLATIVE -> "pulchrīs";
+                    case ACCUSATIVE -> "pulchrās";
+                    default -> "pulchrae";
+                };
+            }
+        }
+    }
+
+    public static Lexeme getNewTestAdjectiveLexeme(){
+        LexemeBuilder builder = new LexemeBuilder("pulcher", GrammaticalPosition.ADJECTIVE, "1");
+        builder.addInflectionClass(InflectionClass.FIRST);
+        builder.addInflectionClass(InflectionClass.SECOND);
+        for(Agreement agreement : generateAgreements()){
+            builder.addInflection(agreement);
+        }
+        return builder.build();
+    }
+
+    public static List<Agreement> generateAgreements() {
+        List<Agreement> agreements = new ArrayList<>();
+
+        for (GrammaticalDegree degree : GrammaticalDegree.values()) {
+            for (GrammaticalGender gender : GrammaticalGender.values()) {
+                for (GrammaticalNumber number : GrammaticalNumber.values()) {
+                    for (GrammaticalCase grammaticalCase : GrammaticalCase.values()) {
+                        String form = generateForm( gender, number, grammaticalCase);
+                        if (form != null) {
+                            agreements.add(buildAgreement(form, gender, number, grammaticalCase));
+                        }
+                    }
+                }
+            }
+        }
+        return agreements;
+    }
+    private static Agreement buildAgreement(String form, GrammaticalGender gender , GrammaticalNumber number , GrammaticalCase grammaticalCase){
+        Agreement.Builder builder = new Agreement.Builder(form);
+        return builder.addGender(gender).setNumber(number).setGrammaticalCase(grammaticalCase).build();
     }
 }

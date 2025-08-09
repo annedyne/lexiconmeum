@@ -81,48 +81,6 @@ git commit -am "Start 0.1.2-SNAPSHOT"
 git push origin develop
 ```
 
-## MVP Functional Requirements
-- [X] User should be able to search for a lexeme and get a real-time drop down of suggestions (autocompleted) based on what they’ve typed so far.
-- User should be able to view a detail of the lexeme showing it’s
-    - definition
-    - [X] basic verb tenses in tables
-    - [X] noun declensions in tables
-
-Phase II
-- User should be able to click on tabs to view participles, passive
-- User should be able to click on tabs to view masculine, feminine or neuter versions of the above
-
-Phase III
-- User should be able to search for lexemes using tags.
-- User should be able to search for lexemes using English equivalents
-
-Phase IV
-- containerize
-
-Scale 
-- 1G of lexical data
-
-## Non Functional Requirements
-- low latency search - < 200 ms
-- real time drop-down 
-
-
-## Core Entities
-- Lexeme 
-    - position
-    - glosses
-    - inflections
-        - form
-- Grammatical Features (can be associated at Lexeme or Inflection Level)
-    - position 
-    - tense
-    - gender
-    - voice
-    - aspect
-- Lexeme Detail
-    - definition
-    - Inflection table
-
 ## Stack
 ### Backend:
 - REST APIs: Java SpringBoot Server

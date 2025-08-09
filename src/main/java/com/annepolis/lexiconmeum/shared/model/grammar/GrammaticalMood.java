@@ -1,4 +1,4 @@
-package com.annepolis.lexiconmeum.lexeme.detail.grammar;
+package com.annepolis.lexiconmeum.shared.model.grammar;
 
 public enum GrammaticalMood {
     INDICATIVE("Indicative","Indicative"),

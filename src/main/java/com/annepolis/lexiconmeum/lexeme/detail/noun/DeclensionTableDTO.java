@@ -1,8 +1,8 @@
 package com.annepolis.lexiconmeum.lexeme.detail.noun;
 
 import com.annepolis.lexiconmeum.lexeme.detail.InflectionTableDTO;
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalCase;
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalNumber;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.EnumMap;
@@ -17,9 +17,11 @@ import java.util.Map;
 public class DeclensionTableDTO implements InflectionTableDTO {
 
     @JsonProperty("declensions")
-    Map<GrammaticalNumber, Map<GrammaticalCase, String>> table  = new EnumMap<>(GrammaticalNumber.class);
+    Map<GrammaticalNumber, Map<GrammaticalCase, String>> table  =
+            new EnumMap<>(GrammaticalNumber.class);
 
-    public void setInflectionTable(Map<GrammaticalNumber, Map<GrammaticalCase, String>> table) {
+    public void setInflectionTable(
+            Map<GrammaticalNumber, Map<GrammaticalCase, String>> table ) {
         this.table = table;
     }
 

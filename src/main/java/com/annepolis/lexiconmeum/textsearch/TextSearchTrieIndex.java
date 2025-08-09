@@ -53,51 +53,51 @@ class TextSearchTrieIndex implements TextSearchIndex {
      * Inserts a word into the TextSearchTrieIndex.
      * Each character of the word is stored in a linked structure.
      */
-    public void insert(String word, UUID lexemeKey) {
+
+    public void insert(String wordForm, UUID lexemeId) {
         TrieNode node = getRoot();
-        for (char ch : word.toCharArray()) {
+        for (char wordCharacter : wordForm.toCharArray()) {
 
             //Normalize key so we can search without adding macrons
-            String normalized = Normalizer.normalize(Character.toString(ch), Normalizer.Form.NFD);
-            Character normalizedKey = normalized.charAt(0);
+            String normalizedWordCharacter = Normalizer.normalize(Character.toString(wordCharacter), Normalizer.Form.NFD);
+            Character normalizedCharacterKey = normalizedWordCharacter.charAt(0);
 
-            //if key doesn't exist in child-map yet, add it with new associated node
-            node.getChildren().putIfAbsent(normalizedKey, new TrieNode());
+            //if key doesn't exist in childNode-map yet, add it with new associated node
+            node.getCharacterNodeMap().putIfAbsent(normalizedCharacterKey, new TrieNode());
 
             //populate the node associated with the current char
-            TrieNode child = node.getChildren().get(normalizedKey);
+            TrieNode childNode = node.getCharacterNodeMap().get(normalizedCharacterKey);
 
             //set content with non-normalized character
-            child.setContent(ch);
+            childNode.setContent(wordCharacter);
 
             //traverse to next level
-            node = child;
+            node = childNode;
         }
         //mark end of word
         node.setEndOfWord(true);
-        node.addLexemeKey(lexemeKey);
+        node.addLexemeId(lexemeId);
     }
 
     /**
      * Searches for words that start with a given prefix.
      * @param prefix The prefix to search for.
      * @param limit The maximum number of results to return.
-     * @return A list of words that start with the given prefix.
+     * @return A list of word forms that start with the given prefix.
      */
-
     @Override
-    public List<String> search(String prefix, int limit) {
+    public List<String> searchForMatchingForms(String prefix, int limit) {
         List<String> results = new ArrayList<>();
         TrieNode node = getRoot();
 
         // Navigate down the trie searching for each character of the prefix array
-        for (char ch : prefix.toCharArray()) { //word
-            if (!node.getChildren().containsKey(ch)) {
+        for (char prefixCharacter : prefix.toCharArray()) {
+            if (!node.getCharacterNodeMap().containsKey(prefixCharacter)) {
                 // If the prefix is not found, return an empty list
                 return results;
             }
             //traverse to down the tree to the next node/char in the prefix
-            node = node.getChildren().get(ch);
+            node = node.getCharacterNodeMap().get(prefixCharacter);
         }
 
         // Once we've reached the end of the prefix,
@@ -121,8 +121,8 @@ class TextSearchTrieIndex implements TextSearchIndex {
         }
 
         if (node.isEndOfWord()) {
-            // If we reach a valid word, add it and associated lexeme keys to the prefixMatchResults
-            for(UUID lexemeKey : node.getLexemeKeys()){
+            // If we reach a valid word form, add it and associated lexeme keys to the prefixMatchResults
+            for(UUID lexemeKey : node.getLexemeIds()){
                 if (prefixMatchResults.size() >= wordLimit) break;
 
                 String matchResult = suggestionMapper.toFormIdString(prefix.toString(), lexemeKey);
@@ -133,7 +133,7 @@ class TextSearchTrieIndex implements TextSearchIndex {
 
         // navigate recursively down each word/branch of this prefix,
         // collecting its letters and appending them to our prefix
-        for (var nodeEntry : node.getChildren().entrySet()) {
+        for (var nodeEntry : node.getCharacterNodeMap().entrySet()) {
             prefix.append(nodeEntry.getValue().getContent());
             logger.debug("appending {}", nodeEntry.getValue().getContent());
 
@@ -150,13 +150,13 @@ class TextSearchTrieIndex implements TextSearchIndex {
     }
 
     private static class TrieNode {
-        private final Map<Character, TrieNode> children = new HashMap<>();
+        private final Map<Character, TrieNode> characterNodeMap = new HashMap<>();
         private char content;
         private boolean isEndOfWord;
-        private final List<UUID> lexemeKeys = new ArrayList<>();
+        private final Set<UUID> lexemeIds = new HashSet<>();
 
-        public Map<Character, TrieNode> getChildren() {
-            return children;
+        public Map<Character, TrieNode> getCharacterNodeMap() {
+            return characterNodeMap;
         }
 
         public char getContent() {
@@ -176,12 +176,12 @@ class TextSearchTrieIndex implements TextSearchIndex {
         }
 
 
-        public List<UUID> getLexemeKeys() {
-            return lexemeKeys;
+        public Set<UUID> getLexemeIds() {
+            return lexemeIds;
         }
 
-        public void addLexemeKey(UUID key) {
-            lexemeKeys.add(key);
+        public void addLexemeId(UUID key) {
+            lexemeIds.add(key);
         }
     }
 }

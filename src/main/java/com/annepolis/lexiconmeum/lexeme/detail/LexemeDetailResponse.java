@@ -7,8 +7,26 @@ import java.util.List;
 
 public class LexemeDetailResponse {
 
+    String inflectionClass;
+    String lemma;
     List<String> principalParts = new ArrayList<>();
     List<String> definitions = new ArrayList<>();
+
+    public String getInflectionClass() {
+        return inflectionClass;
+    }
+
+    public void setInflectionClass(String inflectionClass) {
+        this.inflectionClass = inflectionClass;
+    }
+
+    public String getLemma() {
+        return lemma;
+    }
+
+    public void setLemma(String lemma) {
+        this.lemma = lemma;
+    }
 
     @JsonProperty("inflectionTable")
     InflectionTableDTO inflectionTableDTO;

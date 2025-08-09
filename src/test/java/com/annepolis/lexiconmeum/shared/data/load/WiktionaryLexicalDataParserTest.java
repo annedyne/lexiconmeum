@@ -1,14 +1,18 @@
 package com.annepolis.lexiconmeum.shared.data.load;
 
+import com.annepolis.lexiconmeum.TestUtil;
 import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalTense;
+import com.annepolis.lexiconmeum.lexeme.detail.InflectionKey;
+import com.annepolis.lexiconmeum.lexeme.detail.adjective.Agreement;
 import com.annepolis.lexiconmeum.lexeme.detail.noun.Declension;
 import com.annepolis.lexiconmeum.lexeme.detail.verb.Conjugation;
-import com.annepolis.lexiconmeum.lexeme.detail.verb.InflectionKey;
-import com.annepolis.lexiconmeum.shared.Lexeme;
+import com.annepolis.lexiconmeum.shared.model.Lexeme;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
@@ -22,7 +26,10 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
 
+import static com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass.THIRD;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -37,6 +44,7 @@ class WiktionaryLexicalDataParserTest {
 
     private List<Lexeme> verbLexemes;
     private List<Lexeme> nounLexemes;
+    private List<Lexeme> adjectiveLexemes;
 
     public List<Lexeme> getVerbLexemes() throws IOException {
         if(verbLexemes == null) {
@@ -52,17 +60,21 @@ class WiktionaryLexicalDataParserTest {
         return nounLexemes;
     }
 
+    public List<Lexeme> getAdjectiveLexemes() throws IOException {
+        if(adjectiveLexemes == null) {
+            parseAdjectiveLexemes();
+        }
+        return adjectiveLexemes;
+    }
     @Test
     void resourceExists() {
         Resource resource = resourceLoader.getResource("classpath:testDataRaw.jsonl");
-
         assertTrue(resource.exists(), "Expected testDataRaw.jsonl to be present on the classpath");
     }
 
     @Test
     void nounResourceExists() {
         Resource resource = resourceLoader.getResource("classpath:testDataNoun.jsonl");
-
         assertTrue(resource.exists(), "Expected testDataNoun.jsonl to be present on the classpath");
     }
 
@@ -102,6 +114,47 @@ class WiktionaryLexicalDataParserTest {
             assertEquals("amo", lexemes.get(0).getLemma());
 
         }
+    }
+
+    @ParameterizedTest
+    @MethodSource("expectedPulcherForms")
+    void threeTerminationAdjectiveInflectionsLoaded(String expectedForm) throws Exception {
+        Optional<Lexeme> pulcher = getAdjectiveLexemes().stream()
+                .filter(l -> l.getLemma().equals("pulcher"))
+                .findFirst();
+        assertTrue(pulcher.isPresent(), "Pulcher lexeme not found");
+
+        boolean found = pulcher.get().getInflections().stream()
+                .anyMatch(i -> i.getForm().equals(expectedForm)
+                        || expectedForm.equals("pulcherrimē")); //no superlative adverb in data
+
+        pulcher.get().getInflections()
+                .forEach(i -> {
+                    if (i instanceof Agreement ag) {
+                        assert ag.getNumber() != null : "GrammaticalNumber is null in Agreement: " + ag;
+                    }
+                });
+        assertTrue(found, "Expected form not found: " + expectedForm);
+    }
+
+    static Stream<String> expectedPulcherForms() {
+        return TestUtil.expectedPulcherForms();
+    }
+
+    @Test
+    void thirdInflectionAssignedSetOnTwoTerminationAdjectiveInflection() throws IOException {
+        Optional<Lexeme> brevis = getAdjectiveLexemes().stream()
+                .filter(l -> l.getLemma().equals("brevis"))
+                .findFirst();
+        assertTrue(brevis.isPresent(), "Brevis lexeme not found");
+        assertEquals(Set.of(THIRD), brevis.get().getInflectionClasses());
+
+        brevis.get().getInflections().stream()
+                .forEach(i -> {
+                    if (i instanceof Agreement ag) {
+                        assert ag.getNumber() != null : "GrammaticalNumber is null in Agreement: " + ag;
+                    }
+                });
     }
 
     @Test
@@ -174,6 +227,19 @@ class WiktionaryLexicalDataParserTest {
             parser.parseJsonl(reader, lexeme -> {
                 if (lexeme.getInflections().get(0) instanceof Conjugation) {
                     verbLexemes.add(lexeme);
+                }
+            });
+
+        }
+    }
+
+    private void parseAdjectiveLexemes() throws IOException {
+        Resource resource = resourceLoader.getResource("classpath:testDataAdjective.jsonl");
+        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
+            adjectiveLexemes = new ArrayList<>();
+            parser.parseJsonl(reader, lexeme -> {
+                if (lexeme.getInflections().get(0) instanceof Agreement) {
+                    adjectiveLexemes.add(lexeme);
                 }
             });
 

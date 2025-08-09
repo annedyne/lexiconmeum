@@ -1,7 +1,8 @@
-package com.annepolis.lexiconmeum.lexeme.detail.grammar;
+package com.annepolis.lexiconmeum.shared.model.grammar;
 
+import com.annepolis.lexiconmeum.lexeme.detail.BuilderHasGrammaticalCase;
 import com.annepolis.lexiconmeum.lexeme.detail.InflectionBuilder;
-import com.annepolis.lexiconmeum.lexeme.detail.noun.Declension;
+import com.annepolis.lexiconmeum.lexeme.detail.adjective.Agreement;
 import com.annepolis.lexiconmeum.lexeme.detail.verb.Conjugation;
 import org.apache.logging.log4j.Logger;
 
@@ -12,62 +13,94 @@ import java.util.function.Consumer;
 public enum InflectionFeature {
 
     CASE_NOMINATIVE("nominative", builder -> {
-        if (builder instanceof Declension.Builder declBuilder) {
-            declBuilder.setGrammaticalCase(GrammaticalCase.NOMINATIVE);
+        if (builder instanceof BuilderHasGrammaticalCase caseBuilder) {
+            caseBuilder.setGrammaticalCase(GrammaticalCase.NOMINATIVE);
         }
     }),
     CASE_DATIVE("dative", builder -> {
-        if (builder instanceof Declension.Builder declBuilder) {
+        if (builder instanceof BuilderHasGrammaticalCase declBuilder) {
             declBuilder.setGrammaticalCase(GrammaticalCase.DATIVE);
         }
     }),
     CASE_ACCUSATIVE("accusative", builder -> {
-        if (builder instanceof Declension.Builder declBuilder) {
+        if (builder instanceof BuilderHasGrammaticalCase declBuilder) {
             declBuilder.setGrammaticalCase(GrammaticalCase.ACCUSATIVE);
         }
     }),
     CASE_GENITIVE("genitive", builder -> {
-        if (builder instanceof Declension.Builder declBuilder) {
+        if (builder instanceof BuilderHasGrammaticalCase declBuilder) {
             declBuilder.setGrammaticalCase(GrammaticalCase.GENITIVE);
         }
     }),
 
     CASE_ABLATIVE("ablative", builder -> {
-        if (builder instanceof Declension.Builder declBuilder) {
+        if (builder instanceof BuilderHasGrammaticalCase declBuilder) {
             declBuilder.setGrammaticalCase(GrammaticalCase.ABLATIVE);
         }
     }),
     CASE_VOCATIVE("vocative", builder -> {
-        if (builder instanceof Declension.Builder declBuilder) {
+        if (builder instanceof BuilderHasGrammaticalCase declBuilder) {
             declBuilder.setGrammaticalCase(GrammaticalCase.VOCATIVE);
         }
     }),
     CASE_LOCATIVE("locative", builder -> {
-        if (builder instanceof Declension.Builder declBuilder) {
+        if (builder instanceof BuilderHasGrammaticalCase declBuilder) {
             declBuilder.setGrammaticalCase(GrammaticalCase.LOCATIVE);
         }
     }),
     CASE_OBLIQUE("oblique", builder -> {
-        if (builder instanceof Declension.Builder declBuilder) {
+        if (builder instanceof BuilderHasGrammaticalCase declBuilder) {
             declBuilder.setGrammaticalCase(GrammaticalCase.OBLIQUE);
         }
     }),
 
-    NUMBER_SINGULAR("singular", builder -> {
-        if (builder instanceof Declension.Builder declBuilder) {
-            declBuilder.setNumber(GrammaticalNumber.SINGULAR);
-        } else if (builder instanceof Conjugation.Builder conjBuilder) {
-            conjBuilder.setNumber(GrammaticalNumber.SINGULAR);
+    GENDER_FEMININE("feminine", builder -> {
+        if (builder instanceof Agreement.Builder agrBuilder) {
+            agrBuilder.addGender(GrammaticalGender.FEMININE);
         }
     }),
 
-    NUMBER_PLURAL("plural", builder -> {
-        if (builder instanceof Declension.Builder declBuilder) {
-            declBuilder.setNumber(GrammaticalNumber.PLURAL);
-        } else if (builder instanceof Conjugation.Builder conjBuilder) {
-            conjBuilder.setNumber(GrammaticalNumber.PLURAL);
+    GENDER_MASCULINE("masculine", builder -> {
+        if (builder instanceof Agreement.Builder agrBuilder) {
+            agrBuilder.addGender(GrammaticalGender.MASCULINE);
         }
     }),
+
+    GENDER_NEUTER("neuter", builder -> {
+        if (builder instanceof Agreement.Builder agrBuilder){
+            agrBuilder.addGender(GrammaticalGender.NEUTER);
+        }
+    }),
+
+    DEGREE_POSITIVE("positive", builder -> {
+        if (builder instanceof Agreement.Builder agrBuilder){
+            agrBuilder.setDegree(GrammaticalDegree.POSITIVE);
+        }
+    }),
+
+    DEGREE_COMPARATIVE("comparative", builder -> {
+        if (builder instanceof Agreement.Builder agrBuilder){
+            agrBuilder.setDegree(GrammaticalDegree.COMPARATIVE);
+        }
+    }),
+
+    DEGREE_SUPERLATIVE("superlative", builder -> {
+        if (builder instanceof Agreement.Builder agrBuilder){
+            agrBuilder.setDegree(GrammaticalDegree.SUPERLATIVE);
+        }
+    }),
+
+    ADVERB("adverb", builder -> {
+        if (builder instanceof Agreement.Builder agrBuilder){
+            agrBuilder.setAdverb(true);
+        }
+    }),
+
+    NUMBER_SINGULAR("singular", builder ->
+        builder.setNumber(GrammaticalNumber.SINGULAR)),
+
+    NUMBER_PLURAL("plural", builder ->
+        builder.setNumber(GrammaticalNumber.PLURAL)),
 
     PERSON_FIRST("first-person", builder -> {
         if (builder instanceof Conjugation.Builder conjBuilder) {
@@ -167,13 +200,13 @@ public enum InflectionFeature {
 
     public static Optional<InflectionFeature> fromTag(String tag) {
         return Arrays.stream(values())
-                .filter(inflectionFeature -> inflectionFeature.tag.equalsIgnoreCase(tag))
-                .findFirst();
+            .filter(inflectionFeature -> inflectionFeature.tag.equalsIgnoreCase(tag))
+            .findFirst();
     }
 
     public static InflectionFeature resolveOrThrow(String tag) {
         return fromTag(tag)
-                .orElseThrow(() -> new IllegalArgumentException("Unknown grammatical feature tag: " + tag));
+            .orElseThrow(() -> new IllegalArgumentException("Unknown grammatical feature tag: " + tag));
     }
 
     public static Optional<InflectionFeature> resolveWithWarning(String tag, Logger logger) {

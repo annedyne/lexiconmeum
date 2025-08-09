@@ -1,9 +1,10 @@
-package com.annepolis.lexiconmeum.shared;
+package com.annepolis.lexiconmeum.shared.model;
 
 import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalGender;
-import com.annepolis.lexiconmeum.lexeme.detail.grammar.GrammaticalPosition;
-import com.annepolis.lexiconmeum.lexeme.detail.verb.InflectionKey;
+import com.annepolis.lexiconmeum.lexeme.detail.InflectionKey;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -13,22 +14,25 @@ public class LexemeBuilder {
     private final UUID id;
     private final String lemma;
     private final GrammaticalPosition position;
+    private final String etymologyNumber;
     private GrammaticalGender gender;
     private final List<Sense> senses = new ArrayList<>();
     private final Map<String, Inflection> inflectionIndex = new HashMap<>();
+    private final Set<InflectionClass> inflectionClasses = new TreeSet<>();
 
-    public LexemeBuilder(String lemma, GrammaticalPosition position){
+    public LexemeBuilder(String lemma, GrammaticalPosition position, String etymologyNumber){
         this.lemma = lemma;
         this.position = position;
-        this.id = computeId( lemma, position);
+        this.etymologyNumber = etymologyNumber;
+        this.id = computeId( lemma, position, etymologyNumber);
     }
 
-    private UUID computeId(String lemma, GrammaticalPosition position){
-        return UUID.nameUUIDFromBytes(computeId(lemma, position.name()).getBytes(StandardCharsets.UTF_8));
+    private UUID computeId(String lemma, GrammaticalPosition position, String etymologyNumber){
+        return UUID.nameUUIDFromBytes(computeId(lemma, position.name(), etymologyNumber).getBytes(StandardCharsets.UTF_8));
     }
 
-    private static String computeId(String lemma, String position) {
-        return lemma + "#" + position;
+    private static String computeId(String lemma, String position, String etymologyNumber) {
+        return lemma + "#" + position + "#" + etymologyNumber;
     }
 
     public UUID getId() {
@@ -41,6 +45,10 @@ public class LexemeBuilder {
 
     public GrammaticalPosition getPosition(){
         return this.position;
+    }
+
+    public String getEtymologyNumber() {
+        return etymologyNumber;
     }
 
     public LexemeBuilder setGender(GrammaticalGender gender){
@@ -81,6 +89,14 @@ public class LexemeBuilder {
         return inflectionIndex;
     }
 
+    public Set<InflectionClass> getInflectionClasses() {
+        return inflectionClasses;
+    }
+
+    public LexemeBuilder addInflectionClass(InflectionClass inflectionClass) {
+        this.inflectionClasses.add(inflectionClass);
+        return this;
+    }
 
     public Lexeme build(){
 
@@ -92,6 +108,7 @@ public class LexemeBuilder {
 
         return new Lexeme(this);
     }
+
 
 
 }
