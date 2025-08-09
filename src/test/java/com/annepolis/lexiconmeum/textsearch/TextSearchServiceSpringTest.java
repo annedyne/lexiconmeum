@@ -42,5 +42,16 @@ class TextSearchServiceSpringTest {
 
     }
 
+    @Test
+    void getWordsStartingWithNoDupes(){
+
+        List<TextSearchSuggestionDTO> result = underTest.getWordsStartingWith("brevis", 10);
+        assertEquals(4, result.size());
+
+        result = underTest.getWordsStartingWith("amarem", 10);
+        assertEquals(4, result.size());
+
+    }
+
 
 }

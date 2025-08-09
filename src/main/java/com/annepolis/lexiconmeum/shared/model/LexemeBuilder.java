@@ -14,23 +14,25 @@ public class LexemeBuilder {
     private final UUID id;
     private final String lemma;
     private final GrammaticalPosition position;
+    private final String etymologyNumber;
     private GrammaticalGender gender;
     private final List<Sense> senses = new ArrayList<>();
     private final Map<String, Inflection> inflectionIndex = new HashMap<>();
     private final Set<InflectionClass> inflectionClasses = new TreeSet<>();
 
-    public LexemeBuilder(String lemma, GrammaticalPosition position){
+    public LexemeBuilder(String lemma, GrammaticalPosition position, String etymologyNumber){
         this.lemma = lemma;
         this.position = position;
-        this.id = computeId( lemma, position);
+        this.etymologyNumber = etymologyNumber;
+        this.id = computeId( lemma, position, etymologyNumber);
     }
 
-    private UUID computeId(String lemma, GrammaticalPosition position){
-        return UUID.nameUUIDFromBytes(computeId(lemma, position.name()).getBytes(StandardCharsets.UTF_8));
+    private UUID computeId(String lemma, GrammaticalPosition position, String etymologyNumber){
+        return UUID.nameUUIDFromBytes(computeId(lemma, position.name(), etymologyNumber).getBytes(StandardCharsets.UTF_8));
     }
 
-    private static String computeId(String lemma, String position) {
-        return lemma + "#" + position;
+    private static String computeId(String lemma, String position, String etymologyNumber) {
+        return lemma + "#" + position + "#" + etymologyNumber;
     }
 
     public UUID getId() {
@@ -43,6 +45,10 @@ public class LexemeBuilder {
 
     public GrammaticalPosition getPosition(){
         return this.position;
+    }
+
+    public String getEtymologyNumber() {
+        return etymologyNumber;
     }
 
     public LexemeBuilder setGender(GrammaticalGender gender){

@@ -28,7 +28,7 @@ public class TestUtil {
 
     public static Lexeme getNewTestNounLexeme(){
 
-        return new LexemeBuilder("amīcus", GrammaticalPosition.NOUN)
+        return new LexemeBuilder("amīcus", GrammaticalPosition.NOUN, "1")
 
 
         .addInflection(getNewTestDeclension( SINGULAR, NOMINATIVE,  "amīcus"))
@@ -56,7 +56,7 @@ public class TestUtil {
     }
     public static Lexeme getNewTestVerbLexeme(){
 
-        LexemeBuilder builder = new LexemeBuilder("amo", VERB);
+        LexemeBuilder builder = new LexemeBuilder("amo", VERB, "1");
 
         buildConjugation(builder, "amō", ACTIVE, INDICATIVE, FIRST, PRESENT, SINGULAR);
         buildConjugation(builder, "amās", ACTIVE, INDICATIVE, SECOND, PRESENT, SINGULAR);
@@ -215,7 +215,7 @@ public class TestUtil {
     }
 
     public static Lexeme getNewTestAdjectiveLexeme(){
-        LexemeBuilder builder = new LexemeBuilder("pulcher", GrammaticalPosition.ADJECTIVE);
+        LexemeBuilder builder = new LexemeBuilder("pulcher", GrammaticalPosition.ADJECTIVE, "1");
         builder.addInflectionClass(InflectionClass.FIRST);
         builder.addInflectionClass(InflectionClass.SECOND);
         for(Agreement agreement : generateAgreements()){
