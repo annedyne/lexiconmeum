@@ -100,8 +100,8 @@ class WiktionaryLexicalDataParserTest {
             parser.parseJsonl(reader, lexemes::add);
 
             assertEquals(3, lexemes.size());
-            assertEquals(GrammaticalPosition.VERB, lexemes.get(0).getPosition());
-            assertEquals(GrammaticalPosition.NOUN, lexemes.get(1).getPosition());
+            assertEquals(GrammaticalPosition.VERB, lexemes.get(0).getGrammaticalPosition());
+            assertEquals(GrammaticalPosition.NOUN, lexemes.get(1).getGrammaticalPosition());
         }
     }
 

@@ -54,17 +54,16 @@ public class LexemeDetailController {
         Lexeme lexeme = lexemeProvider.getLexemeIfPresent(id)
                 .orElseThrow(() -> new NoSuchElementException("Lexeme not found"));
 
-        // Validate type if requested
-        if (expectedType != null && lexeme.getPosition() != expectedType) {
-            throw new LexemeTypeMismatchException("Expected " + expectedType + " but got " + lexeme.getPosition());
+        if (expectedType != null && lexeme.getGrammaticalPosition() != expectedType) {
+            throw new LexemeTypeMismatchException("Expected " + expectedType + " but got " + lexeme.getGrammaticalPosition());
         }
 
-        // Route to appropriate service (you could also do this via a strategy map)
-        LexemeDetailResponse response = switch (lexeme.getPosition()) {
+        LexemeDetailResponse response = switch (lexeme.getGrammaticalPosition()) {
             case NOUN -> lexemeDeclensionService.getLexemeDetail(id);
             case VERB -> lexemeConjugationService.getLexemeDetail(id);
             case ADJECTIVE -> lexemeAgreementService.getLexemeDetail(id);
-            default -> throw new UnsupportedOperationException("Detail not implemented for: " + lexeme.getPosition());
+            case ADVERB -> lexemeUninflectedService.getLexemeDetail(id);
+            default -> throw new UnsupportedOperationException("Detail not implemented for: " + lexeme.getGrammaticalPosition());
         };
 
         return ResponseEntity.ok(response);

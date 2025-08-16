@@ -40,7 +40,7 @@ public class TextSearchSuggestionService implements TextSearchService<TextSearch
                     String word = extractForm(rawWord);
                     return lexemeProvider.getLexemeIfPresent(lexemeId)
                             .map(lexeme ->
-                                textSearchSuggestionMapper.toTextSearchDTO(word, lexemeId, lexeme.getPosition())
+                                textSearchSuggestionMapper.toTextSearchDTO(word, lexemeId, lexeme.getGrammaticalPosition())
                             );
                 })
                 .flatMap(Optional::stream)

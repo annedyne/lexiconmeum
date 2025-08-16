@@ -28,7 +28,7 @@ public class LexemeCache implements LexemeSink, LexemeProvider {
     public Lexeme getLexemeOfType(UUID lexemeId, GrammaticalPosition expectedType) {
         Lexeme lexeme = lexemeIdToLexemeLookup.get(lexemeId);
 
-        boolean matches = expectedType.equals(lexeme.getPosition());
+        boolean matches = expectedType.equals(lexeme.getGrammaticalPosition());
         if (!matches) {
             throw new LexemeTypeMismatchException("Expected lexeme of type " + expectedType.name());
         }
