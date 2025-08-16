@@ -1,8 +1,8 @@
 package com.annepolis.lexiconmeum.lexeme.detail.adjective;
 
 import com.annepolis.lexiconmeum.lexeme.detail.BuilderHasGrammaticalCase;
-import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
-import com.annepolis.lexiconmeum.lexeme.detail.InflectionBuilder;
+import com.annepolis.lexiconmeum.shared.model.Inflection;
+import com.annepolis.lexiconmeum.shared.model.InflectionBuilder;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalDegree;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;

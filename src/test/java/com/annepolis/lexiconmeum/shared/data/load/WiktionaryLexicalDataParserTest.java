@@ -1,11 +1,11 @@
 package com.annepolis.lexiconmeum.shared.data.load;
 
 import com.annepolis.lexiconmeum.TestUtil;
-import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
-import com.annepolis.lexiconmeum.lexeme.detail.InflectionKey;
 import com.annepolis.lexiconmeum.lexeme.detail.adjective.Agreement;
 import com.annepolis.lexiconmeum.lexeme.detail.noun.Declension;
 import com.annepolis.lexiconmeum.lexeme.detail.verb.Conjugation;
+import com.annepolis.lexiconmeum.shared.model.Inflection;
+import com.annepolis.lexiconmeum.shared.model.InflectionKey;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;

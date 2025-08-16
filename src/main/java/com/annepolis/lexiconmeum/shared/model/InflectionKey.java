@@ -1,4 +1,4 @@
-package com.annepolis.lexiconmeum.lexeme.detail;
+package com.annepolis.lexiconmeum.shared.model;
 
 import com.annepolis.lexiconmeum.lexeme.detail.adjective.Agreement;
 import com.annepolis.lexiconmeum.lexeme.detail.noun.Declension;

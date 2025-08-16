@@ -1,7 +1,7 @@
 package com.annepolis.lexiconmeum.textsearch;
 
 import com.annepolis.lexiconmeum.TestUtil;
-import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
+import com.annepolis.lexiconmeum.shared.model.Inflection;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
