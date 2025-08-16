@@ -5,6 +5,7 @@ import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalMood;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice;
+import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import org.springframework.stereotype.Component;
 
 import java.util.*;

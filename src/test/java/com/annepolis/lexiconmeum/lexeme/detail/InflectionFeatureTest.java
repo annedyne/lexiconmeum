@@ -1,9 +1,9 @@
 package com.annepolis.lexiconmeum.lexeme.detail;
 
-import com.annepolis.lexiconmeum.lexeme.detail.adjective.Agreement;
-import com.annepolis.lexiconmeum.lexeme.detail.verb.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.shared.model.grammar.InflectionFeature;
+import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
+import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;

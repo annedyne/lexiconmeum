@@ -3,8 +3,8 @@ package com.annepolis.lexiconmeum.lexeme.detail.verb;
 import com.annepolis.lexiconmeum.TestUtil;
 import com.annepolis.lexiconmeum.lexeme.detail.LexemeDetailResponse;
 import com.annepolis.lexiconmeum.lexeme.detail.LexemeInflectionMapper;
-import com.annepolis.lexiconmeum.shared.model.InflectionKey;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
+import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

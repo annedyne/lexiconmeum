@@ -4,6 +4,7 @@ import com.annepolis.lexiconmeum.lexeme.detail.LexemeInflectionMapper;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
+import com.annepolis.lexiconmeum.shared.model.inflection.Declension;
 import org.springframework.stereotype.Component;
 
 import java.util.EnumMap;

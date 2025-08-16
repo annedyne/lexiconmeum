@@ -1,8 +1,5 @@
-package com.annepolis.lexiconmeum.lexeme.detail.adjective;
+package com.annepolis.lexiconmeum.shared.model.inflection;
 
-import com.annepolis.lexiconmeum.lexeme.detail.BuilderHasGrammaticalCase;
-import com.annepolis.lexiconmeum.shared.model.Inflection;
-import com.annepolis.lexiconmeum.shared.model.InflectionBuilder;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalDegree;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
@@ -11,7 +8,7 @@ import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class Agreement  implements Inflection  {
+public class Agreement  implements Inflection {
     private final String form;
     private final String alternativeForm;
     private final Set<GrammaticalGender> genders;

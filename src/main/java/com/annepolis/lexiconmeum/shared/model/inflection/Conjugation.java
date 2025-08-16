@@ -1,7 +1,5 @@
-package com.annepolis.lexiconmeum.lexeme.detail.verb;
+package com.annepolis.lexiconmeum.shared.model.inflection;
 
-import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
-import com.annepolis.lexiconmeum.lexeme.detail.InflectionBuilder;
 import com.annepolis.lexiconmeum.shared.model.grammar.*;
 
 import java.util.ArrayList;

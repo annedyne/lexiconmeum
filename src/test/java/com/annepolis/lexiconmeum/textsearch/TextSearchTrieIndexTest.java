@@ -1,16 +1,15 @@
 package com.annepolis.lexiconmeum.textsearch;
 
 import com.annepolis.lexiconmeum.TestUtil;
-import com.annepolis.lexiconmeum.shared.model.Inflection;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 class TextSearchTrieIndexTest {
@@ -38,33 +37,37 @@ class TextSearchTrieIndexTest {
         underTest.insert(lexeme2.getLemma(), lexeme2.getId());
 
         List<String> results = underTest.searchForMatchingForms(prefix, 20);
-        assertEquals(lexeme.getLemma() + ": " + lexeme.getId(), results.get(0));
 
-        assertEquals(lexeme2.getLemma() + ": " + lexeme2.getId(), results.get(1));
+        assertTrue(results.contains(lexeme.getLemma() + ": " + lexeme.getId()));
+        assertTrue(results.contains(lexeme2.getLemma() + ": " + lexeme2.getId()));
     }
 
     @Test
-    void givenPrefixReturnsAllMatches(){
+    void givenPrefixReturnsAllUniqueMatches(){
         TextSearchTrieIndex underTest = new TextSearchTrieIndex(new TextSearchSuggestionMapper());
         Lexeme lexeme = TestUtil.getNewTestNounLexeme();
         for (Inflection inflection : lexeme.getInflections()){
             underTest.insert(inflection.getForm(), lexeme.getId());
         }
         List<String> results = underTest.searchForMatchingForms("amico", 20);
-        assertEquals(4, results.size());
+        assertEquals(3, results.size());
     }
 
     @Test
-    void givenSuffixReturnsAllMatches(){
+    void givenSuffixReturnsAllUniqueMatches(){
         TextSearchTrieIndex underTest = new TextSearchTrieIndex(new TextSearchSuggestionMapper());
         List<Lexeme> lexemes = TestUtil.getMixedPositionTestLexemes();
+
+
         for(Lexeme lexeme : lexemes) {
-            for (String word : lexeme.getInflections().stream().map( inflection -> new StringBuilder(inflection.getForm()).reverse().toString()).toList()){
-                    underTest.insert(word, lexeme.getId());
+
+            for (String word : lexeme.getInflections().stream().map(
+                    inflection -> new StringBuilder(inflection.getForm()).reverse().toString()).toList()){
+                underTest.insert(word, lexeme.getId());
             }
         }
         List<String> results = underTest.searchForMatchingForms(new StringBuilder("is").reverse().toString(), 20);
-        assertEquals(7, results.size());
+        assertEquals(6, results.size());
     }
 
 }

@@ -1,11 +1,11 @@
 package com.annepolis.lexiconmeum.lexeme.detail.noun;
 
 import com.annepolis.lexiconmeum.TestUtil;
-import com.annepolis.lexiconmeum.lexeme.detail.InflectionKey;
 import com.annepolis.lexiconmeum.lexeme.detail.LexemeDetailResponse;
 import com.annepolis.lexiconmeum.shared.LexemeProvider;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

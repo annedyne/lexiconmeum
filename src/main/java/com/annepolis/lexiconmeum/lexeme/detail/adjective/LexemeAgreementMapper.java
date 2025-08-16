@@ -6,6 +6,7 @@ import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
 import com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass;
+import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
 import org.springframework.stereotype.Component;
 
 import java.util.*;

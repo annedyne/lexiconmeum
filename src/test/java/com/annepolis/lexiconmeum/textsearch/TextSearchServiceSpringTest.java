@@ -36,9 +36,9 @@ class TextSearchServiceSpringTest {
     }
 
     @Test
-    void getWordsEndingWithReturnsCachedResults(){
+    void getWordsEndingWithReturnsUniqueCachedResults(){
         List<TextSearchSuggestionDTO> result = underTest.getWordsEndingWith("eris", 10);
-        assertEquals(5, result.size());
+        assertEquals(4, result.size());
 
     }
 

@@ -2,6 +2,7 @@ package com.annepolis.lexiconmeum.shared.model;
 
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass;
+import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
 
 import java.util.*;
 

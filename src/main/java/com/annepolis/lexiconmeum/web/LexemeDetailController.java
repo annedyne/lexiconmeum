@@ -62,7 +62,6 @@ public class LexemeDetailController {
             case NOUN -> lexemeDeclensionService.getLexemeDetail(id);
             case VERB -> lexemeConjugationService.getLexemeDetail(id);
             case ADJECTIVE -> lexemeAgreementService.getLexemeDetail(id);
-            case ADVERB -> lexemeUninflectedService.getLexemeDetail(id);
             default -> throw new UnsupportedOperationException("Detail not implemented for: " + lexeme.getGrammaticalPosition());
         };
 

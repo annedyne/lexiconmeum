@@ -1,9 +1,10 @@
 package com.annepolis.lexiconmeum.lexeme.detail.verb;
 
 import com.annepolis.lexiconmeum.TestUtil;
-import com.annepolis.lexiconmeum.shared.model.InflectionKey;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.grammar.*;
+import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
+import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

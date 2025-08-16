@@ -1,4 +1,4 @@
-package com.annepolis.lexiconmeum.shared.model;
+package com.annepolis.lexiconmeum.shared.model.inflection;
 
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
 

@@ -1,11 +1,11 @@
 package com.annepolis.lexiconmeum.lexeme.detail.adjective;
 
 import com.annepolis.lexiconmeum.lexeme.detail.AbstractLexemeDetailMapper;
-import com.annepolis.lexiconmeum.lexeme.detail.InflectionKey;
 import com.annepolis.lexiconmeum.lexeme.detail.InflectionTableDTO;
 import com.annepolis.lexiconmeum.lexeme.detail.LexemeDetailResponse;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass;
+import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;

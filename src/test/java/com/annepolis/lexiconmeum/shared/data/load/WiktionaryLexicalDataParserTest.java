@@ -1,14 +1,10 @@
 package com.annepolis.lexiconmeum.shared.data.load;
 
 import com.annepolis.lexiconmeum.TestUtil;
-import com.annepolis.lexiconmeum.lexeme.detail.adjective.Agreement;
-import com.annepolis.lexiconmeum.lexeme.detail.noun.Declension;
-import com.annepolis.lexiconmeum.lexeme.detail.verb.Conjugation;
-import com.annepolis.lexiconmeum.shared.model.Inflection;
-import com.annepolis.lexiconmeum.shared.model.InflectionKey;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
+import com.annepolis.lexiconmeum.shared.model.inflection.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -99,7 +95,7 @@ class WiktionaryLexicalDataParserTest {
             List<Lexeme> lexemes = new ArrayList<>();
             parser.parseJsonl(reader, lexemes::add);
 
-            assertEquals(3, lexemes.size());
+            assertEquals(9, lexemes.size());
             assertEquals(GrammaticalPosition.VERB, lexemes.get(0).getGrammaticalPosition());
             assertEquals(GrammaticalPosition.NOUN, lexemes.get(1).getGrammaticalPosition());
         }

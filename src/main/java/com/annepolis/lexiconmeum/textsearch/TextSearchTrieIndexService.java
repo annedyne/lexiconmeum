@@ -2,6 +2,7 @@ package com.annepolis.lexiconmeum.textsearch;
 
 import com.annepolis.lexiconmeum.shared.LexemeSink;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
+import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
 import com.github.benmanes.caffeine.cache.Cache;
 
 import java.util.List;

@@ -1,9 +1,9 @@
 package com.annepolis.lexiconmeum.shared.model.grammar;
 
-import com.annepolis.lexiconmeum.lexeme.detail.BuilderHasGrammaticalCase;
-import com.annepolis.lexiconmeum.lexeme.detail.adjective.Agreement;
-import com.annepolis.lexiconmeum.lexeme.detail.verb.Conjugation;
-import com.annepolis.lexiconmeum.shared.model.InflectionBuilder;
+import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
+import com.annepolis.lexiconmeum.shared.model.inflection.BuilderHasGrammaticalCase;
+import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
+import com.annepolis.lexiconmeum.shared.model.inflection.InflectionBuilder;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
