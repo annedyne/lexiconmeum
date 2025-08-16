@@ -2,6 +2,7 @@ package com.annepolis.lexiconmeum.lexeme.detail;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.Sense;
+import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
 
 import java.util.List;
 import java.util.Map;

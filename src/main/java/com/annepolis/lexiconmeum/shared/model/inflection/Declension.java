@@ -1,8 +1,5 @@
-package com.annepolis.lexiconmeum.lexeme.detail.noun;
+package com.annepolis.lexiconmeum.shared.model.inflection;
 
-import com.annepolis.lexiconmeum.lexeme.detail.BuilderHasGrammaticalCase;
-import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
-import com.annepolis.lexiconmeum.lexeme.detail.InflectionBuilder;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
 

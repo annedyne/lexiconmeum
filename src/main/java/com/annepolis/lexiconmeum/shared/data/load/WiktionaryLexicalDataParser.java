@@ -1,12 +1,12 @@
 package com.annepolis.lexiconmeum.shared.data.load;
 
-import com.annepolis.lexiconmeum.lexeme.detail.adjective.Agreement;
-import com.annepolis.lexiconmeum.lexeme.detail.noun.Declension;
-import com.annepolis.lexiconmeum.lexeme.detail.verb.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.Sense;
 import com.annepolis.lexiconmeum.shared.model.grammar.*;
+import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
+import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
+import com.annepolis.lexiconmeum.shared.model.inflection.Declension;
 import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

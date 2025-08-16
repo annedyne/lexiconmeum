@@ -1,8 +1,5 @@
-package com.annepolis.lexiconmeum.lexeme.detail;
+package com.annepolis.lexiconmeum.shared.model.inflection;
 
-import com.annepolis.lexiconmeum.lexeme.detail.adjective.Agreement;
-import com.annepolis.lexiconmeum.lexeme.detail.noun.Declension;
-import com.annepolis.lexiconmeum.lexeme.detail.verb.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.grammar.*;
 import org.springframework.stereotype.Component;
 
