@@ -38,7 +38,7 @@ class TextSearchServiceSpringTest {
     @Test
     void getWordsEndingWithReturnsUniqueCachedResults(){
         List<TextSearchSuggestionDTO> result = underTest.getWordsEndingWith("eris", 10);
-        assertEquals(4, result.size());
+        assertEquals(5, result.size());
 
     }
 
@@ -53,5 +53,37 @@ class TextSearchServiceSpringTest {
 
     }
 
+    @Test
+    void adverbsLoadedIntoSearch(){
+
+        List<TextSearchSuggestionDTO> result = underTest.getWordsStartingWith("coram", 10);
+        assertEquals(1, result.size());
+
+        result = underTest.getWordsStartingWith("celeriter", 10);
+        assertEquals(1, result.size());
+
+    }
+
+    @Test
+    void nounsLoadedIntoSearch(){
+
+        List<TextSearchSuggestionDTO> result = underTest.getWordsStartingWith("pocula", 10);
+        assertEquals(1, result.size());
+
+        result = underTest.getWordsStartingWith("cora", 10);
+        assertEquals(1, result.size());
+
+    }
+
+    @Test
+    void verbsLoadedIntoSearch(){
+
+        List<TextSearchSuggestionDTO> result = underTest.getWordsStartingWith("amabam", 10);
+        assertEquals(4, result.size());
+
+        result = underTest.getWordsStartingWith("amamus", 10);
+        assertEquals(1, result.size());
+
+    }
 
 }
