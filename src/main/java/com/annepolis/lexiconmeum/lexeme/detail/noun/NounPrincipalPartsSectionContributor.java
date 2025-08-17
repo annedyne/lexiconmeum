@@ -2,10 +2,10 @@ package com.annepolis.lexiconmeum.lexeme.detail.noun;
 
 import com.annepolis.lexiconmeum.lexeme.detail.LexemeDetailResponse;
 import com.annepolis.lexiconmeum.lexeme.detail.LexemeDetailSectionContributor;
-import com.annepolis.lexiconmeum.shared.model.Inflection;
-import com.annepolis.lexiconmeum.shared.model.InflectionKey;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
+import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
