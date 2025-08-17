@@ -2,7 +2,6 @@ package com.annepolis.lexiconmeum.textsearch;
 
 import com.annepolis.lexiconmeum.shared.LexemeSink;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
 import com.github.benmanes.caffeine.cache.Cache;
 
 import java.util.List;
@@ -11,11 +10,13 @@ class TextSearchTrieIndexService implements TextSearchService<String>, LexemeSin
 
     private final TextSearchTrieIndex prefixTextSearchIndex;
     private final TextSearchTrieIndex suffixTextSearchIndex;
+    private final SearchableFormsProvider searchableFormsProvider;
     private final Cache<String, List<String>> cache;
 
-    public TextSearchTrieIndexService(TextSearchTrieIndex prefixTextSearchIndex, TextSearchTrieIndex suffixTextSearchIndex, Cache<String, List<String>> cache){
+    public TextSearchTrieIndexService(TextSearchTrieIndex prefixTextSearchIndex, TextSearchTrieIndex suffixTextSearchIndex, SearchableFormsProvider searchableFormsProvider, Cache<String, List<String>> cache){
         this.prefixTextSearchIndex = prefixTextSearchIndex;
         this.suffixTextSearchIndex = suffixTextSearchIndex;
+        this.searchableFormsProvider = searchableFormsProvider;
         this.cache = cache;
     }
 
@@ -30,9 +31,9 @@ class TextSearchTrieIndexService implements TextSearchService<String>, LexemeSin
     }
 
     public void populateIndex(Lexeme lexeme) {
-        for(Inflection inflection: lexeme.getInflections()){
-            prefixTextSearchIndex.insert(inflection.getForm(), lexeme.getId());
-            suffixTextSearchIndex.insert(new StringBuilder(inflection.getForm()).reverse().toString(), lexeme.getId());
+        for(String form: searchableFormsProvider.getSearchableForms(lexeme)){
+            prefixTextSearchIndex.insert(form, lexeme.getId());
+            suffixTextSearchIndex.insert(new StringBuilder(form).reverse().toString(), lexeme.getId());
         }
     }
 

@@ -89,6 +89,7 @@ class WiktionaryLexicalDataParser {
             case NOUN -> buildLexemeWithForms(builder, root, this::addDeclensionForms);
             case VERB -> buildLexemeWithForms(builder, root, this::addConjugationForms);
             case ADJECTIVE -> buildLexemeWithForms(builder, root, this::addAdjectiveForms);
+            case ADVERB -> buildLexemeWithOutForms(builder);
             default -> {
                 logger.trace("Unsupported position: {}", position);
                 yield Optional.empty();
@@ -98,6 +99,15 @@ class WiktionaryLexicalDataParser {
 
     public static String normalizeEtymologyNumber(String ety) {
         return ety == null || ety.isBlank() ? "1" : ety;
+    }
+
+    private Optional<Lexeme> buildLexemeWithOutForms(LexemeBuilder builder){
+        try {
+            return Optional.of(builder.build());
+        } catch (Exception ex) {
+            logger.warn("Failed to build lexeme: {}", ex.getMessage());
+            return Optional.empty();
+        }
     }
 
     private Optional<Lexeme> buildLexemeWithForms(

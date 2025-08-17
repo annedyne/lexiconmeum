@@ -3,6 +3,7 @@ package com.annepolis.lexiconmeum.textsearch;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -24,8 +25,15 @@ class TextSearchServiceConfig {
     }
 
     @Bean
-    public TextSearchTrieIndexService textSearchTrieCacheComponent() {
-        return new TextSearchTrieIndexService(prefixTrie(), suffixTrie(), caffeineCache());
+    public TextSearchTrieIndexService textSearchTrieCacheComponent(
+            @Qualifier("defaultSearchableFormsProvider")
+            SearchableFormsProvider searchableFormsProvider
+
+    ) {
+        return new TextSearchTrieIndexService(prefixTrie(), suffixTrie(),
+                searchableFormsProvider,
+                caffeineCache()
+        );
     }
 
     @Bean
@@ -45,5 +53,6 @@ class TextSearchServiceConfig {
     public TextSearchTrieIndex suffixTrie(){
         return new TextSearchTrieIndex(new TextSearchSuggestionMapper());
     }
+
 
 }
