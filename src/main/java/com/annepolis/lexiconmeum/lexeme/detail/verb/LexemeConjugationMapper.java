@@ -12,13 +12,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-class LexemeConjugationMapper implements LexemeInflectionMapper {
+public class LexemeConjugationMapper implements LexemeInflectionMapper {
 
-    static Comparator<ConjugationTableDTO> conjugationTableDTOComparator =
-            Comparator.comparing(LexemeConjugationMapper::resolveVoiceOrder)
-                    .thenComparing(LexemeConjugationMapper::resolveMoodOrder);
+     Comparator<ConjugationTableDTO> conjugationTableDTOComparator =
+            Comparator.comparing(this::resolveVoiceOrder)
+                    .thenComparing(this::resolveMoodOrder);
 
-    private static int resolveVoiceOrder(ConjugationTableDTO dto) {
+    private int resolveVoiceOrder(ConjugationTableDTO dto) {
         try {
             return GrammaticalVoice.valueOf(dto.getVoice()).ordinal();
         } catch (Exception e) {
@@ -26,7 +26,7 @@ class LexemeConjugationMapper implements LexemeInflectionMapper {
         }
     }
 
-    private static int resolveMoodOrder(ConjugationTableDTO dto) {
+    private int resolveMoodOrder(ConjugationTableDTO dto) {
         String mood = dto.getMood();
         if (mood == null) return Integer.MAX_VALUE;
         try {
