@@ -27,7 +27,7 @@ public class LexemeBuilder {
         this.id = computeId( lemma, position, etymologyNumber);
     }
 
-    private UUID computeId(String lemma, GrammaticalPosition position, String etymologyNumber){
+    private static UUID computeId(String lemma, GrammaticalPosition position, String etymologyNumber){
         return UUID.nameUUIDFromBytes(computeId(lemma, position.name(), etymologyNumber).getBytes(StandardCharsets.UTF_8));
     }
 
