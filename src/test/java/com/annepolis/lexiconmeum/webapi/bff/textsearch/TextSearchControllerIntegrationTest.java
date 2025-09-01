@@ -1,4 +1,4 @@
-package com.annepolis.lexiconmeum.webapi.bff.textsearch.api;
+package com.annepolis.lexiconmeum.webapi.bff.textsearch;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;

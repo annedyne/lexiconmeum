@@ -2,7 +2,7 @@ package com.annepolis.lexiconmeum.shared.model;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 
-public class LexemeTest {
+class LexemeTest {
 
     @org.junit.jupiter.api.Test
     void equalsContract() {

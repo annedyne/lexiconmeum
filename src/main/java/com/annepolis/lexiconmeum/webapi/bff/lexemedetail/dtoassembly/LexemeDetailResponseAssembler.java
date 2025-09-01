@@ -6,7 +6,7 @@ import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
 import java.util.List;
 import java.util.Map;
 
-class LexemeDetailResponseAssembler implements LexemeDetailResponseAssemblerService {
+class LexemeDetailResponseAssembler implements LexemeDetailUseCase {
     private final Map<GrammaticalPosition, List<LexemeDetailSectionContributor>> pipelines;
 
     public LexemeDetailResponseAssembler(Map<GrammaticalPosition, List<LexemeDetailSectionContributor>> pipelines) {
@@ -14,7 +14,7 @@ class LexemeDetailResponseAssembler implements LexemeDetailResponseAssemblerServ
     }
 
     @Override
-    public LexemeDetailResponse assemble(Lexeme lexeme) {
+    public LexemeDetailResponse execute(Lexeme lexeme) {
         var dto = new LexemeDetailResponse();
         var sectionContributors = pipelines.getOrDefault(lexeme.getGrammaticalPosition(), List.of());
         sectionContributors.forEach(c -> c.contribute(lexeme, dto));

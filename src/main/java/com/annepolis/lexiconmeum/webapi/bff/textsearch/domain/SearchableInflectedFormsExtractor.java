@@ -1,4 +1,4 @@
-package com.annepolis.lexiconmeum.webapi.bff.textsearch;
+package com.annepolis.lexiconmeum.webapi.bff.textsearch.domain;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import org.springframework.stereotype.Component;
@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Component
-public class SearchableInflectedFormsProvider implements SearchableFormsProvider {
+public class SearchableInflectedFormsExtractor implements SearchableFormsExtractor {
 
     public Set<String> getSearchableForms(Lexeme lexeme) {
         Set<String> forms = new LinkedHashSet<>();
