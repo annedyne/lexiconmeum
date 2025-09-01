@@ -37,9 +37,7 @@ class WiktionaryLexicalDataLoader {
 
         try (Reader reader = new InputStreamReader(lexicalData.getInputStream())) {
             logger.info("Initiating lexical data load");
-            parser.parseJsonl(reader, lexeme -> {
-                ingestLexemeUseCase.ingest(lexeme);
-            });
+            parser.parseJsonl(reader, ingestLexemeUseCase::ingest);
             logger.info("Finished lexical data load");
         }
     }

@@ -1,5 +1,6 @@
-package com.annepolis.lexiconmeum.webapi.bff.textsearch;
+package com.annepolis.lexiconmeum.webapi.bff.textsearch.index;
 
+import com.annepolis.lexiconmeum.webapi.bff.textsearch.domain.FormMatch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -8,53 +9,52 @@ import java.text.Normalizer;
 import java.util.*;
 
 /**
- * A basic in-memory TextSearchTrieIndex implementation for efficient prefix-based string lookup.
+ * A basic in-memory TrieAutocompleteIndex implementation for efficient prefix-based string lookup.
  *
  * <p>This implementation can also be used for suffix-based lookup by reversing
  * the input words before insertion, and reversing the results after retrieval.
- * This allows a single TextSearchTrieIndex structure to support both prefix and suffix queries
+ * This allows a single TrieAutocompleteIndex structure to support both prefix and suffix queries
  * without changing the core logic.
  *
- * <p>Example usage for suffix search:
- * <pre>
- * // Insert reversed words into the trie
- * for (String word : words) {
- *     trie.insert(new StringBuilder(word).reverse().toString());
- * }
- *
- * // Search using reversed suffix, then reverse the results
- * List<String> reversedResults = trie.search(new StringBuilder("ing").reverse().toString(), 10);
- * List<String> results = reversedResults.stream()
- *     .map(w -> new StringBuilder(w).reverse().toString())
- *     .collect(Collectors.toList());
- * </pre>
- *
- * <p>This approach avoids the need for a separate Suffix TextSearchTrieIndex structure and keeps
- * the implementation simple and reusable.
  */
-
 @Component
-class TextSearchTrieIndex implements TextSearchIndex {
+class TrieAutocompleteIndex implements AutocompleteIndexBackend {
 
-    static final Logger logger = LogManager.getLogger(TextSearchTrieIndex.class);
+    static final Logger logger = LogManager.getLogger(TrieAutocompleteIndex.class);
 
-    private final TrieNode root;// Root node of the TextSearchTrieIndex
-    private final TextSearchSuggestionMapper suggestionMapper;
+    private final TrieNode root;
     TrieNode getRoot() {
         return root;
     }
 
-    public TextSearchTrieIndex(TextSearchSuggestionMapper suggestionMapper){
+    public TrieAutocompleteIndex(){
         root = new TrieNode();
-       this.suggestionMapper = suggestionMapper;
     }
 
     /**
-     * Inserts a word into the TextSearchTrieIndex.
-     * Each character of the word is stored in a linked structure.
+     * Inserts a word form into the trie for efficient prefix lookups.
+     *
+     * <p>Each character is normalized to its base code point using Unicode NFD so that diacritics
+     * are ignored during indexing and lookup. The original (non-normalized) character is kept
+     * in the node content for reconstruction of the stored form when returning matches.
+     *
+     * <p>Notes:
+     * - Input is case-sensitive (no case normalization is performed).
+     * - Multiple lexeme IDs can be associated with the same word form; duplicates are de-duplicated.
+     * - If {@code wordForm} is null/blank or {@code lexemeId} is null, the insert is ignored and a warning is logged.
+     * - Not thread-safe; external synchronization is required for concurrent writes.
+     *
+     * <p>Complexity: O(n) time and O(n) space in the length of {@code wordForm}.
+     *
+     * @param wordForm the word form to index
+     * @param lexemeId the UUID of the Lexeme to associate with this form
      */
-
     public void insert(String wordForm, UUID lexemeId) {
+        if (wordForm == null || wordForm.isBlank() || lexemeId == null) {
+            logger.warn("Ignoring insert of null/blank form or null lexemeId");
+            return;
+        }
+
         TrieNode node = getRoot();
         for (char wordCharacter : wordForm.toCharArray()) {
 
@@ -85,9 +85,16 @@ class TextSearchTrieIndex implements TextSearchIndex {
      * @param limit The maximum number of results to return.
      * @return A list of word forms that start with the given prefix.
      */
+
     @Override
-    public List<String> searchForMatchingForms(String prefix, int limit) {
-        List<String> results = new ArrayList<>();
+    public List<FormMatch> searchForMatchingForms(String prefix, int limit) {
+        List<FormMatch> results = new ArrayList<>();
+
+        if (prefix == null || prefix.isBlank() || limit <= 0) {
+            logger.debug("searchForMatchingForms called with invalid input: prefix='{}', limit={}", prefix, limit);
+            return results;
+        }
+
         TrieNode node = getRoot();
 
         // Navigate down the trie searching for each character of the prefix array
@@ -109,13 +116,13 @@ class TextSearchTrieIndex implements TextSearchIndex {
 
 
     /**
-     * Depth-First Search (DFS) helper function to collect words from the TextSearchTrieIndex.
+     * Depth-First Search (DFS) helper function to collect words from the TrieAutocompleteIndex.
      * @param node The current TrieNode being explored.
      * @param prefix The string built so far (represents the word in progress).
      * @param prefixMatchResults The list of found words.
      * @param wordLimit The maximum number of words to collect.
      */
-        private void dfs(TrieNode node, StringBuilder prefix, List<String> prefixMatchResults, int wordLimit) {
+        private void dfs(TrieNode node, StringBuilder prefix, List<FormMatch> prefixMatchResults, int wordLimit) {
         if (prefixMatchResults.size() >= wordLimit) {
             return;
         }
@@ -125,7 +132,7 @@ class TextSearchTrieIndex implements TextSearchIndex {
             for(UUID lexemeKey : node.getLexemeIds()){
                 if (prefixMatchResults.size() >= wordLimit) break;
 
-                String matchResult = suggestionMapper.toFormIdString(prefix.toString(), lexemeKey);
+                FormMatch matchResult = new FormMatch(prefix.toString(), lexemeKey);
                 prefixMatchResults.add(matchResult);
                 logger.info("adding word: {}", matchResult);
             }

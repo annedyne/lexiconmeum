@@ -2,7 +2,7 @@ package com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 
-public interface LexemeDetailResponseAssemblerService {
+public interface LexemeDetailUseCase {
 
-    LexemeDetailResponse assemble(Lexeme lexeme);
+    LexemeDetailResponse execute(Lexeme lexeme);
 }

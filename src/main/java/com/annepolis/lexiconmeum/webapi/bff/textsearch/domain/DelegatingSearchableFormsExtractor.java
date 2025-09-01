@@ -1,4 +1,4 @@
-package com.annepolis.lexiconmeum.webapi.bff.textsearch;
+package com.annepolis.lexiconmeum.webapi.bff.textsearch.domain;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
@@ -7,11 +7,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-public class DelegatingSearchableFormsProvider implements SearchableFormsProvider {
+public class DelegatingSearchableFormsExtractor implements SearchableFormsExtractor {
 
-    Map<GrammaticalPosition, SearchableFormsProvider> formsProviders;
+    Map<GrammaticalPosition, SearchableFormsExtractor> formsProviders;
 
-    public DelegatingSearchableFormsProvider(Map<GrammaticalPosition, SearchableFormsProvider> formsProviders) {
+    public DelegatingSearchableFormsExtractor(Map<GrammaticalPosition, SearchableFormsExtractor> formsProviders) {
         this.formsProviders = Map.copyOf(formsProviders);
     }
 
@@ -22,9 +22,9 @@ public class DelegatingSearchableFormsProvider implements SearchableFormsProvide
         GrammaticalPosition position =
                 Objects.requireNonNull(lexeme.getGrammaticalPosition(), "lexeme.grammaticalPosition must not be null");
 
-        SearchableFormsProvider delegate = formsProviders.get(position);
+        SearchableFormsExtractor delegate = formsProviders.get(position);
         if (delegate == null) {
-            throw new IllegalStateException("No SearchableFormsProvider configured for position: " + position);
+            throw new IllegalStateException("No SearchableFormsExtractor configured for position: " + position);
         }
 
         return formsProviders.get(lexeme.getGrammaticalPosition()).getSearchableForms(lexeme);

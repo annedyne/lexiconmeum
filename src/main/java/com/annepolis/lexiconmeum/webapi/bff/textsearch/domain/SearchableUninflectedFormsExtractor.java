@@ -1,4 +1,4 @@
-package com.annepolis.lexiconmeum.webapi.bff.textsearch;
+package com.annepolis.lexiconmeum.webapi.bff.textsearch.domain;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import org.springframework.stereotype.Component;
@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 
 @Component
-public class SearchableUninflectedFormsProvider implements SearchableFormsProvider {
+public class SearchableUninflectedFormsExtractor implements SearchableFormsExtractor {
 
     @Override
     public Set<String> getSearchableForms(Lexeme lexeme) {

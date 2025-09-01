@@ -7,6 +7,7 @@ import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.shared.util.JsonDTOLogger;
 import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.LexemeDetailResponse;
+import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.LexemeDetailUseCase;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
@@ -22,20 +23,20 @@ import static com.annepolis.lexiconmeum.webapi.ApiRoutes.LEXEME_DETAIL;
 class LexemeDetailController {
 
     static final Logger logger = LogManager.getLogger(LexemeDetailController.class);
-    private final LexemeDetailService lexemeDetailService;
+    private final LexemeDetailUseCase lexemeDetailUseCase;
     private final JsonDTOLogger jsonDTOLogger;
     private final LexemeReader lexemeReader;
 
-    LexemeDetailController(LexemeDetailService lexemeDetailService,
-                                  LexemeReader lexemeReader,
-                                  JsonDTOLogger jsonDTOLogger ){
-        this.lexemeDetailService = lexemeDetailService;
+    LexemeDetailController(LexemeDetailUseCase lexemeDetailUseCase,
+                           LexemeReader lexemeReader,
+                           JsonDTOLogger jsonDTOLogger ){
+        this.lexemeDetailUseCase = lexemeDetailUseCase;
         this.lexemeReader = lexemeReader;
         this.jsonDTOLogger = jsonDTOLogger;
     }
 
     @GetMapping(LEXEME_DETAIL)
-    private ResponseEntity<LexemeDetailResponse> getLexemeDetail(
+    ResponseEntity<LexemeDetailResponse> getLexemeDetail(
             @PathVariable UUID id,
             @RequestParam(name = "type", required = false) GrammaticalPosition expectedType
     ) {
@@ -44,13 +45,13 @@ class LexemeDetailController {
         if (expectedType != null && lexeme.getGrammaticalPosition() != expectedType) {
             throw new LexemeTypeMismatchException("Expected " + expectedType + " but got " + lexeme.getGrammaticalPosition());
         }
-        LexemeDetailResponse response = lexemeDetailService.getLexemeDetail(lexeme);
+        LexemeDetailResponse response = lexemeDetailUseCase.execute(lexeme);
         jsonDTOLogger.logAsJson(response);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping(LEXEMES)
-    private Lexeme getLexeme(@RequestParam String lexemeId){
+    Lexeme getLexeme(@RequestParam String lexemeId){
         logger.debug("fetching lexeme: {}", lexemeId);
         UUID uuid = UUID.fromString(lexemeId);
         Lexeme lexeme = getLexeme(uuid);

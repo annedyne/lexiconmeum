@@ -1,8 +1,10 @@
-package com.annepolis.lexiconmeum.webapi.bff.textsearch;
+package com.annepolis.lexiconmeum.webapi.bff.textsearch.app;
 
 import com.annepolis.lexiconmeum.shared.LexemeReader;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.webapi.bff.textsearch.domain.FormMatch;
+import com.annepolis.lexiconmeum.webapi.bff.textsearch.index.AutocompleteIndex;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,25 +19,23 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(MockitoExtension.class)
-class TextSearchServiceTest {
+class AutocompleteServiceTest {
 
-    TextSearchSuggestionService underTest;
+    AutocompleteService underTest;
 
     @BeforeEach
-    void init(@Mock TextSearchTrieIndexService textSearchTrieIndexService ){
-        underTest = new TextSearchSuggestionService(textSearchTrieIndexService, new TextSearchSuggestionMapper(), getLexemeProviderStub());
+    void init(@Mock AutocompleteIndex routedAutocompleteIndex){
+        underTest = new AutocompleteService(routedAutocompleteIndex, new SuggestionMapper(), getLexemeProviderStub());
     }
 
     @Test
     void testWordEnrichment(){
-        TextSearchSuggestionMapper mapper = new TextSearchSuggestionMapper();
-
-        List<String> rawWords = new ArrayList<>();
+        List<FormMatch> rawWords = new ArrayList<>();
         for (int i = 1; i <= 5; i++) {
-            String wordString = mapper.toFormIdString("test" + i, UUID.randomUUID());
-            rawWords.add(wordString);
+            FormMatch match = new FormMatch("test" + i, UUID.randomUUID() );
+            rawWords.add(match);
         }
-        List<TextSearchSuggestionDTO> result = underTest.enrichRawWords(rawWords);
+        List<SuggestionResponse> result = underTest.mapMatchesToSuggestionResponses(rawWords);
         assertNotNull(result);
     }
 

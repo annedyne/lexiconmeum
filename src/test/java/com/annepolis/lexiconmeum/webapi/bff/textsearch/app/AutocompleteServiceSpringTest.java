@@ -1,4 +1,4 @@
-package com.annepolis.lexiconmeum.webapi.bff.textsearch;
+package com.annepolis.lexiconmeum.webapi.bff.textsearch.app;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,23 +11,23 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 @SpringBootTest
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
-class TextSearchServiceSpringTest {
+class AutocompleteServiceSpringTest {
 
-    private final TextSearchSuggestionService underTest;
+    private final AutocompleteService underTest;
 
-    TextSearchServiceSpringTest(TextSearchSuggestionService textSearchService) {
+    AutocompleteServiceSpringTest(AutocompleteService textSearchService) {
         this.underTest = textSearchService;
     }
 
     @Test
     void testWiring(){
-        assertInstanceOf(TextSearchSuggestionService.class, underTest);
+        assertInstanceOf(AutocompleteService.class, underTest);
     }
 
     @Test
     void getWordsStartingWithReturnsExpectedResultsFromCache(){
 
-        List<TextSearchSuggestionDTO> result = underTest.getWordsStartingWith("am", 10);
+        List<SuggestionResponse> result = underTest.getWordsStartingWith("am", 10);
         assertEquals(10, result.size());
 
         result = underTest.getWordsStartingWith("amarem", 10);
@@ -37,7 +37,7 @@ class TextSearchServiceSpringTest {
 
     @Test
     void getWordsEndingWithReturnsUniqueCachedResults(){
-        List<TextSearchSuggestionDTO> result = underTest.getWordsEndingWith("eris", 10);
+        List<SuggestionResponse> result = underTest.getWordsEndingWith("eris", 10);
         assertEquals(5, result.size());
 
     }
@@ -45,7 +45,7 @@ class TextSearchServiceSpringTest {
     @Test
     void getWordsStartingWithNoDupes(){
 
-        List<TextSearchSuggestionDTO> result = underTest.getWordsStartingWith("brevis", 10);
+        List<SuggestionResponse> result = underTest.getWordsStartingWith("brevis", 10);
         assertEquals(4, result.size());
 
         result = underTest.getWordsStartingWith("amarem", 10);
@@ -56,7 +56,7 @@ class TextSearchServiceSpringTest {
     @Test
     void adverbsLoadedIntoSearch(){
 
-        List<TextSearchSuggestionDTO> result = underTest.getWordsStartingWith("coram", 10);
+        List<SuggestionResponse> result = underTest.getWordsStartingWith("coram", 10);
         assertEquals(1, result.size());
 
         result = underTest.getWordsStartingWith("celeriter", 10);
@@ -67,7 +67,7 @@ class TextSearchServiceSpringTest {
     @Test
     void nounsLoadedIntoSearch(){
 
-        List<TextSearchSuggestionDTO> result = underTest.getWordsStartingWith("pocula", 10);
+        List<SuggestionResponse> result = underTest.getWordsStartingWith("pocula", 10);
         assertEquals(1, result.size());
 
         result = underTest.getWordsStartingWith("cora", 10);
@@ -78,7 +78,7 @@ class TextSearchServiceSpringTest {
     @Test
     void verbsLoadedIntoSearch(){
 
-        List<TextSearchSuggestionDTO> result = underTest.getWordsStartingWith("amabam", 10);
+        List<SuggestionResponse> result = underTest.getWordsStartingWith("amabam", 10);
         assertEquals(4, result.size());
 
         result = underTest.getWordsStartingWith("amamus", 10);
