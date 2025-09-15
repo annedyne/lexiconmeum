@@ -1,6 +1,7 @@
 package com.annepolis.lexiconmeum.shared.model;
 
 import com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass;
+import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeechDetails;
 import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
 
@@ -15,7 +16,7 @@ public class Lexeme {
 
     private final UUID id;
     private final String lemma;
-    private final GrammaticalPosition position;
+    private final PartOfSpeech position;
     private final PartOfSpeechDetails partOfSpeechDetails;
     private final String etymologyNumber;
     private final Set<InflectionClass> inflectionClasses;
@@ -39,7 +40,7 @@ public class Lexeme {
 
     public String getLemma() { return lemma; }
 
-    public GrammaticalPosition getGrammaticalPosition() {
+    public PartOfSpeech getPartOfSpeech() {
         return position;
     }
 

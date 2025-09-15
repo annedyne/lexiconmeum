@@ -18,10 +18,6 @@ public enum PartOfSpeech {
         this.inflectionType = inflectionType;
     }
 
-    public String getTag() {
-        return tag;
-    }
-
     public String getInflectionType() {
         return inflectionType;
     }

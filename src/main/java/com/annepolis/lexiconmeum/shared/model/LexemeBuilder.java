@@ -2,6 +2,7 @@ package com.annepolis.lexiconmeum.shared.model;
 
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
 import com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass;
+import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeechDetails;
 import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
@@ -13,7 +14,7 @@ public class LexemeBuilder {
 
     private final UUID id;
     private final String lemma;
-    private final GrammaticalPosition position;
+    private final PartOfSpeech position;
     private final String etymologyNumber;
     private GrammaticalGender gender;
     private PartOfSpeechDetails partOfSpeechDetails;
@@ -21,14 +22,14 @@ public class LexemeBuilder {
     private final Map<String, Inflection> inflectionIndex = new HashMap<>();
     private final Set<InflectionClass> inflectionClasses = new TreeSet<>();
 
-    public LexemeBuilder(String lemma, GrammaticalPosition position, String etymologyNumber){
+    public LexemeBuilder(String lemma, PartOfSpeech position, String etymologyNumber){
         this.lemma = lemma;
         this.position = position;
         this.etymologyNumber = etymologyNumber;
         this.id = computeId( lemma, position, etymologyNumber);
     }
 
-    private static UUID computeId(String lemma, GrammaticalPosition position, String etymologyNumber){
+    private static UUID computeId(String lemma, PartOfSpeech position, String etymologyNumber){
         return UUID.nameUUIDFromBytes(computeId(lemma, position.name(), etymologyNumber).getBytes(StandardCharsets.UTF_8));
     }
 
@@ -44,7 +45,7 @@ public class LexemeBuilder {
         return lemma;
     }
 
-    public GrammaticalPosition getPosition(){
+    public PartOfSpeech getPosition(){
         return this.position;
     }
 
@@ -55,10 +56,6 @@ public class LexemeBuilder {
     public LexemeBuilder setGender(GrammaticalGender gender){
         this.gender = gender;
         return this;
-    }
-
-    public GrammaticalGender getGender() {
-        return gender;
     }
 
     public PartOfSpeechDetails getPartOfSpeechDetails() {

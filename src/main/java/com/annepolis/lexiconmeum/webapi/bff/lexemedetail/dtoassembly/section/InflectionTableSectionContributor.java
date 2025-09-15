@@ -1,7 +1,7 @@
 package com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.section;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeech;
 import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.LexemeDetailResponse;
 import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.LexemeDetailSectionContributor;
 import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection.InflectionTableMapper;
@@ -11,9 +11,9 @@ import java.util.Map;
 
 @Component("inflectionTableSectionContributor")
 class InflectionTableSectionContributor implements LexemeDetailSectionContributor {
-    private final Map<GrammaticalPosition, InflectionTableMapper> mappers;
+    private final Map<PartOfSpeech, InflectionTableMapper> mappers;
 
-    public InflectionTableSectionContributor(Map<GrammaticalPosition, InflectionTableMapper> mappers) {
+    public InflectionTableSectionContributor(Map<PartOfSpeech, InflectionTableMapper> mappers) {
         this.mappers = mappers;
     }
 

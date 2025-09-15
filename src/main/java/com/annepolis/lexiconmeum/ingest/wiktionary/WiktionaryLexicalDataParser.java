@@ -6,6 +6,7 @@ import com.annepolis.lexiconmeum.shared.model.Sense;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalFeature;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
 import com.annepolis.lexiconmeum.shared.model.grammar.InflectionFeature;
+import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
 import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.inflection.Declension;
@@ -76,12 +77,12 @@ class WiktionaryLexicalDataParser {
         String posTag = root.path(POSITION.get()).asText();
         String etymologyNumber = normalizeEtymologyNumber(root.path(ETYMOLOGY_NUMBER.get()).asText());
 
-        Optional<GrammaticalPosition> optionalPosition = GrammaticalPosition.resolveWithWarning(posTag, logger);
+        Optional<PartOfSpeech> optionalPosition = PartOfSpeech.resolveWithWarning(posTag, logger);
 
         if (optionalPosition.isEmpty()) {
             return Optional.empty();
         }
-        GrammaticalPosition position = optionalPosition.get();
+        PartOfSpeech position = optionalPosition.get();
 
         LexemeBuilder builder = new LexemeBuilder(lemma, position, etymologyNumber);
 

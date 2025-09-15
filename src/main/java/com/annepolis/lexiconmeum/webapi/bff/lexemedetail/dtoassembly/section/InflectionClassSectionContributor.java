@@ -2,6 +2,7 @@ package com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.section;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass;
+import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeech;
 import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.LexemeDetailResponse;
 import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.LexemeDetailSectionContributor;
 import org.springframework.stereotype.Component;
@@ -11,9 +12,9 @@ import java.util.stream.Collectors;
 
 @Component("inflectionClassSectionContributor")
 class InflectionClassSectionContributor implements LexemeDetailSectionContributor {
-    private final Set<GrammaticalPosition> positions;
+    private final Set<PartOfSpeech> positions;
 
-    public InflectionClassSectionContributor(Set<GrammaticalPosition> positions) {
+    public InflectionClassSectionContributor(Set<PartOfSpeech> positions) {
         this.positions = positions;
     }
 
