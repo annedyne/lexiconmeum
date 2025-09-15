@@ -4,7 +4,6 @@ import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.Sense;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalFeature;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
 import com.annepolis.lexiconmeum.shared.model.grammar.InflectionFeature;
 import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;

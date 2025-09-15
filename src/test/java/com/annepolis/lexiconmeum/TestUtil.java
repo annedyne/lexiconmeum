@@ -18,7 +18,6 @@ import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalMood.*;
 import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber.PLURAL;
 import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber.SINGULAR;
 import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPerson.*;
-import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition.VERB;
 import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense.PERFECT;
 import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense.PRESENT;
 import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice.ACTIVE;

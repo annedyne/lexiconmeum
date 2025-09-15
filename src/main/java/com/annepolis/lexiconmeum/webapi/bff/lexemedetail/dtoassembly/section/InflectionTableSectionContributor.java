@@ -19,12 +19,12 @@ class InflectionTableSectionContributor implements LexemeDetailSectionContributo
 
     @Override
     public boolean supports(Lexeme lexeme) {
-        return mappers.containsKey(lexeme.getGrammaticalPosition());
+        return mappers.containsKey(lexeme.getPartOfSpeech());
     }
 
     @Override
     public void contribute(Lexeme lexeme, LexemeDetailResponse dto) {
-        dto.setInflectionTableDTO(mappers.get(lexeme.getGrammaticalPosition()).toInflectionTableDTO(lexeme));
+        dto.setInflectionTableDTO(mappers.get(lexeme.getPartOfSpeech()).toInflectionTableDTO(lexeme));
     }
 
 }

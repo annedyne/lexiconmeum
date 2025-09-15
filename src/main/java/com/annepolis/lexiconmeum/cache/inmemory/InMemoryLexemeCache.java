@@ -30,7 +30,7 @@ import java.util.UUID;
     public Lexeme getLexemeOfType(UUID lexemeId, GrammaticalPosition expectedType) {
         Lexeme lexeme = lexemeIdToLexemeLookup.get(lexemeId);
 
-        boolean matches = expectedType.equals(lexeme.getGrammaticalPosition());
+        boolean matches = expectedType.equals(lexeme.getPartOfSpeech());
         if (!matches) {
             throw new LexemeTypeMismatchException("Expected lexeme of type " + expectedType.name());
         }

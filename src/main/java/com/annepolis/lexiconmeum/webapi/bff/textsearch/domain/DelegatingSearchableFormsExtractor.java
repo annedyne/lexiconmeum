@@ -27,6 +27,6 @@ public class DelegatingSearchableFormsExtractor implements SearchableFormsExtrac
             throw new IllegalStateException("No SearchableFormsExtractor configured for position: " + position);
         }
 
-        return formsProviders.get(lexeme.getGrammaticalPosition()).getSearchableForms(lexeme);
+        return formsProviders.get(lexeme.getPartOfSpeech()).getSearchableForms(lexeme);
     }
 }

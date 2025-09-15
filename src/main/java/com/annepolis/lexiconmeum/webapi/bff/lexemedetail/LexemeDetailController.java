@@ -42,8 +42,8 @@ class LexemeDetailController {
     ) {
         Lexeme lexeme = getLexeme(id);
 
-        if (expectedType != null && lexeme.getGrammaticalPosition() != expectedType) {
-            throw new LexemeTypeMismatchException("Expected " + expectedType + " but got " + lexeme.getGrammaticalPosition());
+        if (expectedType != null && lexeme.getPartOfSpeech() != expectedType) {
+            throw new LexemeTypeMismatchException("Expected " + expectedType + " but got " + lexeme.getPartOfSpeech());
         }
         LexemeDetailResponse response = lexemeDetailUseCase.execute(lexeme);
         jsonDTOLogger.logAsJson(response);

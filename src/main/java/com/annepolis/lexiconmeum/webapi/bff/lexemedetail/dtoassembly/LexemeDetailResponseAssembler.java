@@ -16,7 +16,7 @@ class LexemeDetailResponseAssembler implements LexemeDetailUseCase {
     @Override
     public LexemeDetailResponse execute(Lexeme lexeme) {
         var dto = new LexemeDetailResponse();
-        var sectionContributors = pipelines.getOrDefault(lexeme.getGrammaticalPosition(), List.of());
+        var sectionContributors = pipelines.getOrDefault(lexeme.getPartOfSpeech(), List.of());
         sectionContributors.forEach(c -> c.contribute(lexeme, dto));
         return dto;
     }

@@ -1,7 +1,6 @@
 package com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.section;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass;
 import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.LexemeDetailResponse;
 import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.LexemeDetailSectionContributor;
@@ -20,7 +19,7 @@ class InflectionClassSectionContributor implements LexemeDetailSectionContributo
 
     @Override
     public boolean supports(Lexeme lexeme) {
-        return positions.contains(lexeme.getGrammaticalPosition());
+        return positions.contains(lexeme.getPartOfSpeech());
     }
 
     @Override
@@ -29,7 +28,7 @@ class InflectionClassSectionContributor implements LexemeDetailSectionContributo
                 .map(InflectionClass::getDisplayTag)
                 .collect(Collectors.joining(" & "));
         if (!display.isBlank()) {
-            String suffix = lexeme.getGrammaticalPosition().getInflectionType();
+            String suffix = lexeme.getPartOfSpeech().getInflectionType();
             dto.setInflectionClass(display + " " + suffix);
         }
     }
