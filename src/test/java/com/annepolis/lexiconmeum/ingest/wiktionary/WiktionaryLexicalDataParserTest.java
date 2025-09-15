@@ -2,8 +2,8 @@ package com.annepolis.lexiconmeum.ingest.wiktionary;
 
 import com.annepolis.lexiconmeum.TestUtil;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
+import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -95,9 +95,9 @@ class WiktionaryLexicalDataParserTest {
             List<Lexeme> lexemes = new ArrayList<>();
             parser.parseJsonl(reader, lexemes::add);
 
-            assertEquals(9, lexemes.size());
-            assertEquals(GrammaticalPosition.VERB, lexemes.get(0).getGrammaticalPosition());
-            assertEquals(GrammaticalPosition.NOUN, lexemes.get(1).getGrammaticalPosition());
+            assertEquals(10, lexemes.size());
+            assertEquals(PartOfSpeech.VERB, lexemes.get(0).getPartOfSpeech());
+            assertEquals(PartOfSpeech.NOUN, lexemes.get(1).getPartOfSpeech());
         }
     }
 

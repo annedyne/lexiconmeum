@@ -1,8 +1,8 @@
 package com.annepolis.lexiconmeum.shared.model;
 
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass;
+import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeechDetails;
 import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
@@ -14,7 +14,7 @@ public class LexemeBuilder {
 
     private final UUID id;
     private final String lemma;
-    private final GrammaticalPosition position;
+    private final PartOfSpeech partOfSpeech;
     private final String etymologyNumber;
     private GrammaticalGender gender;
     private PartOfSpeechDetails partOfSpeechDetails;
@@ -22,19 +22,19 @@ public class LexemeBuilder {
     private final Map<String, Inflection> inflectionIndex = new HashMap<>();
     private final Set<InflectionClass> inflectionClasses = new TreeSet<>();
 
-    public LexemeBuilder(String lemma, GrammaticalPosition position, String etymologyNumber){
+    public LexemeBuilder(String lemma, PartOfSpeech partOfSpeech, String etymologyNumber){
         this.lemma = lemma;
-        this.position = position;
+        this.partOfSpeech = partOfSpeech;
         this.etymologyNumber = etymologyNumber;
-        this.id = computeId( lemma, position, etymologyNumber);
+        this.id = computeId( lemma, partOfSpeech, etymologyNumber);
     }
 
-    private static UUID computeId(String lemma, GrammaticalPosition position, String etymologyNumber){
-        return UUID.nameUUIDFromBytes(computeId(lemma, position.name(), etymologyNumber).getBytes(StandardCharsets.UTF_8));
+    private static UUID computeId(String lemma, PartOfSpeech partOfSpeech, String etymologyNumber){
+        return UUID.nameUUIDFromBytes(computeId(lemma, partOfSpeech.name(), etymologyNumber).getBytes(StandardCharsets.UTF_8));
     }
 
-    private static String computeId(String lemma, String position, String etymologyNumber) {
-        return lemma + "#" + position + "#" + etymologyNumber;
+    private static String computeId(String lemma, String partOfSpeech, String etymologyNumber) {
+        return lemma + "#" + partOfSpeech + "#" + etymologyNumber;
     }
 
     public UUID getId() {
@@ -45,8 +45,8 @@ public class LexemeBuilder {
         return lemma;
     }
 
-    public GrammaticalPosition getPosition(){
-        return this.position;
+    public PartOfSpeech getPartOfSpeech(){
+        return this.partOfSpeech;
     }
 
     public String getEtymologyNumber() {
@@ -56,10 +56,6 @@ public class LexemeBuilder {
     public LexemeBuilder setGender(GrammaticalGender gender){
         this.gender = gender;
         return this;
-    }
-
-    public GrammaticalGender getGender() {
-        return gender;
     }
 
     public PartOfSpeechDetails getPartOfSpeechDetails() {
@@ -110,10 +106,10 @@ public class LexemeBuilder {
 
     public Lexeme build(){
 
-        if (lemma == null || position == null) {
+        if (lemma == null || partOfSpeech == null) {
             throw new IllegalStateException("Missing required fields: " +
                     (lemma == null ? "lemma " : "") +
-                    (position == null ? "position " : ""));
+                    (partOfSpeech == null ? "partOfSpeech " : ""));
         }
 
         return new Lexeme(this);

@@ -1,6 +1,6 @@
 package com.annepolis.lexiconmeum.webapi.bff.textsearch.domain;
 
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeech;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -16,18 +16,18 @@ public class DelegatingSearchableFormsExtractorConfig {
             SearchableInflectedFormsExtractor inflectedFormsProvider,
             SearchableUninflectedFormsExtractor uninflectedFormsProvider
     ){
-        Map<GrammaticalPosition, SearchableFormsExtractor> formsExtractors = new EnumMap<>(GrammaticalPosition.class);
-        formsExtractors.put(GrammaticalPosition.VERB, inflectedFormsProvider);
-        formsExtractors.put(GrammaticalPosition.NOUN, inflectedFormsProvider);
-        formsExtractors.put(GrammaticalPosition.ADJECTIVE, inflectedFormsProvider);
-        formsExtractors.put(GrammaticalPosition.ADVERB, uninflectedFormsProvider);
+        Map<PartOfSpeech, SearchableFormsExtractor> formsExtractors = new EnumMap<>(PartOfSpeech.class);
+        formsExtractors.put(PartOfSpeech.VERB, inflectedFormsProvider);
+        formsExtractors.put(PartOfSpeech.NOUN, inflectedFormsProvider);
+        formsExtractors.put(PartOfSpeech.ADJECTIVE, inflectedFormsProvider);
+        formsExtractors.put(PartOfSpeech.ADVERB, uninflectedFormsProvider);
 
-        Set<GrammaticalPosition> missing = EnumSet.allOf(GrammaticalPosition.class);
+        Set<PartOfSpeech> missing = EnumSet.allOf(PartOfSpeech.class);
         missing.removeAll(formsExtractors.keySet());
 
         if (!missing.isEmpty()) {
             throw new IllegalStateException(
-                    "No SearchableFormsExtractor configured for positions: " + missing);
+                    "No SearchableFormsExtractor configured for partsOfSpeech: " + missing);
         }
 
         return new DelegatingSearchableFormsExtractor(formsExtractors);

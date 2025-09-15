@@ -1,8 +1,8 @@
 package com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.section;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass;
+import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeech;
 import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.LexemeDetailResponse;
 import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.LexemeDetailSectionContributor;
 import org.springframework.stereotype.Component;
@@ -12,15 +12,15 @@ import java.util.stream.Collectors;
 
 @Component("inflectionClassSectionContributor")
 class InflectionClassSectionContributor implements LexemeDetailSectionContributor {
-    private final Set<GrammaticalPosition> positions;
+    private final Set<PartOfSpeech> partsOfSpeech;
 
-    public InflectionClassSectionContributor(Set<GrammaticalPosition> positions) {
-        this.positions = positions;
+    public InflectionClassSectionContributor(Set<PartOfSpeech> partsOfSpeech) {
+        this.partsOfSpeech = partsOfSpeech;
     }
 
     @Override
     public boolean supports(Lexeme lexeme) {
-        return positions.contains(lexeme.getGrammaticalPosition());
+        return partsOfSpeech.contains(lexeme.getPartOfSpeech());
     }
 
     @Override
@@ -29,7 +29,7 @@ class InflectionClassSectionContributor implements LexemeDetailSectionContributo
                 .map(InflectionClass::getDisplayTag)
                 .collect(Collectors.joining(" & "));
         if (!display.isBlank()) {
-            String suffix = lexeme.getGrammaticalPosition().getInflectionType();
+            String suffix = lexeme.getPartOfSpeech().getInflectionType();
             dto.setInflectionClass(display + " " + suffix);
         }
     }

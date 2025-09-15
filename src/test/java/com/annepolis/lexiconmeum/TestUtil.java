@@ -18,17 +18,17 @@ import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalMood.*;
 import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber.PLURAL;
 import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber.SINGULAR;
 import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPerson.*;
-import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition.VERB;
 import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense.PERFECT;
 import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense.PRESENT;
 import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice.ACTIVE;
 import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice.PASSIVE;
+import static com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeech.VERB;
 
 public class TestUtil {
 
     public static Lexeme getNewTestNounLexeme(){
 
-        return new LexemeBuilder("amīcus", GrammaticalPosition.NOUN, "1")
+        return new LexemeBuilder("amīcus", PartOfSpeech.NOUN, "1")
 
 
         .addInflection(getNewTestDeclension( SINGULAR, NOMINATIVE,  "amīcus"))
@@ -119,7 +119,7 @@ public class TestUtil {
         .build();
     }
 
-    public static List<Lexeme> getMixedPositionTestLexemes(){
+    public static List<Lexeme> getMixedPartOfSpeechTestLexemes(){
         List<Lexeme> lexemes = new ArrayList<>();
 
         lexemes.add(getNewTestVerbLexeme());
@@ -215,7 +215,7 @@ public class TestUtil {
     }
 
     public static Lexeme getNewTestAdjectiveLexeme(){
-        LexemeBuilder builder = new LexemeBuilder("pulcher", GrammaticalPosition.ADJECTIVE, "1");
+        LexemeBuilder builder = new LexemeBuilder("pulcher", PartOfSpeech.ADJECTIVE, "1");
         builder.addInflectionClass(InflectionClass.FIRST);
         builder.addInflectionClass(InflectionClass.SECOND);
         for(Agreement agreement : generateAgreements()){
@@ -225,7 +225,7 @@ public class TestUtil {
     }
 
     public static Lexeme getNewTestThreeTerminationAdjectiveLexeme(){
-        LexemeBuilder builder = new LexemeBuilder("celer", GrammaticalPosition.ADJECTIVE, "1");
+        LexemeBuilder builder = new LexemeBuilder("celer", PartOfSpeech.ADJECTIVE, "1");
         builder.addInflectionClass(InflectionClass.THIRD);
         builder.setPartOfSpeechDetails(new AdjectiveDetails(AdjectiveTerminationType.THREE_TERMINATION));
         for(Agreement agreement : generateAgreements()){

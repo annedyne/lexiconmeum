@@ -3,7 +3,7 @@ package com.annepolis.lexiconmeum.webapi.bff.textsearch.index;
 import com.annepolis.lexiconmeum.TestUtil;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
 import com.annepolis.lexiconmeum.webapi.bff.textsearch.domain.FormMatch;
 import org.junit.jupiter.api.Test;
@@ -28,10 +28,10 @@ class TrieAutocompleteIndexTest {
     void trieReturnsAllMatchingWordsGivenPrefix(){
         String prefix = "test";
         String word = prefix + "word";
-        LexemeBuilder dLexemeBuilder = new LexemeBuilder(word, GrammaticalPosition.NOUN, "1");
+        LexemeBuilder dLexemeBuilder = new LexemeBuilder(word, PartOfSpeech.NOUN, "1");
         Lexeme lexeme = dLexemeBuilder.build();
 
-        LexemeBuilder cLexemeBuilder = new LexemeBuilder( word, GrammaticalPosition.VERB, "1");
+        LexemeBuilder cLexemeBuilder = new LexemeBuilder( word, PartOfSpeech.VERB, "1");
         Lexeme lexeme2 = cLexemeBuilder.build();
 
         TrieAutocompleteIndex underTest = new TrieAutocompleteIndex();
@@ -61,7 +61,7 @@ class TrieAutocompleteIndexTest {
     @Test
     void givenSuffixReturnsAllUniqueMatches(){
         TrieAutocompleteIndex underTest = new TrieAutocompleteIndex();
-        List<Lexeme> lexemes = TestUtil.getMixedPositionTestLexemes();
+        List<Lexeme> lexemes = TestUtil.getMixedPartOfSpeechTestLexemes();
 
 
         for(Lexeme lexeme : lexemes) {

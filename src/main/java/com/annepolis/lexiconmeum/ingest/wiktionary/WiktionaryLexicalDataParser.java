@@ -4,9 +4,9 @@ import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.Sense;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalFeature;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
 import com.annepolis.lexiconmeum.shared.model.grammar.InflectionFeature;
+import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
 import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.inflection.Declension;
@@ -74,27 +74,27 @@ class WiktionaryLexicalDataParser {
 
     private Optional<Lexeme> buildLexeme(JsonNode root) {
         String lemma = root.path(WORD.get()).asText();
-        String posTag = root.path(POSITION.get()).asText();
+        String posTag = root.path(PART_OF_SPEECH.get()).asText();
         String etymologyNumber = normalizeEtymologyNumber(root.path(ETYMOLOGY_NUMBER.get()).asText());
 
-        Optional<GrammaticalPosition> optionalPosition = GrammaticalPosition.resolveWithWarning(posTag, logger);
+        Optional<PartOfSpeech> optionalPartOfSpeech = PartOfSpeech.resolveWithWarning(posTag, logger);
 
-        if (optionalPosition.isEmpty()) {
+        if (optionalPartOfSpeech.isEmpty()) {
             return Optional.empty();
         }
-        GrammaticalPosition position = optionalPosition.get();
+        PartOfSpeech partOfSpeech = optionalPartOfSpeech.get();
 
-        LexemeBuilder builder = new LexemeBuilder(lemma, position, etymologyNumber);
+        LexemeBuilder builder = new LexemeBuilder(lemma, partOfSpeech, etymologyNumber);
 
         addSenses(root.path(SENSES.get()), builder);
 
-        return switch (position) {
+        return switch (partOfSpeech) {
             case NOUN -> buildLexemeWithForms(builder, root, this::addDeclensionForms);
             case VERB -> buildLexemeWithForms(builder, root, this::addConjugationForms);
             case ADJECTIVE -> buildLexemeWithForms(builder, root, this::addAdjectiveForms);
             case ADVERB -> buildLexemeWithOutForms(builder);
             default -> {
-                logger.trace("Unsupported position: {}", position);
+                logger.trace("Unsupported partOfSpeech: {}", partOfSpeech);
                 yield Optional.empty();
             }
         };

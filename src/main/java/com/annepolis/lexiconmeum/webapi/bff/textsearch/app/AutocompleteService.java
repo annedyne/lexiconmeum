@@ -44,7 +44,7 @@ public class AutocompleteService implements AutocompleteUseCase {
                 .filter(match -> match != null && match.form() != null && !match.form().isBlank() && match.lexemeId() != null)
                 .map(match -> lexemeReader.getLexemeIfPresent(match.lexemeId())
                         .map(lexeme ->
-                                suggestionMapper.toResponse(match.form(), match.lexemeId(), lexeme.getGrammaticalPosition())
+                                suggestionMapper.toResponse(match.form(), match.lexemeId(), lexeme.getPartOfSpeech())
                         ))
                 .flatMap(Optional::stream)
                 .toList();

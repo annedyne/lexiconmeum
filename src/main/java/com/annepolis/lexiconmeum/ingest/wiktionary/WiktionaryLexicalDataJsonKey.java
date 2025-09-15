@@ -3,7 +3,7 @@ package com.annepolis.lexiconmeum.ingest.wiktionary;
 public enum WiktionaryLexicalDataJsonKey {
 
     WORD("word"),
-    POSITION("pos"),
+    PART_OF_SPEECH("pos"),
     NOUN("noun"),
     VERB("verb"),
     DECLENSION("declension"),

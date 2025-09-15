@@ -1,6 +1,6 @@
 package com.annepolis.lexiconmeum.webapi.bff.textsearch.app;
 
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeech;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -8,7 +8,7 @@ import java.util.UUID;
 @Component
 public class SuggestionMapper {
 
-    SuggestionResponse toResponse(String word, UUID lexemeId, GrammaticalPosition grammaticalPosition){
-        return new SuggestionResponse(word, lexemeId, grammaticalPosition);
+    SuggestionResponse toResponse(String word, UUID lexemeId, PartOfSpeech partOfSpeech){
+        return new SuggestionResponse(word, lexemeId, partOfSpeech);
     }
 }

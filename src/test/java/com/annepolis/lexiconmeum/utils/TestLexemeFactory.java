@@ -25,7 +25,7 @@ public final class TestLexemeFactory {
 
         AdjectiveDetails details = new AdjectiveDetails( terminationType);
 
-        LexemeBuilder lexemeBuilder = new LexemeBuilder("test-adj", GrammaticalPosition.ADJECTIVE, "1" );
+        LexemeBuilder lexemeBuilder = new LexemeBuilder("test-adj", PartOfSpeech.ADJECTIVE, "1" );
         lexemeBuilder.setPartOfSpeechDetails(details);
 
         for (Agreement a : agreements) {

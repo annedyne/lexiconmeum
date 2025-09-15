@@ -1,7 +1,7 @@
 package com.annepolis.lexiconmeum.webapi.bff.textsearch.domain;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeech;
 
 import java.util.Map;
 import java.util.Objects;
@@ -9,9 +9,9 @@ import java.util.Set;
 
 public class DelegatingSearchableFormsExtractor implements SearchableFormsExtractor {
 
-    Map<GrammaticalPosition, SearchableFormsExtractor> formsProviders;
+    Map<PartOfSpeech, SearchableFormsExtractor> formsProviders;
 
-    public DelegatingSearchableFormsExtractor(Map<GrammaticalPosition, SearchableFormsExtractor> formsProviders) {
+    public DelegatingSearchableFormsExtractor(Map<PartOfSpeech, SearchableFormsExtractor> formsProviders) {
         this.formsProviders = Map.copyOf(formsProviders);
     }
 
@@ -19,14 +19,14 @@ public class DelegatingSearchableFormsExtractor implements SearchableFormsExtrac
     @Override
     public Set<String> getSearchableForms(Lexeme lexeme) {
         Objects.requireNonNull(lexeme, "lexeme must not be null");
-        GrammaticalPosition position =
-                Objects.requireNonNull(lexeme.getGrammaticalPosition(), "lexeme.grammaticalPosition must not be null");
+        PartOfSpeech partOfSpeech =
+                Objects.requireNonNull(lexeme.getPartOfSpeech(), "lexeme.partOfSpeech must not be null");
 
-        SearchableFormsExtractor delegate = formsProviders.get(position);
+        SearchableFormsExtractor delegate = formsProviders.get(partOfSpeech);
         if (delegate == null) {
-            throw new IllegalStateException("No SearchableFormsExtractor configured for position: " + position);
+            throw new IllegalStateException("No SearchableFormsExtractor configured for partOfSpeech: " + partOfSpeech);
         }
 
-        return formsProviders.get(lexeme.getGrammaticalPosition()).getSearchableForms(lexeme);
+        return formsProviders.get(lexeme.getPartOfSpeech()).getSearchableForms(lexeme);
     }
 }

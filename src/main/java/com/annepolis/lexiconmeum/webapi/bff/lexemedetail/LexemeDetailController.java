@@ -4,7 +4,7 @@ import com.annepolis.lexiconmeum.shared.LexemeReader;
 import com.annepolis.lexiconmeum.shared.exception.LexemeNotFoundException;
 import com.annepolis.lexiconmeum.shared.exception.LexemeTypeMismatchException;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.util.JsonDTOLogger;
 import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.LexemeDetailResponse;
 import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.LexemeDetailUseCase;
@@ -38,12 +38,12 @@ class LexemeDetailController {
     @GetMapping(LEXEME_DETAIL)
     ResponseEntity<LexemeDetailResponse> getLexemeDetail(
             @PathVariable UUID id,
-            @RequestParam(name = "type", required = false) GrammaticalPosition expectedType
+            @RequestParam(name = "type", required = false) PartOfSpeech expectedType
     ) {
         Lexeme lexeme = getLexeme(id);
 
-        if (expectedType != null && lexeme.getGrammaticalPosition() != expectedType) {
-            throw new LexemeTypeMismatchException("Expected " + expectedType + " but got " + lexeme.getGrammaticalPosition());
+        if (expectedType != null && lexeme.getPartOfSpeech() != expectedType) {
+            throw new LexemeTypeMismatchException("Expected " + expectedType + " but got " + lexeme.getPartOfSpeech());
         }
         LexemeDetailResponse response = lexemeDetailUseCase.execute(lexeme);
         jsonDTOLogger.logAsJson(response);
