@@ -23,7 +23,17 @@ public enum GrammaticalFeature {
         builder.addInflectionClass(InflectionClass.FOURTH)),
 
     FIFTH(Set.of("declension-5"), builder ->
-        builder.addInflectionClass(InflectionClass.FIFTH));
+        builder.addInflectionClass(InflectionClass.FIFTH)),
+
+    TWO_TERMINATION(Set.of("two-termination"), builder ->  {
+        AdjectiveDetails adjectiveDetails = new AdjectiveDetails(AdjectiveTerminationType.TWO_TERMINATION);
+        builder.setPartOfSpeechDetails(adjectiveDetails);
+    }),
+
+    THREE_TERMINATION(Set.of("three-termination"), builder ->  {
+        AdjectiveDetails adjectiveDetails = new AdjectiveDetails(AdjectiveTerminationType.THREE_TERMINATION);
+        builder.setPartOfSpeechDetails(adjectiveDetails);
+    });
 
     private final Set<String> tags;
     private final Consumer<LexemeBuilder> setter;

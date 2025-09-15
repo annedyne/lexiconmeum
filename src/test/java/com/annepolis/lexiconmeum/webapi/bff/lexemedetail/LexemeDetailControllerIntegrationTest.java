@@ -87,7 +87,7 @@ class LexemeDetailControllerIntegrationTest {
     }
     @Test
     void testDetailEndpointWitAdjectiveId() throws JsonProcessingException {
-        LexemeBuilder lexemeBuilder = new LexemeBuilder("brevis", GrammaticalPosition.ADJECTIVE, "1");
+        LexemeBuilder lexemeBuilder = new LexemeBuilder("celer", GrammaticalPosition.ADJECTIVE, "1");
         UUID lexemeId = lexemeBuilder.build().getId();
 
         String url = UriComponentsBuilder

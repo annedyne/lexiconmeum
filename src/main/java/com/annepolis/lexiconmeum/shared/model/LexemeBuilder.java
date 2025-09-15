@@ -3,6 +3,7 @@ package com.annepolis.lexiconmeum.shared.model;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass;
+import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeechDetails;
 import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
 
@@ -16,6 +17,7 @@ public class LexemeBuilder {
     private final GrammaticalPosition position;
     private final String etymologyNumber;
     private GrammaticalGender gender;
+    private PartOfSpeechDetails partOfSpeechDetails;
     private final List<Sense> senses = new ArrayList<>();
     private final Map<String, Inflection> inflectionIndex = new HashMap<>();
     private final Set<InflectionClass> inflectionClasses = new TreeSet<>();
@@ -58,6 +60,14 @@ public class LexemeBuilder {
 
     public GrammaticalGender getGender() {
         return gender;
+    }
+
+    public PartOfSpeechDetails getPartOfSpeechDetails() {
+        return partOfSpeechDetails;
+    }
+
+    public void setPartOfSpeechDetails(PartOfSpeechDetails partOfSpeechDetails) {
+        this.partOfSpeechDetails = partOfSpeechDetails;
     }
 
     public LexemeBuilder addSense(Sense sense){
