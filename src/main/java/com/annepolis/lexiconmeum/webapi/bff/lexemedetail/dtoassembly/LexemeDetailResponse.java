@@ -1,5 +1,6 @@
 package com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly;
 
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection.InflectionTableDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -16,6 +17,9 @@ public class LexemeDetailResponse {
     String lemma;
     UUID lexemeId;
     GrammaticalPosition position;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    GrammaticalGender grammaticalGender;
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     List<String> definitions = new ArrayList<>();
@@ -51,6 +55,14 @@ public class LexemeDetailResponse {
 
     public void setLexemeId(UUID lexemeId) {
         this.lexemeId = lexemeId;
+    }
+
+    public GrammaticalGender getGrammaticalGender() {
+        return grammaticalGender;
+    }
+
+    public void setGrammaticalGender(GrammaticalGender grammaticalGender) {
+        this.grammaticalGender = grammaticalGender;
     }
 
     public List<String> getDefinitions() {

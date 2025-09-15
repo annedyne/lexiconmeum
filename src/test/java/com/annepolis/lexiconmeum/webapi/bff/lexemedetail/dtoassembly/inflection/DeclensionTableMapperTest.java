@@ -12,7 +12,7 @@ class DeclensionTableMapperTest {
     void toDeclensionTableDTOCorrectlyFormed(){
         DeclensionTableMapper mapper = new DeclensionTableMapper();
         DeclensionTableDTO tableDTO = mapper.toInflectionTableDTO(TestUtil.getNewTestNounLexeme());
-        Assertions.assertEquals("amīcus", tableDTO.table.get(GrammaticalNumber.SINGULAR).get(GrammaticalCase.NOMINATIVE));
+        Assertions.assertEquals("amīcus", tableDTO.getInflectionTable().get(GrammaticalNumber.SINGULAR).get(GrammaticalCase.NOMINATIVE));
     }
 
 

@@ -224,6 +224,16 @@ public class TestUtil {
         return builder.build();
     }
 
+    public static Lexeme getNewTestThreeTerminationAdjectiveLexeme(){
+        LexemeBuilder builder = new LexemeBuilder("celer", GrammaticalPosition.ADJECTIVE, "1");
+        builder.addInflectionClass(InflectionClass.THIRD);
+        builder.setPartOfSpeechDetails(new AdjectiveDetails(AdjectiveTerminationType.THREE_TERMINATION));
+        for(Agreement agreement : generateAgreements()){
+            builder.addInflection(agreement);
+        }
+        return builder.build();
+    }
+
     public static List<Agreement> generateAgreements() {
         List<Agreement> agreements = new ArrayList<>();
 

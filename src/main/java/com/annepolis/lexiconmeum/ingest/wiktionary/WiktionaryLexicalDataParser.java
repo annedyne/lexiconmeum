@@ -3,7 +3,10 @@ package com.annepolis.lexiconmeum.ingest.wiktionary;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.Sense;
-import com.annepolis.lexiconmeum.shared.model.grammar.*;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalFeature;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
+import com.annepolis.lexiconmeum.shared.model.grammar.InflectionFeature;
 import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
 import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.inflection.Declension;
@@ -143,7 +146,20 @@ class WiktionaryLexicalDataParser {
             if (isDeclensionForm(formNode)) {
                 buildDeclension(formNode, getParseMode()).ifPresent(lexemeBuilder::addInflection);
             } else {
-                getGender(formNode).ifPresent(lexemeBuilder::setGender);
+                //this sets genders for nouns with gender-specific inflections (Ex: 1st & 2nd, not 3rd)
+                setCanonicalGender(formNode, lexemeBuilder);
+            }
+        }
+    }
+    //finds
+    void setCanonicalGender(JsonNode formNode, LexemeBuilder lexemeBuilder){
+        JsonNode tags = formNode.path(TAGS.get());
+        for (int i = 0; i < tags.size(); i++) {
+            //if first tag is CANONICAL then next is gender
+            if (CANONICAL.name().equalsIgnoreCase(tags.get(i).asText()) && i + 1 < tags.size()) {
+
+                GrammaticalFeature.resolveWithWarning(tags.get(i + 1).asText(), logger)
+                        .ifPresent(feature -> feature.applyTo(lexemeBuilder));
             }
         }
     }
@@ -216,17 +232,6 @@ class WiktionaryLexicalDataParser {
                                              // doesn't include person so excluding for now
     }
 
-    private Optional<GrammaticalGender> getGender(JsonNode formNode){
-        JsonNode tags = formNode.path(TAGS.get());
-        for (int i = 0; i < tags.size(); i++) {
-            //if first tag is CANONICAL then next is gender
-            if (CANONICAL.name().equalsIgnoreCase(tags.get(i).asText()) && i + 1 < tags.size()) {
-               return GrammaticalGender.fromTag(tags.get(i + 1).asText());
-            }
-        }
-        return Optional.empty();
-    }
-
     private void addSenses(JsonNode sensesNode, LexemeBuilder lexemeBuilder) {
         if (sensesNode.isArray()) {
             for (JsonNode senseNode : sensesNode) {
@@ -244,6 +249,7 @@ class WiktionaryLexicalDataParser {
                         .ifPresent(feature -> feature.applyTo(lexemeBuilder));
             }
         }
+
         JsonNode glosses = senseNode.path(GLOSSES.get());
         if (glosses.isArray() && !glosses.isEmpty()) {
 

@@ -1,10 +1,7 @@
 package com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
-import com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass;
+import com.annepolis.lexiconmeum.shared.model.grammar.*;
 import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +16,13 @@ public class AgreementTableMapper implements InflectionTableMapper {
                 Map<GrammaticalNumber, Map<GrammaticalCase, String>>> table = new LinkedHashMap<>();
 
         if (lexeme != null) {
-            boolean twoTermination = lexeme.getInflectionClasses().contains(InflectionClass.THIRD);
+            boolean twoTermination;
+            PartOfSpeechDetails details = lexeme.getPartOfSpeechDetails();
+            if (details instanceof AdjectiveDetails adj) {
+                twoTermination = adj.terminationType() == AdjectiveTerminationType.TWO_TERMINATION;
+            } else {
+                twoTermination = false;
+            }
 
             lexeme.getInflections().stream()
                     .filter(Agreement.class::isInstance)
