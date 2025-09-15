@@ -1,0 +1,52 @@
+@startuml
+'https://plantuml.com/component-diagram
+
+top to bottom direction
+
+package "textsearchApi" {
+  [Controller] as controller
+  HTTP - controller
+  [AutoCompleteSuggestionDTO] as dto
+  [AutoCompleteSuggestionMapper] as mapper
+}
+
+package "App" {
+  () AutoCompleteSuggestionUseCase as usecase
+  [AutoCompleteSuggestionService] as appService
+}
+
+package "domain" {
+  () FormsProviderRegistry as registry
+  [DelegatingSearchableFormsProvider] as delegator
+  [SearchableInflectedFormsProvider] as inflectedProvider
+  [SearchableUninflectedFormsProvider] as uninflectedProvider
+}
+
+
+package "index" {
+ () AutocompleteIndex as indexInterface
+ [TrieAutocompleteIndex] as indexService
+ [TextSearchTrieIndex] as trieIndex
+
+}
+
+package "config" {
+ [TextSearchServiceConfig]
+ [DelegatingSearchableFormsProviderConfig]
+ [TextSearchProperties]
+}
+
+controller --> usecase : uses
+usecase .. appService
+mapper --> dto
+dto ..> controller
+appService --> indexInterface : uses
+indexService ---> registry
+
+
+delegator .d. registry
+registry .. inflectedProvider
+registry .. uninflectedProvider
+delegator --> inflectedProvider
+delegator --> uninflectedProvider
+@enduml

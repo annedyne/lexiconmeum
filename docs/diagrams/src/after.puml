@@ -1,0 +1,97 @@
+@startuml
+allowmixing
+
+title Proposed State (hexagonal/ports-adapters)
+
+package "Domain Model" {
+  class Lexeme
+  class SearchQuery
+  class LexemeDetailResponse
+}
+
+package "Application (Inbound Ports / Use Cases)" {
+  interface IngestLexemeUseCase
+  interface GetLexemeUseCase
+  interface SearchLexemesUseCase
+
+  component IngestLexemeService
+  component GetLexemeService
+  component SearchLexemesService
+}
+
+package "Domain/Ports (Outbound Ports)" {
+  interface LexemeStore   <<outbound>>
+  interface LexemeReader  <<outbound>>
+  interface TextSearchIndex <<outbound>>
+  class SearchableFormsService <<domain service>>
+}
+
+' Implementations of inbound ports (application services)
+IngestLexemeService ..|> IngestLexemeUseCase
+GetLexemeService ..|> GetLexemeUseCase
+SearchLexemesService ..|> SearchLexemesUseCase
+
+' Application services depend on outbound ports and domain services
+IngestLexemeService --> LexemeStore
+IngestLexemeService --> TextSearchIndex
+IngestLexemeService --> SearchableFormsService
+
+GetLexemeService --> LexemeReader
+
+SearchLexemesService --> TextSearchIndex
+
+package "Adapters - Inbound" {
+  package "Web BFF" {
+    component LexemeDetailController
+    component TextSearchController
+    component LexemeDetailResponseAssembler
+  }
+  package "Loader" {
+    component Loader
+    component Parser
+  }
+}
+
+package "Adapters - Outbound" {
+  package "Cache" {
+    component InMemoryLexemeCache
+  }
+  package "TextSearch" {
+    component TrieTextSearchIndex
+  }
+}
+
+' Outbound adapter implementations
+InMemoryLexemeCache ..|> LexemeStore
+InMemoryLexemeCache ..|> LexemeReader
+
+TrieTextSearchIndex ..|> TextSearchIndex
+SearchableFormsService -[hidden]-> Lexeme : uses domain model (kept as domain/internal)
+
+' Inbound flows
+Loader --> Parser
+Parser --> Lexeme : builds
+Loader --> IngestLexemeUseCase : passes Lexeme
+
+LexemeDetailController --> GetLexemeUseCase : query by id
+GetLexemeUseCase --> Lexeme : returns
+
+LexemeDetailController --> LexemeDetailResponseAssembler
+LexemeDetailResponseAssembler --> Lexeme : reads
+LexemeDetailResponseAssembler --> LexemeDetailResponse : produces
+
+TextSearchController --> SearchLexemesUseCase
+SearchLexemesUseCase --> LexemeDetailResponse : or list of matches (depending on API)
+
+' Outbound flows from application
+IngestLexemeService --> LexemeStore : persist/cache
+IngestLexemeService --> TextSearchIndex : index forms
+IngestLexemeService --> SearchableFormsService : derive forms
+
+' Get/read path
+GetLexemeService --> LexemeReader : fetch
+
+' Search path
+SearchLexemesService --> TextSearchIndex : query
+
+@enduml

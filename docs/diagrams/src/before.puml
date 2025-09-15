@@ -1,0 +1,76 @@
+@startuml
+allowmixing
+
+title Current State (as described)
+
+
+
+package "ingest" {
+  component Loader
+  component Parser
+}
+
+package "Domain Model" {
+  class Lexeme
+}
+
+package "Shared (contracts + model)" {
+  interface LexemeProvider
+  interface LexemeSink
+}
+
+package "Cache" {
+  component InMemoryLexemeCache
+}
+
+package "webapi" {
+  component TextSearchController
+  component LexemeDetailController
+}
+
+package "TextSearch" {
+  component TextSearchTrieIndexService
+  component TextSearchTrieIndex
+  interface TextSearchService
+  interface SearchableFormsProvider
+}
+
+package "lexemedetail" {
+  component LexemeDetailService
+  interface LexemeDetailResponsePipelineService
+  component LexemeDetailResponsePipeline
+}
+
+
+
+' Model references
+LexemeProvider -u-> Lexeme : returns/uses
+LexemeSink -u-> Lexeme : accepts
+SearchableFormsProvider -u-> Lexeme : reads
+LexemeDetailResponsePipelineService --> Lexeme : assembles from
+
+' Cache provides both read and write contracts
+InMemoryLexemeCache ..|> LexemeProvider
+InMemoryLexemeCache ..|> LexemeSink
+
+' Text search index service uses forms provider and index, implements sink and exposes a query API
+TextSearchTrieIndexService ..|> LexemeSink
+TextSearchTrieIndexService ..|> TextSearchService
+TextSearchTrieIndexService --> TextSearchTrieIndex
+TextSearchTrieIndexService --> SearchableFormsProvider
+
+' Loader path: loader -> parser -> sink(s)
+Loader --> Parser
+Parser -u-> Lexeme : builds
+Loader --> LexemeSink : sends parsed Lexeme
+
+' Web detail path: controller -> service -> pipeline; controller reads via provider
+LexemeDetailController --> LexemeProvider : read Lexeme
+LexemeDetailController --> LexemeDetailService
+LexemeDetailService --> LexemeDetailResponsePipelineService
+LexemeDetailResponsePipeline ..|> LexemeDetailResponsePipelineService
+
+' Web text search path: controller calls text search directly
+TextSearchController --> TextSearchService
+
+@enduml
