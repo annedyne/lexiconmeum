@@ -61,7 +61,7 @@ class TrieAutocompleteIndexTest {
     @Test
     void givenSuffixReturnsAllUniqueMatches(){
         TrieAutocompleteIndex underTest = new TrieAutocompleteIndex();
-        List<Lexeme> lexemes = TestUtil.getMixedPositionTestLexemes();
+        List<Lexeme> lexemes = TestUtil.getMixedPartOfSpeechTestLexemes();
 
 
         for(Lexeme lexeme : lexemes) {

@@ -16,7 +16,7 @@ public class LexemeDetailResponse {
 
     String lemma;
     UUID lexemeId;
-    PartOfSpeech position;
+    PartOfSpeech partOfSpeech;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     GrammaticalGender grammaticalGender;
@@ -41,12 +41,12 @@ public class LexemeDetailResponse {
         this.lemma = lemma;
     }
 
-    public PartOfSpeech getPosition() {
-        return position;
+    public PartOfSpeech getPartOfSpeech() {
+        return partOfSpeech;
     }
 
-    public void setPosition(PartOfSpeech position) {
-        this.position = position;
+    public void setPartOfSpeech(PartOfSpeech partOfSpeech) {
+        this.partOfSpeech = partOfSpeech;
     }
 
     public UUID getLexemeId() {

@@ -27,7 +27,7 @@ public class DelegatingSearchableFormsExtractorConfig {
 
         if (!missing.isEmpty()) {
             throw new IllegalStateException(
-                    "No SearchableFormsExtractor configured for positions: " + missing);
+                    "No SearchableFormsExtractor configured for partsOfSpeech: " + missing);
         }
 
         return new DelegatingSearchableFormsExtractor(formsExtractors);

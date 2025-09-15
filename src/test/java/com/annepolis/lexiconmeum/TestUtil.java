@@ -119,7 +119,7 @@ public class TestUtil {
         .build();
     }
 
-    public static List<Lexeme> getMixedPositionTestLexemes(){
+    public static List<Lexeme> getMixedPartOfSpeechTestLexemes(){
         List<Lexeme> lexemes = new ArrayList<>();
 
         lexemes.add(getNewTestVerbLexeme());

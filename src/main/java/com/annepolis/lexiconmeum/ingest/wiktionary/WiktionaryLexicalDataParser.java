@@ -74,27 +74,27 @@ class WiktionaryLexicalDataParser {
 
     private Optional<Lexeme> buildLexeme(JsonNode root) {
         String lemma = root.path(WORD.get()).asText();
-        String posTag = root.path(POSITION.get()).asText();
+        String posTag = root.path(PART_OF_SPEECH.get()).asText();
         String etymologyNumber = normalizeEtymologyNumber(root.path(ETYMOLOGY_NUMBER.get()).asText());
 
-        Optional<PartOfSpeech> optionalPosition = PartOfSpeech.resolveWithWarning(posTag, logger);
+        Optional<PartOfSpeech> optionalPartOfSpeech = PartOfSpeech.resolveWithWarning(posTag, logger);
 
-        if (optionalPosition.isEmpty()) {
+        if (optionalPartOfSpeech.isEmpty()) {
             return Optional.empty();
         }
-        PartOfSpeech position = optionalPosition.get();
+        PartOfSpeech partOfSpeech = optionalPartOfSpeech.get();
 
-        LexemeBuilder builder = new LexemeBuilder(lemma, position, etymologyNumber);
+        LexemeBuilder builder = new LexemeBuilder(lemma, partOfSpeech, etymologyNumber);
 
         addSenses(root.path(SENSES.get()), builder);
 
-        return switch (position) {
+        return switch (partOfSpeech) {
             case NOUN -> buildLexemeWithForms(builder, root, this::addDeclensionForms);
             case VERB -> buildLexemeWithForms(builder, root, this::addConjugationForms);
             case ADJECTIVE -> buildLexemeWithForms(builder, root, this::addAdjectiveForms);
             case ADVERB -> buildLexemeWithOutForms(builder);
             default -> {
-                logger.trace("Unsupported position: {}", position);
+                logger.trace("Unsupported partOfSpeech: {}", partOfSpeech);
                 yield Optional.empty();
             }
         };

@@ -19,12 +19,12 @@ public class DelegatingSearchableFormsExtractor implements SearchableFormsExtrac
     @Override
     public Set<String> getSearchableForms(Lexeme lexeme) {
         Objects.requireNonNull(lexeme, "lexeme must not be null");
-        PartOfSpeech position =
+        PartOfSpeech partOfSpeech =
                 Objects.requireNonNull(lexeme.getPartOfSpeech(), "lexeme.partOfSpeech must not be null");
 
-        SearchableFormsExtractor delegate = formsProviders.get(position);
+        SearchableFormsExtractor delegate = formsProviders.get(partOfSpeech);
         if (delegate == null) {
-            throw new IllegalStateException("No SearchableFormsExtractor configured for position: " + position);
+            throw new IllegalStateException("No SearchableFormsExtractor configured for partOfSpeech: " + partOfSpeech);
         }
 
         return formsProviders.get(lexeme.getPartOfSpeech()).getSearchableForms(lexeme);

@@ -30,14 +30,14 @@ public enum PartOfSpeech {
 
     public static PartOfSpeech resolveOrThrow(String tag) {
         return fromTag(tag)
-                .orElseThrow(() -> new IllegalArgumentException("Unknown grammatical position: " + tag));
+                .orElseThrow(() -> new IllegalArgumentException("Unknown partOfSpeech: " + tag));
     }
 
     public static Optional<PartOfSpeech> resolveWithWarning(String tag, Logger logger) {
-        Optional<PartOfSpeech> position = fromTag(tag);
-        if (position.isEmpty()) {
-            logger.trace("Unknown grammatical position tag: '{}'", tag);
+        Optional<PartOfSpeech> partOfSpeech = fromTag(tag);
+        if (partOfSpeech.isEmpty()) {
+            logger.trace("Unknown partOfSpeech tag: '{}'", tag);
         }
-        return position;
+        return partOfSpeech;
     }
 }

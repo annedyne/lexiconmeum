@@ -13,7 +13,7 @@ class IdentitySectionContributor implements LexemeDetailSectionContributor {
     @Override
     public void contribute(Lexeme lexeme, LexemeDetailResponse dto) {
         dto.setLexemeId(lexeme.getId());
-        dto.setPosition(lexeme.getPartOfSpeech());
+        dto.setPartOfSpeech(lexeme.getPartOfSpeech());
         dto.setLemma(lexeme.getLemma());
     }
 }

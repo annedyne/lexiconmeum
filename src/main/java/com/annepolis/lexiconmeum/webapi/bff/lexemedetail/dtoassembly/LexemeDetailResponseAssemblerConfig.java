@@ -30,8 +30,8 @@ import java.util.*;
 
         var common = List.of(identityContributor, definitionsContributor);
 
-        for (PartOfSpeech position : PartOfSpeech.values()) {
-            pipelines.put(position, new ArrayList<>(common));
+        for (PartOfSpeech partOfSpeech : PartOfSpeech.values()) {
+            pipelines.put(partOfSpeech, new ArrayList<>(common));
         }
 
         pipelines.get(PartOfSpeech.VERB).addAll(List.of(
@@ -68,7 +68,7 @@ import java.util.*;
     }
 
     @Bean
-    Set<PartOfSpeech> inflectionClassPositions() {
+    Set<PartOfSpeech> inflectionClassPartOfSpeechs() {
         return EnumSet.of(
                 PartOfSpeech.VERB,
                 PartOfSpeech.NOUN,

@@ -12,15 +12,15 @@ import java.util.stream.Collectors;
 
 @Component("inflectionClassSectionContributor")
 class InflectionClassSectionContributor implements LexemeDetailSectionContributor {
-    private final Set<PartOfSpeech> positions;
+    private final Set<PartOfSpeech> partsOfSpeech;
 
-    public InflectionClassSectionContributor(Set<PartOfSpeech> positions) {
-        this.positions = positions;
+    public InflectionClassSectionContributor(Set<PartOfSpeech> partsOfSpeech) {
+        this.partsOfSpeech = partsOfSpeech;
     }
 
     @Override
     public boolean supports(Lexeme lexeme) {
-        return positions.contains(lexeme.getPartOfSpeech());
+        return partsOfSpeech.contains(lexeme.getPartOfSpeech());
     }
 
     @Override
