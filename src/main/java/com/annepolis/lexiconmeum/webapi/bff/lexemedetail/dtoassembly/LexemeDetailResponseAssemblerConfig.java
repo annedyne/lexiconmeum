@@ -21,9 +21,10 @@ import java.util.*;
            @Qualifier("inflectionClassSectionContributor") LexemeDetailSectionContributor inflectionClassContributor,
            @Qualifier("inflectionTableSectionContributor") LexemeDetailSectionContributor inflectionTableContributor,
            @Qualifier("nounPrincipalPartsSectionContributor") LexemeDetailSectionContributor nounPrincipalPartsContributor,
-           @Qualifier("verbPrincipalPartsSectionContributor") LexemeDetailSectionContributor verbPrincipalPartsContributor
+           @Qualifier("verbPrincipalPartsSectionContributor") LexemeDetailSectionContributor verbPrincipalPartsContributor,
+           @Qualifier("nounGenderSectionContributor") LexemeDetailSectionContributor nounGenderSectionContributor
 
-            // Add/remove contributors as needed
+           // Add/remove contributors as needed
     ) {
         Map<GrammaticalPosition, List<LexemeDetailSectionContributor>> pipelines = new EnumMap<>(GrammaticalPosition.class);
 
@@ -42,6 +43,7 @@ import java.util.*;
         pipelines.get(GrammaticalPosition.NOUN).addAll(List.of(
                 inflectionTableContributor,
                 nounPrincipalPartsContributor,
+                nounGenderSectionContributor,
                 inflectionClassContributor
         ));
 

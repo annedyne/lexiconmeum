@@ -25,6 +25,21 @@ public enum GrammaticalFeature {
     FIFTH(Set.of("declension-5"), builder ->
         builder.addInflectionClass(InflectionClass.FIFTH)),
 
+    GENDER_FEMININE(Set.of("feminine"), builder -> {
+        NounDetails nounDetails = new NounDetails(GrammaticalGender.FEMININE);
+        builder.setPartOfSpeechDetails(nounDetails);
+    }),
+
+    GENDER_MASCULINE(Set.of("masculine"), builder ->  {
+        NounDetails nounDetails = new NounDetails(GrammaticalGender.MASCULINE);
+        builder.setPartOfSpeechDetails(nounDetails);
+    }),
+
+    GENDER_NEUTER(Set.of("neuter"), builder ->  {
+        NounDetails nounDetails = new NounDetails(GrammaticalGender.NEUTER);
+        builder.setPartOfSpeechDetails(nounDetails);
+    }),
+
     TWO_TERMINATION(Set.of("two-termination"), builder ->  {
         AdjectiveDetails adjectiveDetails = new AdjectiveDetails(AdjectiveTerminationType.TWO_TERMINATION);
         builder.setPartOfSpeechDetails(adjectiveDetails);

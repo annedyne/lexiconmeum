@@ -35,7 +35,7 @@ class NounPrincipalPartsSectionContributor implements LexemeDetailSectionContrib
 
         Optional.ofNullable(inflectionIndex.get(inflectionKey.buildSecondDeclensionPrincipalPartKey()))
                 .map(Inflection::getForm)
-                .filter(form -> !form.isBlank()) // Optional: skip blank forms
+                .filter(form -> !form.isBlank())
                 .ifPresent(dto::addPrincipalPart);
     }
 }
