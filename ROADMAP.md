@@ -10,7 +10,7 @@ A staged development plan to balance MVP delivery, engineering quality, and lear
 
 - [ ] Add support for all word types (e.g. adjectives, adverbs, etc.)
     - [x] adjectives
-    - [ ] adverbs
+    - [x] adverbs
     - [ ] prepositions 
 - [ ] Complete verb support (add passive voice and any missing tenses/moods)
 - [ ] Fix dropdown arrow navigation in search field
@@ -23,7 +23,7 @@ A staged development plan to balance MVP delivery, engineering quality, and lear
 
 **Goal:** Match the backend's seamless deploy process to reduce friction and risk.
 
-- [ ] Automate front-end build and deployment (GitHub Actions or local script)
+- [x] Automate front-end build and deployment (GitHub Actions or local script)
 - [ ] Use `rsync` or safe delete strategy to prevent accidental file loss
 - [ ] Version build output for traceability (e.g., `lexiconmeum-frontend-20250725`)
 - [ ] Ensure deploy logs clearly show success/failure
@@ -33,8 +33,8 @@ A staged development plan to balance MVP delivery, engineering quality, and lear
 
 ## 🧪 Phase 1.6 – Front-End Testing
 
-- [ ] Set up Vitest for unit testing
-- [ ] Write tests for suggestion box logic, error handling, etc.
+- [x] Set up Vitest for unit testing
+- [x] Write tests for suggestion box logic, error handling, etc.
 - [ ] Test keyboard navigation behavior in dropdown
 - [ ] Run tests in CI (GitHub Actions or locally)
 
