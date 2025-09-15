@@ -6,18 +6,24 @@ import java.util.Arrays;
 import java.util.Optional;
 
 public enum GrammaticalPosition {
-    NOUN("noun"),
-    VERB("verb"),
-    ADVERB("adv"),
-    ADJECTIVE("adj");
+    NOUN("noun", "declension"),
+    VERB("verb", "conjugation"),
+    ADVERB("adv", ""),
+    ADJECTIVE("adj", "declension");
     private final String tag;
+    private final String inflectionType;
 
-    GrammaticalPosition(String tag) {
+    GrammaticalPosition(String tag, String inflectionType) {
         this.tag = tag;
+        this.inflectionType = inflectionType;
     }
 
     public String getTag() {
         return tag;
+    }
+
+    public String getInflectionType() {
+        return inflectionType;
     }
 
     public static Optional<GrammaticalPosition> fromTag(String tag) {

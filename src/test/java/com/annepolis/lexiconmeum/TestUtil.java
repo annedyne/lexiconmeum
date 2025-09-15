@@ -1,12 +1,12 @@
 package com.annepolis.lexiconmeum;
 
-import com.annepolis.lexiconmeum.lexeme.detail.adjective.Agreement;
-import com.annepolis.lexiconmeum.lexeme.detail.noun.Declension;
-import com.annepolis.lexiconmeum.lexeme.detail.verb.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.Sense;
 import com.annepolis.lexiconmeum.shared.model.grammar.*;
+import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
+import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
+import com.annepolis.lexiconmeum.shared.model.inflection.Declension;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -135,7 +135,7 @@ public class TestUtil {
                 for (GrammaticalNumber number : GrammaticalNumber.values()) {
                     for (GrammaticalCase grammaticalCase : GrammaticalCase.values()) {
                         String form = generateForm( gender, number, grammaticalCase);
-                        if (form != null) forms.add(form);
+                        forms.add(form);
                     }
                 }
             }
@@ -224,6 +224,16 @@ public class TestUtil {
         return builder.build();
     }
 
+    public static Lexeme getNewTestThreeTerminationAdjectiveLexeme(){
+        LexemeBuilder builder = new LexemeBuilder("celer", GrammaticalPosition.ADJECTIVE, "1");
+        builder.addInflectionClass(InflectionClass.THIRD);
+        builder.setPartOfSpeechDetails(new AdjectiveDetails(AdjectiveTerminationType.THREE_TERMINATION));
+        for(Agreement agreement : generateAgreements()){
+            builder.addInflection(agreement);
+        }
+        return builder.build();
+    }
+
     public static List<Agreement> generateAgreements() {
         List<Agreement> agreements = new ArrayList<>();
 
@@ -232,9 +242,7 @@ public class TestUtil {
                 for (GrammaticalNumber number : GrammaticalNumber.values()) {
                     for (GrammaticalCase grammaticalCase : GrammaticalCase.values()) {
                         String form = generateForm( gender, number, grammaticalCase);
-                        if (form != null) {
-                            agreements.add(buildAgreement(form, gender, number, grammaticalCase));
-                        }
+                        agreements.add(buildAgreement(form, gender, number, grammaticalCase));
                     }
                 }
             }

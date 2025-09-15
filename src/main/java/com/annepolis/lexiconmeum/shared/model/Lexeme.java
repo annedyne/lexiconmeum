@@ -1,8 +1,9 @@
 package com.annepolis.lexiconmeum.shared.model;
 
-import com.annepolis.lexiconmeum.lexeme.detail.Inflection;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass;
+import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeechDetails;
+import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
 
 import java.util.*;
 
@@ -16,12 +17,13 @@ public class Lexeme {
     private final UUID id;
     private final String lemma;
     private final GrammaticalPosition position;
+    private final PartOfSpeechDetails partOfSpeechDetails;
     private final String etymologyNumber;
     private final Set<InflectionClass> inflectionClasses;
     private final List<Sense> senses;
     private final Map<String, Inflection> inflections;
 
-    Lexeme(LexemeBuilder builder ) {
+    Lexeme(LexemeBuilder builder) {
         this.lemma = builder.getLemma();
         this.position = builder.getPosition();
         this.etymologyNumber = builder.getEtymologyNumber();
@@ -29,6 +31,7 @@ public class Lexeme {
         this.inflections = builder.getInflections();
         this.senses = builder.getSenses();
         this.inflectionClasses = builder.getInflectionClasses();
+        this.partOfSpeechDetails = builder.getPartOfSpeechDetails();
     }
 
     public UUID getId() {
@@ -37,8 +40,12 @@ public class Lexeme {
 
     public String getLemma() { return lemma; }
 
-    public GrammaticalPosition getPosition() {
+    public GrammaticalPosition getGrammaticalPosition() {
         return position;
+    }
+
+    public PartOfSpeechDetails getPartOfSpeechDetails() {
+        return partOfSpeechDetails;
     }
 
     public Set<InflectionClass> getInflectionClasses() {

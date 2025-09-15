@@ -1,8 +1,8 @@
 package com.annepolis.lexiconmeum;
 
-import com.annepolis.lexiconmeum.shared.data.load.LoadProperties;
-import com.annepolis.lexiconmeum.textsearch.TextSearchProperties;
-import com.annepolis.lexiconmeum.web.WebApiProperties;
+import com.annepolis.lexiconmeum.ingest.wiktionary.LoadProperties;
+import com.annepolis.lexiconmeum.webapi.WebApiProperties;
+import com.annepolis.lexiconmeum.webapi.bff.textsearch.TextSearchProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 

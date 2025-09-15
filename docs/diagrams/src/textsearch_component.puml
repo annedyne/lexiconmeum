@@ -1,0 +1,35 @@
+@startuml
+'https://plantuml.com/component-diagram
+
+
+package "textsearch" {
+    [TextSearchController] as controller
+    HTTP - controller
+}
+
+package "Search Service" {
+    () TextSearchService as service
+    controller .d.> service : uses
+
+
+   [TextSearchSuggestionService] as suggestionService
+   service ..suggestionService
+
+   [TextSearchSuggestionMapper] as mapper
+   [TextSearchSuggestionDTO] as dto
+   suggestionService -d-> mapper
+   mapper --> dto
+}
+
+package "Trie Index" {
+    () TextSearchService as service2
+    [TextSearchTrieIndexService] as trieService
+    suggestionService .r.> service2 : uses
+    trieService .u. service2
+    () TextSearchIndex as indexInterface
+    [TextSearchTrieIndex] as index
+    indexInterface ..index
+    trieService .d.> indexInterface : uses
+}
+
+@enduml
