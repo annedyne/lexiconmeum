@@ -13,6 +13,7 @@ A staged development plan to balance MVP delivery, engineering quality, and lear
     - [x] adverbs
     - [ ] prepositions 
 - [ ] Complete verb support (add passive voice and any missing tenses/moods)
+- [ ] Include positive, comparative, and superlative adjective forms in a single detail response 
 - [ ] Fix dropdown arrow navigation in search field
 - [ ] Automatically clear error messages when input changes or retry succeeds
 - [ ] Delay frontend framework migration until necessary

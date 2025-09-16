@@ -92,6 +92,6 @@ git push origin develop
 
 ## Data Source
 
-This project uses data extracted from [Wiktionary](https://www.wiktionary.org/),  
-which is available under the [Creative Commons Attribution-ShareAlike 3.0 Unported License (CC BY-SA 3.0)](https://creativecommons.org/licenses/by-sa/3.0/).  
-LexiconMeum is not affiliated with or endorsed by Wiktionary or the Wikimedia Foundation.
+Lexical data originate from [Wiktionary](https://www.wiktionary.org/) (licensed under [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/)) and are obtained in machine‑readable form via [Kaikki.org](https://kaikki.org/) using the Wiktextract project.  
+If you cite this dataset or derivative work, please also credit Wiktextract as requested by Kaikki.org (e.g., “Tatu Ylonen: Wiktextract: Wiktionary as Machine‑Readable Structured Data, LREC”) and provide links to the sources and license.  
+LexiconMeum is not affiliated with or endorsed by Wiktionary, the Wikimedia Foundation, or Kaikki.org.
