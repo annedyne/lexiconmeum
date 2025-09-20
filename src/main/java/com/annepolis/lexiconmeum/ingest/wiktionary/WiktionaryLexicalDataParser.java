@@ -98,7 +98,7 @@ class WiktionaryLexicalDataParser {
             case NOUN -> buildLexemeWithForms(builder, root, this::addDeclensionForms);
             case VERB -> buildLexemeWithForms(builder, root, this::addConjugationForms);
             case ADJECTIVE -> buildLexemeWithForms(builder, root, this::addAdjectiveForms);
-            case ADVERB -> buildLexemeWithOutForms(builder);
+            case ADVERB, PREPOSITION, POSTPOSITION -> buildLexemeWithOutForms(builder);
             default -> {
                 logger.trace("Unsupported partOfSpeech: {}", partOfSpeech);
                 yield Optional.empty();

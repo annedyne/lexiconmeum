@@ -1,10 +1,12 @@
 package com.annepolis.lexiconmeum.ingest.tagmapping;
 
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveDetails;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveTerminationType;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.NounDetails;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PrepositionDetails;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
@@ -37,6 +39,26 @@ public enum PartOfSpeechDetailFactory {
     THREE_TERMINATION(Set.of("three-termination"), builder ->  {
         AdjectiveDetails adjectiveDetails = new AdjectiveDetails(AdjectiveTerminationType.THREE_TERMINATION);
         builder.setPartOfSpeechDetails(adjectiveDetails);
+    }),
+
+    GOVERNED_CASE_ACCUSATIVE(Set.of("with-accusative"), builder ->  {
+        PrepositionDetails prepositionDetails = new PrepositionDetails(GrammaticalCase.ACCUSATIVE);
+        builder.setPartOfSpeechDetails(prepositionDetails);
+    }),
+
+    GOVERNED_CASE_ABLATIVE(Set.of("with-ablative"), builder ->  {
+        PrepositionDetails prepositionDetails = new PrepositionDetails(GrammaticalCase.ABLATIVE);
+        builder.setPartOfSpeechDetails(prepositionDetails);
+    }),
+
+    GOVERNED_CASE_GENITIVE(Set.of("with-genitive"), builder ->  {
+        PrepositionDetails prepositionDetails = new PrepositionDetails(GrammaticalCase.GENITIVE);
+        builder.setPartOfSpeechDetails(prepositionDetails);
+    }),
+
+    GOVERNED_CASE_DATIVE(Set.of("with-dative"), builder ->  {
+        PrepositionDetails prepositionDetails = new PrepositionDetails(GrammaticalCase.DATIVE);
+        builder.setPartOfSpeechDetails(prepositionDetails);
     });
 
     private final Set<String> tags;

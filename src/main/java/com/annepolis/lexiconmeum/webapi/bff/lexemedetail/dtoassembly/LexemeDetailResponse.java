@@ -1,5 +1,6 @@
 package com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly;
 
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection.InflectionTableDTO;
@@ -20,6 +21,9 @@ public class LexemeDetailResponse {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     GrammaticalGender grammaticalGender;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    GrammaticalCase governedCase;
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     List<String> definitions = new ArrayList<>();
@@ -63,6 +67,14 @@ public class LexemeDetailResponse {
 
     public void setGrammaticalGender(GrammaticalGender grammaticalGender) {
         this.grammaticalGender = grammaticalGender;
+    }
+
+    public GrammaticalCase getGovernedCase() {
+        return governedCase;
+    }
+
+    public void setGovernedCase(GrammaticalCase governedCase) {
+        this.governedCase = governedCase;
     }
 
     public List<String> getDefinitions() {

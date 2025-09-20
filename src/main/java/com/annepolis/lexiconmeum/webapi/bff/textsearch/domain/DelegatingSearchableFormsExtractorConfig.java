@@ -21,6 +21,8 @@ public class DelegatingSearchableFormsExtractorConfig {
         formsExtractors.put(PartOfSpeech.NOUN, inflectedFormsProvider);
         formsExtractors.put(PartOfSpeech.ADJECTIVE, inflectedFormsProvider);
         formsExtractors.put(PartOfSpeech.ADVERB, uninflectedFormsProvider);
+        formsExtractors.put(PartOfSpeech.PREPOSITION, uninflectedFormsProvider);
+        formsExtractors.put(PartOfSpeech.POSTPOSITION, uninflectedFormsProvider);
 
         Set<PartOfSpeech> missing = EnumSet.allOf(PartOfSpeech.class);
         missing.removeAll(formsExtractors.keySet());

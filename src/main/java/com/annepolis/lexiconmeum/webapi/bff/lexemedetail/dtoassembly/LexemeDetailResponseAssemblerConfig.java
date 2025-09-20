@@ -22,7 +22,8 @@ import java.util.*;
            @Qualifier("inflectionTableSectionContributor") LexemeDetailSectionContributor inflectionTableContributor,
            @Qualifier("nounPrincipalPartsSectionContributor") LexemeDetailSectionContributor nounPrincipalPartsContributor,
            @Qualifier("verbPrincipalPartsSectionContributor") LexemeDetailSectionContributor verbPrincipalPartsContributor,
-           @Qualifier("nounGenderSectionContributor") LexemeDetailSectionContributor nounGenderSectionContributor
+           @Qualifier("nounGenderSectionContributor") LexemeDetailSectionContributor nounGenderSectionContributor,
+           @Qualifier("prepositionCaseSectionContributor") LexemeDetailSectionContributor prepositionCaseSectionContributor
 
            // Add/remove contributors as needed
     ) {
@@ -50,6 +51,13 @@ import java.util.*;
         pipelines.get(PartOfSpeech.ADJECTIVE).addAll(List.of(
                 inflectionTableContributor,
                 inflectionClassContributor
+        ));
+
+        pipelines.get(PartOfSpeech.PREPOSITION).addAll(List.of(
+                prepositionCaseSectionContributor
+        ));
+        pipelines.get(PartOfSpeech.POSTPOSITION).addAll(List.of(
+                prepositionCaseSectionContributor
         ));
         return new LexemeDetailResponseAssembler(pipelines);
     }
