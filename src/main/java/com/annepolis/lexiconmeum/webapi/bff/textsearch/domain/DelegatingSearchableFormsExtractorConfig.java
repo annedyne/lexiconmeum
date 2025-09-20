@@ -1,6 +1,6 @@
 package com.annepolis.lexiconmeum.webapi.bff.textsearch.domain;
 
-import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeech;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -21,6 +21,8 @@ public class DelegatingSearchableFormsExtractorConfig {
         formsExtractors.put(PartOfSpeech.NOUN, inflectedFormsProvider);
         formsExtractors.put(PartOfSpeech.ADJECTIVE, inflectedFormsProvider);
         formsExtractors.put(PartOfSpeech.ADVERB, uninflectedFormsProvider);
+        formsExtractors.put(PartOfSpeech.PREPOSITION, uninflectedFormsProvider);
+        formsExtractors.put(PartOfSpeech.POSTPOSITION, uninflectedFormsProvider);
 
         Set<PartOfSpeech> missing = EnumSet.allOf(PartOfSpeech.class);
         missing.removeAll(formsExtractors.keySet());

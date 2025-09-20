@@ -1,6 +1,6 @@
 package com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly;
 
-import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeech;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection.AgreementTableMapper;
 import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection.ConjugationTableMapper;
 import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection.DeclensionTableMapper;
@@ -22,7 +22,8 @@ import java.util.*;
            @Qualifier("inflectionTableSectionContributor") LexemeDetailSectionContributor inflectionTableContributor,
            @Qualifier("nounPrincipalPartsSectionContributor") LexemeDetailSectionContributor nounPrincipalPartsContributor,
            @Qualifier("verbPrincipalPartsSectionContributor") LexemeDetailSectionContributor verbPrincipalPartsContributor,
-           @Qualifier("nounGenderSectionContributor") LexemeDetailSectionContributor nounGenderSectionContributor
+           @Qualifier("nounGenderSectionContributor") LexemeDetailSectionContributor nounGenderSectionContributor,
+           @Qualifier("prepositionCaseSectionContributor") LexemeDetailSectionContributor prepositionCaseSectionContributor
 
            // Add/remove contributors as needed
     ) {
@@ -50,6 +51,13 @@ import java.util.*;
         pipelines.get(PartOfSpeech.ADJECTIVE).addAll(List.of(
                 inflectionTableContributor,
                 inflectionClassContributor
+        ));
+
+        pipelines.get(PartOfSpeech.PREPOSITION).addAll(List.of(
+                prepositionCaseSectionContributor
+        ));
+        pipelines.get(PartOfSpeech.POSTPOSITION).addAll(List.of(
+                prepositionCaseSectionContributor
         ));
         return new LexemeDetailResponseAssembler(pipelines);
     }

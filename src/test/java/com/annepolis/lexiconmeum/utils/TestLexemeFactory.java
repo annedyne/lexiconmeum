@@ -3,6 +3,9 @@ package com.annepolis.lexiconmeum.utils;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.grammar.*;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveDetails;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveTerminationType;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
 
 import java.util.List;

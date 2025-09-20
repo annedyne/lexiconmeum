@@ -1,4 +1,4 @@
-package com.annepolis.lexiconmeum.shared.model.grammar;
+package com.annepolis.lexiconmeum.shared.model.grammar.partofspeech;
 
 public enum AdjectiveTerminationType {
     THREE_TERMINATION,

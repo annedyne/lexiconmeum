@@ -11,8 +11,10 @@ A staged development plan to balance MVP delivery, engineering quality, and lear
 - [ ] Add support for all word types (e.g. adjectives, adverbs, etc.)
     - [x] adjectives
     - [x] adverbs
-    - [ ] prepositions 
+    - [x] prepositions 
+    - [ ] conjunctions
 - [ ] Complete verb support (add passive voice and any missing tenses/moods)
+- [ ] Include positive, comparative, and superlative adjective forms in a single detail response 
 - [ ] Fix dropdown arrow navigation in search field
 - [ ] Automatically clear error messages when input changes or retry succeeds
 - [ ] Delay frontend framework migration until necessary

@@ -1,7 +1,7 @@
 package com.annepolis.lexiconmeum.shared;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeech;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 
 import java.util.Optional;
 import java.util.UUID;
