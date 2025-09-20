@@ -9,7 +9,10 @@ public enum PartOfSpeech {
     NOUN("noun", "declension"),
     VERB("verb", "conjugation"),
     ADVERB("adv", ""),
-    ADJECTIVE("adj", "declension");
+    ADJECTIVE("adj", "declension"),
+    PREPOSITION("prep", ""),
+    POSTPOSITION("postp", "");
+
     private final String tag;
     private final String inflectionType;
 
