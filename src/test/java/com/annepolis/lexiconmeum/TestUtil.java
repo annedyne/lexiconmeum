@@ -4,6 +4,9 @@ import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.Sense;
 import com.annepolis.lexiconmeum.shared.model.grammar.*;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveDetails;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveTerminationType;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
 import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.inflection.Declension;
@@ -22,7 +25,7 @@ import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense.PE
 import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense.PRESENT;
 import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice.ACTIVE;
 import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice.PASSIVE;
-import static com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeech.VERB;
+import static com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech.VERB;
 
 public class TestUtil {
 

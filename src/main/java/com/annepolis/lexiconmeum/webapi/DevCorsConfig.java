@@ -10,7 +10,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-@Profile("dev")
+@Profile({"dev", "local"})
 public class DevCorsConfig {
     static final Logger logger = LogManager.getLogger(DevCorsConfig.class);
 

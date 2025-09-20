@@ -3,7 +3,7 @@ package com.annepolis.lexiconmeum.webapi.bff.textsearch.index;
 import com.annepolis.lexiconmeum.TestUtil;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
-import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeech;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
 import com.annepolis.lexiconmeum.webapi.bff.textsearch.domain.FormMatch;
 import org.junit.jupiter.api.Test;

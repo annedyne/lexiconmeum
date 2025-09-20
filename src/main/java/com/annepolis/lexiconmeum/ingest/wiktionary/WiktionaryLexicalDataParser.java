@@ -1,12 +1,11 @@
 package com.annepolis.lexiconmeum.ingest.wiktionary;
 
+import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.Sense;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalFeature;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
-import com.annepolis.lexiconmeum.shared.model.grammar.InflectionFeature;
-import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeech;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
 import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.inflection.Declension;
@@ -46,12 +45,19 @@ class WiktionaryLexicalDataParser {
     private final ObjectMapper mapper = new ObjectMapper();
     private ParseMode parseMode;
 
+    // Inject the resolver instead of instantiating it
+    private final LexicalTagResolver lexicalTagResolver;
+
     public ParseMode getParseMode() {
         return parseMode;
     }
 
     public void setParseMode(ParseMode parseMode) {
         this.parseMode = parseMode;
+    }
+
+    WiktionaryLexicalDataParser(LexicalTagResolver lexicalTagResolver) {
+        this.lexicalTagResolver = lexicalTagResolver;
     }
 
     public void parseJsonl(Reader reader, Consumer<Lexeme> consumer) throws IOException {
@@ -158,8 +164,8 @@ class WiktionaryLexicalDataParser {
             //if first tag is CANONICAL then next is gender
             if (CANONICAL.name().equalsIgnoreCase(tags.get(i).asText()) && i + 1 < tags.size()) {
 
-                GrammaticalFeature.resolveWithWarning(tags.get(i + 1).asText(), logger)
-                        .ifPresent(feature -> feature.applyTo(lexemeBuilder));
+                // Use LexicalTagResolver instead of direct factory access
+                lexicalTagResolver.applyToLexeme(tags.get(i + 1).asText(), lexemeBuilder, logger);
             }
         }
     }
@@ -180,7 +186,7 @@ class WiktionaryLexicalDataParser {
         Agreement.Builder builder = new Agreement.Builder(formNode.path(FORM.get()).asText());
 
         for (JsonNode tag : formNode.path(TAGS.get())) {
-            InflectionFeature.resolveOrThrow( tag.asText().toLowerCase()).applyTo(builder);
+            lexicalTagResolver.applyToInflection(tag.asText(), builder, logger);
         }
 
         return builder.build();
@@ -190,8 +196,7 @@ class WiktionaryLexicalDataParser {
         Declension.Builder builder = new Declension.Builder(formNode.path(FORM.get()).asText());
 
         for (JsonNode tag : formNode.path(TAGS.get())) {
-            InflectionFeature.resolveWithWarning(tag.asText(), logger)
-                    .ifPresent(feature -> feature.applyTo(builder));
+            lexicalTagResolver.applyToInflection(tag.asText(), builder, logger);
         }
 
         return new SafeBuilder<>("Declension", builder::build).build(logger, mode);
@@ -210,7 +215,7 @@ class WiktionaryLexicalDataParser {
             tags.add(GrammaticalTense.FUTURE_PERFECT.name().toLowerCase());
         }
         for (String tag : tags){
-            InflectionFeature.resolveOrThrow(tag).applyTo(builder);
+            lexicalTagResolver.applyToInflection(tag, builder, logger);
         }
 
         return builder.build();
@@ -245,8 +250,8 @@ class WiktionaryLexicalDataParser {
         JsonNode tags = senseNode.path(TAGS.get());
         if(tags.isArray() && !tags.isEmpty()){
             for(JsonNode tag : tags){
-                GrammaticalFeature.resolveWithWarning(tag.asText(), logger)
-                        .ifPresent(feature -> feature.applyTo(lexemeBuilder));
+                // Route all sense-level tags through the facade
+                lexicalTagResolver.applyToLexeme(tag.asText(), lexemeBuilder, logger);
             }
         }
 
@@ -262,4 +267,3 @@ class WiktionaryLexicalDataParser {
 
 
 }
-

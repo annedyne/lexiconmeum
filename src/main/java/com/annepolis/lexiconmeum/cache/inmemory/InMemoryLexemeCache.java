@@ -4,7 +4,7 @@ import com.annepolis.lexiconmeum.shared.LexemeReader;
 import com.annepolis.lexiconmeum.shared.LexemeSink;
 import com.annepolis.lexiconmeum.shared.exception.LexemeTypeMismatchException;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeech;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;

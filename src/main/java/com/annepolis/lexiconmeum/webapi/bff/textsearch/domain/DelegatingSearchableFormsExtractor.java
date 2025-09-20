@@ -1,7 +1,7 @@
 package com.annepolis.lexiconmeum.webapi.bff.textsearch.domain;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeech;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 
 import java.util.Map;
 import java.util.Objects;

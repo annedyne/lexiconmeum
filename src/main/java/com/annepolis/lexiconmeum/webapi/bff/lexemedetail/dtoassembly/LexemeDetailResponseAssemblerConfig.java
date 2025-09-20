@@ -1,6 +1,6 @@
 package com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly;
 
-import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeech;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection.AgreementTableMapper;
 import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection.ConjugationTableMapper;
 import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection.DeclensionTableMapper;

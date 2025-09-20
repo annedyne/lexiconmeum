@@ -2,8 +2,8 @@ package com.annepolis.lexiconmeum.shared.model;
 
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
 import com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass;
-import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeech;
-import com.annepolis.lexiconmeum.shared.model.grammar.PartOfSpeechDetails;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeechDetails;
 import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
 
