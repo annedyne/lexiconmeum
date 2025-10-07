@@ -19,8 +19,6 @@ import org.springframework.stereotype.Component;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -39,7 +37,12 @@ class WiktionaryLexicalDataParser {
             "conjugation-1",
             "la-conj",
             "la-adecl",
-            "two-termination"
+            "two-termination",
+            "sigmatic"
+    );
+
+    private static final Set<String> TAG_BLACKLIST = Set.of(
+            "sigmatic"
     );
 
     private final ObjectMapper mapper = new ObjectMapper();
@@ -174,7 +177,7 @@ class WiktionaryLexicalDataParser {
         for (JsonNode formNode : formsNode) {
             if (isConjugationForm(formNode)) {
                 try {
-                    lexemeBuilder.addInflection(buildConjugation(formNode));
+                    buildConjugation(formNode).ifPresent(lexemeBuilder::addInflection);
                 } catch (IllegalArgumentException | IllegalStateException ex) {
                     logger.trace("Skipping invalid form: {}", ex.getMessage());
                 }
@@ -202,23 +205,47 @@ class WiktionaryLexicalDataParser {
         return new SafeBuilder<>("Declension", builder::build).build(logger, mode);
     }
 
-    Conjugation buildConjugation(JsonNode formNode){
-        Conjugation.Builder builder = new Conjugation.Builder(formNode.path(FORM.get()).asText());
-        List<String> tags = new ArrayList<>();
-        for (JsonNode tag : formNode.path(TAGS.get())) {
-            String tagText = tag.asText().toLowerCase();
-            tags.add(tagText);
+    Optional<Conjugation> buildConjugation(JsonNode formNode){
+
+        boolean hasBlacklisted = false;
+        for (JsonNode t : formNode.path(TAGS.get())) {
+            if (TAG_BLACKLIST.contains(t.asText())) { hasBlacklisted = true; break; }
         }
-        if(tags.contains(GrammaticalTense.FUTURE.name().toLowerCase()) && tags.contains(GrammaticalTense.PERFECT.name().toLowerCase())){
-            tags.remove(GrammaticalTense.FUTURE.name().toLowerCase());
-            tags.remove(GrammaticalTense.PERFECT.name().toLowerCase());
-            tags.add(GrammaticalTense.FUTURE_PERFECT.name().toLowerCase());
-        }
-        for (String tag : tags){
-            lexicalTagResolver.applyToInflection(tag, builder, logger);
+        if (hasBlacklisted){
+            return Optional.empty();
         }
 
-        return builder.build();
+        Conjugation.Builder builder = new Conjugation.Builder(formNode.path(FORM.get()).asText());
+
+        boolean seenFuture = false;
+        boolean seenPerfect = false;
+
+        for (JsonNode tagNode : formNode.path(TAGS.get())) {
+            String tag = tagNode.asText();
+
+            if (GrammaticalTense.FUTURE.name().equalsIgnoreCase(tag)) {
+                seenFuture = true;
+            } else if (GrammaticalTense.PERFECT.name().equalsIgnoreCase(tag)) {
+                seenPerfect = true;
+            } else {
+                // Apply non-compound-tense tags immediately
+                lexicalTagResolver.applyToInflection(tag, builder, logger);
+            }
+        }
+
+        // Transform Future and Perfect tag combo to compound tense
+        if (seenFuture && seenPerfect) {
+            lexicalTagResolver.applyToInflection(GrammaticalTense.FUTURE_PERFECT.name(), builder, logger);
+        } else {
+            if (seenFuture) {
+                lexicalTagResolver.applyToInflection(GrammaticalTense.FUTURE.name(), builder, logger);
+            }
+            if (seenPerfect) {
+                lexicalTagResolver.applyToInflection(GrammaticalTense.PERFECT.name(), builder, logger);
+            }
+        }
+
+        return Optional.of(builder.build());
     }
 
     private boolean isDeclensionForm(JsonNode formNode){

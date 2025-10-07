@@ -88,6 +88,7 @@ public class ConjugationTableMapper implements InflectionTableMapper {
 
    Map<MoodVoiceKey, List<Conjugation>> groupConjugationsByMoodAndVoice(List<Conjugation> conjugations){
        return conjugations.stream()
+               .filter(c -> c.getMood() != null && c.getVoice() != null)
                .collect(Collectors.groupingBy(
                        c -> new MoodVoiceKey(c.getMood(), c.getVoice())
                ));

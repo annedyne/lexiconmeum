@@ -1,6 +1,7 @@
 package com.annepolis.lexiconmeum.ingest.wiktionary;
 
 import com.annepolis.lexiconmeum.TestUtil;
+import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
@@ -29,7 +30,7 @@ import static com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass.THI
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@ContextConfiguration(classes = WiktionaryLexicalDataParser.class)
+@ContextConfiguration(classes = {WiktionaryLexicalDataParser.class, LexicalTagResolver.class})
 class WiktionaryLexicalDataParserTest {
 
     @Autowired
