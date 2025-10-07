@@ -1,12 +1,11 @@
 package com.annepolis.lexiconmeum.ingest.wiktionary;
 
+import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.Sense;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalFeature;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
-import com.annepolis.lexiconmeum.shared.model.grammar.InflectionFeature;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
 import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.inflection.Declension;
@@ -20,8 +19,6 @@ import org.springframework.stereotype.Component;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -40,11 +37,19 @@ class WiktionaryLexicalDataParser {
             "conjugation-1",
             "la-conj",
             "la-adecl",
-            "two-termination"
+            "two-termination",
+            "sigmatic"
+    );
+
+    private static final Set<String> TAG_BLACKLIST = Set.of(
+            "sigmatic"
     );
 
     private final ObjectMapper mapper = new ObjectMapper();
     private ParseMode parseMode;
+
+    // Inject the resolver instead of instantiating it
+    private final LexicalTagResolver lexicalTagResolver;
 
     public ParseMode getParseMode() {
         return parseMode;
@@ -52,6 +57,10 @@ class WiktionaryLexicalDataParser {
 
     public void setParseMode(ParseMode parseMode) {
         this.parseMode = parseMode;
+    }
+
+    WiktionaryLexicalDataParser(LexicalTagResolver lexicalTagResolver) {
+        this.lexicalTagResolver = lexicalTagResolver;
     }
 
     public void parseJsonl(Reader reader, Consumer<Lexeme> consumer) throws IOException {
@@ -74,27 +83,27 @@ class WiktionaryLexicalDataParser {
 
     private Optional<Lexeme> buildLexeme(JsonNode root) {
         String lemma = root.path(WORD.get()).asText();
-        String posTag = root.path(POSITION.get()).asText();
+        String posTag = root.path(PART_OF_SPEECH.get()).asText();
         String etymologyNumber = normalizeEtymologyNumber(root.path(ETYMOLOGY_NUMBER.get()).asText());
 
-        Optional<GrammaticalPosition> optionalPosition = GrammaticalPosition.resolveWithWarning(posTag, logger);
+        Optional<PartOfSpeech> optionalPartOfSpeech = PartOfSpeech.resolveWithWarning(posTag, logger);
 
-        if (optionalPosition.isEmpty()) {
+        if (optionalPartOfSpeech.isEmpty()) {
             return Optional.empty();
         }
-        GrammaticalPosition position = optionalPosition.get();
+        PartOfSpeech partOfSpeech = optionalPartOfSpeech.get();
 
-        LexemeBuilder builder = new LexemeBuilder(lemma, position, etymologyNumber);
+        LexemeBuilder builder = new LexemeBuilder(lemma, partOfSpeech, etymologyNumber);
 
         addSenses(root.path(SENSES.get()), builder);
 
-        return switch (position) {
+        return switch (partOfSpeech) {
             case NOUN -> buildLexemeWithForms(builder, root, this::addDeclensionForms);
             case VERB -> buildLexemeWithForms(builder, root, this::addConjugationForms);
             case ADJECTIVE -> buildLexemeWithForms(builder, root, this::addAdjectiveForms);
-            case ADVERB -> buildLexemeWithOutForms(builder);
+            case ADVERB, PREPOSITION, POSTPOSITION -> buildLexemeWithOutForms(builder);
             default -> {
-                logger.trace("Unsupported position: {}", position);
+                logger.trace("Unsupported partOfSpeech: {}", partOfSpeech);
                 yield Optional.empty();
             }
         };
@@ -158,8 +167,8 @@ class WiktionaryLexicalDataParser {
             //if first tag is CANONICAL then next is gender
             if (CANONICAL.name().equalsIgnoreCase(tags.get(i).asText()) && i + 1 < tags.size()) {
 
-                GrammaticalFeature.resolveWithWarning(tags.get(i + 1).asText(), logger)
-                        .ifPresent(feature -> feature.applyTo(lexemeBuilder));
+                // Use LexicalTagResolver instead of direct factory access
+                lexicalTagResolver.applyToLexeme(tags.get(i + 1).asText(), lexemeBuilder, logger);
             }
         }
     }
@@ -168,7 +177,7 @@ class WiktionaryLexicalDataParser {
         for (JsonNode formNode : formsNode) {
             if (isConjugationForm(formNode)) {
                 try {
-                    lexemeBuilder.addInflection(buildConjugation(formNode));
+                    buildConjugation(formNode).ifPresent(lexemeBuilder::addInflection);
                 } catch (IllegalArgumentException | IllegalStateException ex) {
                     logger.trace("Skipping invalid form: {}", ex.getMessage());
                 }
@@ -180,7 +189,7 @@ class WiktionaryLexicalDataParser {
         Agreement.Builder builder = new Agreement.Builder(formNode.path(FORM.get()).asText());
 
         for (JsonNode tag : formNode.path(TAGS.get())) {
-            InflectionFeature.resolveOrThrow( tag.asText().toLowerCase()).applyTo(builder);
+            lexicalTagResolver.applyToInflection(tag.asText(), builder, logger);
         }
 
         return builder.build();
@@ -190,30 +199,53 @@ class WiktionaryLexicalDataParser {
         Declension.Builder builder = new Declension.Builder(formNode.path(FORM.get()).asText());
 
         for (JsonNode tag : formNode.path(TAGS.get())) {
-            InflectionFeature.resolveWithWarning(tag.asText(), logger)
-                    .ifPresent(feature -> feature.applyTo(builder));
+            lexicalTagResolver.applyToInflection(tag.asText(), builder, logger);
         }
 
         return new SafeBuilder<>("Declension", builder::build).build(logger, mode);
     }
 
-    Conjugation buildConjugation(JsonNode formNode){
-        Conjugation.Builder builder = new Conjugation.Builder(formNode.path(FORM.get()).asText());
-        List<String> tags = new ArrayList<>();
-        for (JsonNode tag : formNode.path(TAGS.get())) {
-            String tagText = tag.asText().toLowerCase();
-            tags.add(tagText);
+    Optional<Conjugation> buildConjugation(JsonNode formNode){
+
+        boolean hasBlacklisted = false;
+        for (JsonNode t : formNode.path(TAGS.get())) {
+            if (TAG_BLACKLIST.contains(t.asText())) { hasBlacklisted = true; break; }
         }
-        if(tags.contains(GrammaticalTense.FUTURE.name().toLowerCase()) && tags.contains(GrammaticalTense.PERFECT.name().toLowerCase())){
-            tags.remove(GrammaticalTense.FUTURE.name().toLowerCase());
-            tags.remove(GrammaticalTense.PERFECT.name().toLowerCase());
-            tags.add(GrammaticalTense.FUTURE_PERFECT.name().toLowerCase());
-        }
-        for (String tag : tags){
-            InflectionFeature.resolveOrThrow(tag).applyTo(builder);
+        if (hasBlacklisted){
+            return Optional.empty();
         }
 
-        return builder.build();
+        Conjugation.Builder builder = new Conjugation.Builder(formNode.path(FORM.get()).asText());
+
+        boolean seenFuture = false;
+        boolean seenPerfect = false;
+
+        for (JsonNode tagNode : formNode.path(TAGS.get())) {
+            String tag = tagNode.asText();
+
+            if (GrammaticalTense.FUTURE.name().equalsIgnoreCase(tag)) {
+                seenFuture = true;
+            } else if (GrammaticalTense.PERFECT.name().equalsIgnoreCase(tag)) {
+                seenPerfect = true;
+            } else {
+                // Apply non-compound-tense tags immediately
+                lexicalTagResolver.applyToInflection(tag, builder, logger);
+            }
+        }
+
+        // Transform Future and Perfect tag combo to compound tense
+        if (seenFuture && seenPerfect) {
+            lexicalTagResolver.applyToInflection(GrammaticalTense.FUTURE_PERFECT.name(), builder, logger);
+        } else {
+            if (seenFuture) {
+                lexicalTagResolver.applyToInflection(GrammaticalTense.FUTURE.name(), builder, logger);
+            }
+            if (seenPerfect) {
+                lexicalTagResolver.applyToInflection(GrammaticalTense.PERFECT.name(), builder, logger);
+            }
+        }
+
+        return Optional.of(builder.build());
     }
 
     private boolean isDeclensionForm(JsonNode formNode){
@@ -245,8 +277,8 @@ class WiktionaryLexicalDataParser {
         JsonNode tags = senseNode.path(TAGS.get());
         if(tags.isArray() && !tags.isEmpty()){
             for(JsonNode tag : tags){
-                GrammaticalFeature.resolveWithWarning(tag.asText(), logger)
-                        .ifPresent(feature -> feature.applyTo(lexemeBuilder));
+                // Route all sense-level tags through the facade
+                lexicalTagResolver.applyToLexeme(tag.asText(), lexemeBuilder, logger);
             }
         }
 
@@ -262,4 +294,3 @@ class WiktionaryLexicalDataParser {
 
 
 }
-

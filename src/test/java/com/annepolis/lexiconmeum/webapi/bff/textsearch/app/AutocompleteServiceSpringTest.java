@@ -38,7 +38,7 @@ class AutocompleteServiceSpringTest {
     @Test
     void getWordsEndingWithReturnsUniqueCachedResults(){
         List<SuggestionResponse> result = underTest.getWordsEndingWith("eris", 10);
-        assertEquals(5, result.size());
+        assertEquals(6, result.size());
 
     }
 
@@ -57,7 +57,7 @@ class AutocompleteServiceSpringTest {
     void adverbsLoadedIntoSearch(){
 
         List<SuggestionResponse> result = underTest.getWordsStartingWith("coram", 10);
-        assertEquals(1, result.size());
+        assertEquals(2, result.size());
 
         result = underTest.getWordsStartingWith("celeriter", 10);
         assertEquals(1, result.size());
@@ -69,10 +69,6 @@ class AutocompleteServiceSpringTest {
 
         List<SuggestionResponse> result = underTest.getWordsStartingWith("pocula", 10);
         assertEquals(1, result.size());
-
-        result = underTest.getWordsStartingWith("cora", 10);
-        assertEquals(1, result.size());
-
     }
 
     @Test

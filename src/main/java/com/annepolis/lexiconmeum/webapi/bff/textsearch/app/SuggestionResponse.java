@@ -1,6 +1,6 @@
 package com.annepolis.lexiconmeum.webapi.bff.textsearch.app;
 
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 
 import java.util.UUID;
 
@@ -8,12 +8,12 @@ public class SuggestionResponse {
 
     private String word;
     private UUID lexemeId;
-    private GrammaticalPosition grammaticalPosition;
+    private final PartOfSpeech partOfSpeech;
 
-    public SuggestionResponse(String word, UUID lexemeId, GrammaticalPosition grammaticalPosition){
+    public SuggestionResponse(String word, UUID lexemeId, PartOfSpeech partOfSpeech){
         this.word = word;
         this.lexemeId = lexemeId;
-        this.grammaticalPosition = grammaticalPosition;
+        this.partOfSpeech = partOfSpeech;
     }
     public String getWord() { return word;}
 
@@ -29,7 +29,7 @@ public class SuggestionResponse {
         this.lexemeId = lexemeId;
     }
 
-    public GrammaticalPosition getGrammaticalPosition() {
-        return grammaticalPosition;
+    public PartOfSpeech getPartOfSpeech() {
+        return partOfSpeech;
     }
 }

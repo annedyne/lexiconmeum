@@ -4,7 +4,7 @@ import com.annepolis.lexiconmeum.shared.LexemeReader;
 import com.annepolis.lexiconmeum.shared.LexemeSink;
 import com.annepolis.lexiconmeum.shared.exception.LexemeTypeMismatchException;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -27,10 +27,10 @@ import java.util.UUID;
     }
 
     @Override
-    public Lexeme getLexemeOfType(UUID lexemeId, GrammaticalPosition expectedType) {
+    public Lexeme getLexemeOfType(UUID lexemeId, PartOfSpeech expectedType) {
         Lexeme lexeme = lexemeIdToLexemeLookup.get(lexemeId);
 
-        boolean matches = expectedType.equals(lexeme.getGrammaticalPosition());
+        boolean matches = expectedType.equals(lexeme.getPartOfSpeech());
         if (!matches) {
             throw new LexemeTypeMismatchException("Expected lexeme of type " + expectedType.name());
         }

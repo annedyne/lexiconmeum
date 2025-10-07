@@ -2,7 +2,7 @@ package com.annepolis.lexiconmeum.webapi.bff.lexemedetail;
 
 import com.annepolis.lexiconmeum.TestUtil;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.webapi.ApiRoutes;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,7 +48,7 @@ class LexemeDetailControllerIntegrationTest {
 
     @Test
     void testLexemeEndpoint() throws JsonProcessingException {
-        LexemeBuilder lexemeBuilder = new LexemeBuilder("amo", GrammaticalPosition.VERB, "1");
+        LexemeBuilder lexemeBuilder = new LexemeBuilder("amo", PartOfSpeech.VERB, "1");
         UUID lexemeId = lexemeBuilder.build().getId();
 
         String url = UriComponentsBuilder
@@ -68,7 +68,7 @@ class LexemeDetailControllerIntegrationTest {
 
     @Test
     void testDetailEndpoint() throws JsonProcessingException {
-        LexemeBuilder lexemeBuilder = new LexemeBuilder("poculum", GrammaticalPosition.NOUN, "1");
+        LexemeBuilder lexemeBuilder = new LexemeBuilder("poculum", PartOfSpeech.NOUN, "1");
         UUID lexemeId = lexemeBuilder.build().getId();
 
         String url = UriComponentsBuilder
@@ -87,7 +87,7 @@ class LexemeDetailControllerIntegrationTest {
     }
     @Test
     void testDetailEndpointWitAdjectiveId() throws JsonProcessingException {
-        LexemeBuilder lexemeBuilder = new LexemeBuilder("celer", GrammaticalPosition.ADJECTIVE, "1");
+        LexemeBuilder lexemeBuilder = new LexemeBuilder("celer", PartOfSpeech.ADJECTIVE, "1");
         UUID lexemeId = lexemeBuilder.build().getId();
 
         String url = UriComponentsBuilder
@@ -128,7 +128,7 @@ class LexemeDetailControllerIntegrationTest {
 
     @Test
     void testTypeMismatchReturnsConflict() {
-        LexemeBuilder lexemeBuilder = new LexemeBuilder("poculum", GrammaticalPosition.NOUN, "1");
+        LexemeBuilder lexemeBuilder = new LexemeBuilder("poculum", PartOfSpeech.NOUN, "1");
         UUID lexemeId = lexemeBuilder.build().getId();
 
         String url = UriComponentsBuilder

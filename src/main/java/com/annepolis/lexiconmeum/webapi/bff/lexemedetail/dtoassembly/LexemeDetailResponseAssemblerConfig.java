@@ -1,6 +1,6 @@
 package com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly;
 
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection.AgreementTableMapper;
 import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection.ConjugationTableMapper;
 import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection.DeclensionTableMapper;
@@ -22,57 +22,65 @@ import java.util.*;
            @Qualifier("inflectionTableSectionContributor") LexemeDetailSectionContributor inflectionTableContributor,
            @Qualifier("nounPrincipalPartsSectionContributor") LexemeDetailSectionContributor nounPrincipalPartsContributor,
            @Qualifier("verbPrincipalPartsSectionContributor") LexemeDetailSectionContributor verbPrincipalPartsContributor,
-           @Qualifier("nounGenderSectionContributor") LexemeDetailSectionContributor nounGenderSectionContributor
+           @Qualifier("nounGenderSectionContributor") LexemeDetailSectionContributor nounGenderSectionContributor,
+           @Qualifier("prepositionCaseSectionContributor") LexemeDetailSectionContributor prepositionCaseSectionContributor
 
            // Add/remove contributors as needed
     ) {
-        Map<GrammaticalPosition, List<LexemeDetailSectionContributor>> pipelines = new EnumMap<>(GrammaticalPosition.class);
+        Map<PartOfSpeech, List<LexemeDetailSectionContributor>> pipelines = new EnumMap<>(PartOfSpeech.class);
 
         var common = List.of(identityContributor, definitionsContributor);
 
-        for (GrammaticalPosition position : GrammaticalPosition.values()) {
-            pipelines.put(position, new ArrayList<>(common));
+        for (PartOfSpeech partOfSpeech : PartOfSpeech.values()) {
+            pipelines.put(partOfSpeech, new ArrayList<>(common));
         }
 
-        pipelines.get(GrammaticalPosition.VERB).addAll(List.of(
+        pipelines.get(PartOfSpeech.VERB).addAll(List.of(
                 inflectionTableContributor,
                 verbPrincipalPartsContributor,
                 inflectionClassContributor
         ));
 
-        pipelines.get(GrammaticalPosition.NOUN).addAll(List.of(
+        pipelines.get(PartOfSpeech.NOUN).addAll(List.of(
                 inflectionTableContributor,
                 nounPrincipalPartsContributor,
                 nounGenderSectionContributor,
                 inflectionClassContributor
         ));
 
-        pipelines.get(GrammaticalPosition.ADJECTIVE).addAll(List.of(
+        pipelines.get(PartOfSpeech.ADJECTIVE).addAll(List.of(
                 inflectionTableContributor,
                 inflectionClassContributor
+        ));
+
+        pipelines.get(PartOfSpeech.PREPOSITION).addAll(List.of(
+                prepositionCaseSectionContributor
+        ));
+        pipelines.get(PartOfSpeech.POSTPOSITION).addAll(List.of(
+                prepositionCaseSectionContributor
         ));
         return new LexemeDetailResponseAssembler(pipelines);
     }
 
     @Bean
-    Map<GrammaticalPosition, InflectionTableMapper> inflectionMappers(
+    Map<PartOfSpeech, InflectionTableMapper> inflectionMappers(
             ConjugationTableMapper conjugationTableMapper,
             DeclensionTableMapper lexemeDeclensionMapper,
             AgreementTableMapper lexemeAgreementMapper
     ) {
-        Map<GrammaticalPosition, InflectionTableMapper> mappers = new EnumMap<>(GrammaticalPosition.class);
-        mappers.put(GrammaticalPosition.VERB, conjugationTableMapper);
-        mappers.put(GrammaticalPosition.NOUN, lexemeDeclensionMapper);
-        mappers.put(GrammaticalPosition.ADJECTIVE, lexemeAgreementMapper);
+        Map<PartOfSpeech, InflectionTableMapper> mappers = new EnumMap<>(PartOfSpeech.class);
+        mappers.put(PartOfSpeech.VERB, conjugationTableMapper);
+        mappers.put(PartOfSpeech.NOUN, lexemeDeclensionMapper);
+        mappers.put(PartOfSpeech.ADJECTIVE, lexemeAgreementMapper);
         return mappers;
     }
 
     @Bean
-    Set<GrammaticalPosition> inflectionClassPositions() {
+    Set<PartOfSpeech> inflectionClassPartOfSpeechs() {
         return EnumSet.of(
-                GrammaticalPosition.VERB,
-                GrammaticalPosition.NOUN,
-                GrammaticalPosition.ADJECTIVE
+                PartOfSpeech.VERB,
+                PartOfSpeech.NOUN,
+                PartOfSpeech.ADJECTIVE
         );
     }
 

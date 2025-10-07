@@ -1,5 +1,6 @@
-package com.annepolis.lexiconmeum.shared.model.grammar;
+package com.annepolis.lexiconmeum.ingest.tagmapping;
 
+import com.annepolis.lexiconmeum.shared.model.grammar.*;
 import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
 import com.annepolis.lexiconmeum.shared.model.inflection.BuilderHasGrammaticalCase;
 import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
@@ -10,7 +11,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public enum InflectionFeature {
+public enum InflectionFeatureFactory {
 
     CASE_NOMINATIVE("nominative", builder -> {
         if (builder instanceof BuilderHasGrammaticalCase caseBuilder) {
@@ -189,7 +190,7 @@ public enum InflectionFeature {
     private final String tag;
     private final Consumer<InflectionBuilder> setter;
 
-    InflectionFeature(String tag, Consumer<InflectionBuilder> setter) {
+    InflectionFeatureFactory(String tag, Consumer<InflectionBuilder> setter) {
         this.tag = tag;
         this.setter = setter;
     }
@@ -198,19 +199,19 @@ public enum InflectionFeature {
         setter.accept(d);
     }
 
-    public static Optional<InflectionFeature> fromTag(String tag) {
+    public static Optional<InflectionFeatureFactory> fromTag(String tag) {
         return Arrays.stream(values())
-            .filter(inflectionFeature -> inflectionFeature.tag.equalsIgnoreCase(tag))
+            .filter(inflectionFeatureFactory -> inflectionFeatureFactory.tag.equalsIgnoreCase(tag))
             .findFirst();
     }
 
-    public static InflectionFeature resolveOrThrow(String tag) {
+    public static InflectionFeatureFactory resolveOrThrow(String tag) {
         return fromTag(tag)
             .orElseThrow(() -> new IllegalArgumentException("Unknown grammatical feature tag: " + tag));
     }
 
-    public static Optional<InflectionFeature> resolveWithWarning(String tag, Logger logger) {
-        Optional<InflectionFeature> inflectionFeature = fromTag(tag);
+    public static Optional<InflectionFeatureFactory> resolveWithWarning(String tag, Logger logger) {
+        Optional<InflectionFeatureFactory> inflectionFeature = fromTag(tag);
         if (inflectionFeature.isEmpty()) {
             logger.trace("Unknown inflection feature tag: '{}'", tag);
         }

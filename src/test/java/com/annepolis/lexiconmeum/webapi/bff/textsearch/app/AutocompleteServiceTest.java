@@ -2,7 +2,7 @@ package com.annepolis.lexiconmeum.webapi.bff.textsearch.app;
 
 import com.annepolis.lexiconmeum.shared.LexemeReader;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.webapi.bff.textsearch.domain.FormMatch;
 import com.annepolis.lexiconmeum.webapi.bff.textsearch.index.AutocompleteIndex;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +46,7 @@ class AutocompleteServiceTest {
                 return Optional.empty();
             }
             @Override
-            public Lexeme getLexemeOfType(UUID lemmaId, GrammaticalPosition expectedType) {
+            public Lexeme getLexemeOfType(UUID lemmaId, PartOfSpeech expectedType) {
                 return null;
             }
         };

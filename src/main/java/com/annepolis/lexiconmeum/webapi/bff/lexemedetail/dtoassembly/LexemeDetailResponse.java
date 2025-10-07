@@ -1,7 +1,8 @@
 package com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly;
 
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPosition;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection.InflectionTableDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -16,10 +17,13 @@ public class LexemeDetailResponse {
 
     String lemma;
     UUID lexemeId;
-    GrammaticalPosition position;
+    PartOfSpeech partOfSpeech;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     GrammaticalGender grammaticalGender;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    GrammaticalCase governedCase;
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     List<String> definitions = new ArrayList<>();
@@ -41,12 +45,12 @@ public class LexemeDetailResponse {
         this.lemma = lemma;
     }
 
-    public GrammaticalPosition getPosition() {
-        return position;
+    public PartOfSpeech getPartOfSpeech() {
+        return partOfSpeech;
     }
 
-    public void setPosition(GrammaticalPosition position) {
-        this.position = position;
+    public void setPartOfSpeech(PartOfSpeech partOfSpeech) {
+        this.partOfSpeech = partOfSpeech;
     }
 
     public UUID getLexemeId() {
@@ -63,6 +67,14 @@ public class LexemeDetailResponse {
 
     public void setGrammaticalGender(GrammaticalGender grammaticalGender) {
         this.grammaticalGender = grammaticalGender;
+    }
+
+    public GrammaticalCase getGovernedCase() {
+        return governedCase;
+    }
+
+    public void setGovernedCase(GrammaticalCase governedCase) {
+        this.governedCase = governedCase;
     }
 
     public List<String> getDefinitions() {
