@@ -42,6 +42,7 @@ class WiktionaryLexicalDataParserTest {
     private List<Lexeme> verbLexemes;
     private List<Lexeme> nounLexemes;
     private List<Lexeme> adjectiveLexemes;
+    private List<Lexeme> allLexemeTypes;
 
     public List<Lexeme> getVerbLexemes() throws IOException {
         if(verbLexemes == null) {
