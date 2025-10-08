@@ -42,6 +42,7 @@ class WiktionaryLexicalDataParserTest {
     private List<Lexeme> verbLexemes;
     private List<Lexeme> nounLexemes;
     private List<Lexeme> adjectiveLexemes;
+    private List<Lexeme> allLexemeTypes;
 
     public List<Lexeme> getVerbLexemes() throws IOException {
         if(verbLexemes == null) {
@@ -63,6 +64,14 @@ class WiktionaryLexicalDataParserTest {
         }
         return adjectiveLexemes;
     }
+
+    public List<Lexeme> getAllLexemeTypes() throws IOException {
+        if(allLexemeTypes == null) {
+            parseAllLexemeTypes();
+        }
+        return allLexemeTypes;
+    }
+
     @Test
     void resourceExists() {
         Resource resource = resourceLoader.getResource("classpath:testDataRaw.jsonl");
@@ -111,6 +120,14 @@ class WiktionaryLexicalDataParserTest {
             assertEquals("amo", lexemes.get(0).getLemma());
 
         }
+    }
+
+    @Test
+    void testLoadConjunction() throws Exception {
+        Optional<Lexeme> pulcher = getAdjectiveLexemes().stream()
+                .filter(l -> l.getLemma().equals("pulcher"))
+                .findFirst();
+        assertTrue(pulcher.isPresent(), "Pulcher lexeme not found");
     }
 
     @ParameterizedTest
@@ -205,6 +222,14 @@ class WiktionaryLexicalDataParserTest {
         Assertions.assertNotNull(inflection);
     }
 
+    @Test
+    void parseConjunction() throws  IOException {
+        Optional<Lexeme> etsi = getAllLexemeTypes().stream()
+                .filter(l -> l.getLemma().equals("etsi"))
+                .findFirst();
+        assertTrue(etsi.isPresent(), "Etsi lexeme not found");
+    }
+
     private void parseNounLexemes() throws IOException {
         Resource resource = resourceLoader.getResource("classpath:testDataNoun.jsonl");
         try (Reader reader = new InputStreamReader(resource.getInputStream())) {
@@ -238,6 +263,17 @@ class WiktionaryLexicalDataParserTest {
                 if (lexeme.getInflections().get(0) instanceof Agreement) {
                     adjectiveLexemes.add(lexeme);
                 }
+            });
+
+        }
+    }
+
+    private void parseAllLexemeTypes() throws IOException {
+        Resource resource = resourceLoader.getResource("classpath:testDataRaw.jsonl");
+        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
+            allLexemeTypes = new ArrayList<>();
+            parser.parseJsonl(reader, lexeme -> {
+                allLexemeTypes.add(lexeme);
             });
 
         }

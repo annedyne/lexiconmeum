@@ -17,12 +17,14 @@ public class DelegatingSearchableFormsExtractorConfig {
             SearchableUninflectedFormsExtractor uninflectedFormsProvider
     ){
         Map<PartOfSpeech, SearchableFormsExtractor> formsExtractors = new EnumMap<>(PartOfSpeech.class);
-        formsExtractors.put(PartOfSpeech.VERB, inflectedFormsProvider);
-        formsExtractors.put(PartOfSpeech.NOUN, inflectedFormsProvider);
+
         formsExtractors.put(PartOfSpeech.ADJECTIVE, inflectedFormsProvider);
         formsExtractors.put(PartOfSpeech.ADVERB, uninflectedFormsProvider);
+        formsExtractors.put(PartOfSpeech.CONJUNCTION, uninflectedFormsProvider);
+        formsExtractors.put(PartOfSpeech.NOUN, inflectedFormsProvider);
         formsExtractors.put(PartOfSpeech.PREPOSITION, uninflectedFormsProvider);
         formsExtractors.put(PartOfSpeech.POSTPOSITION, uninflectedFormsProvider);
+        formsExtractors.put(PartOfSpeech.VERB, inflectedFormsProvider);
 
         Set<PartOfSpeech> missing = EnumSet.allOf(PartOfSpeech.class);
         missing.removeAll(formsExtractors.keySet());
