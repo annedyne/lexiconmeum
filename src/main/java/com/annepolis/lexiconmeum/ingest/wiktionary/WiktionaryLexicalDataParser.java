@@ -98,10 +98,11 @@ class WiktionaryLexicalDataParser {
         addSenses(root.path(SENSES.get()), builder);
 
         return switch (partOfSpeech) {
+            case ADJECTIVE -> buildLexemeWithForms(builder, root, this::addAdjectiveForms);
+            case ADVERB, PREPOSITION, POSTPOSITION -> buildLexemeWithOutForms(builder);
+            case CONJUNCTION -> buildLexemeWithForms(builder, root, this::findAndAddCanonicalForm);
             case NOUN -> buildLexemeWithForms(builder, root, this::addDeclensionForms);
             case VERB -> buildLexemeWithForms(builder, root, this::addConjugationForms);
-            case ADJECTIVE -> buildLexemeWithForms(builder, root, this::addAdjectiveForms);
-            case ADVERB, CONJUNCTION, PREPOSITION, POSTPOSITION -> buildLexemeWithOutForms(builder);
             default -> {
                 logger.trace("Unsupported partOfSpeech: {}", partOfSpeech);
                 yield Optional.empty();
@@ -136,17 +137,44 @@ class WiktionaryLexicalDataParser {
         }
     }
 
-    private void addAdjectiveForms(JsonNode formsNode, LexemeBuilder lexemeBuilder) {
+    private void findAndAddCanonicalForm(JsonNode formsNode, LexemeBuilder lexemeBuilder){
         for (JsonNode formNode : formsNode) {
-            if(isDeclensionForm(formNode)) {
-                try {
-                    lexemeBuilder.addInflection(buildAgreement(formNode));
-                } catch (IllegalArgumentException | IllegalStateException ex) {
-                    logger.trace("Skipping invalid form: {}", ex.getMessage());
+            try {
+                for (JsonNode tag : formNode.path(TAGS.get())) {
+                    if(CANONICAL.name().equalsIgnoreCase(tag.asText())){
+                        lexemeBuilder.setCanonicalForm(formNode.path(FORM.get()).asText());
+                        break;
+                    }
+                }
+            } catch (IllegalArgumentException | IllegalStateException ex) {
+                logger.trace("Canonical Form Not Found: {}", ex.getMessage());
+            }
+        }
+    }
+    private void addCanonicalForm(JsonNode formNode, LexemeBuilder lexemeBuilder) {
+        try {
+            for (JsonNode tag : formNode.path(TAGS.get())) {
+                if(CANONICAL.name().equalsIgnoreCase(tag.asText())){
+                    lexemeBuilder.setCanonicalForm(formNode.path(FORM.get()).asText());
+                    break;
                 }
             }
-
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            logger.trace("Skipping invalid form: {}", ex.getMessage());
         }
+    }
+
+    private void addAdjectiveForms(JsonNode formsNode, LexemeBuilder lexemeBuilder) {
+            for (JsonNode formNode : formsNode) {
+                if(isDeclensionForm(formNode)) {
+                    try {
+                        lexemeBuilder.addInflection(buildAgreement(formNode));
+                    } catch (IllegalArgumentException | IllegalStateException ex) {
+                        logger.trace("Skipping invalid form: {}", ex.getMessage());
+                    }
+                }
+
+            }
     }
 
 
@@ -156,18 +184,22 @@ class WiktionaryLexicalDataParser {
                 buildDeclension(formNode, getParseMode()).ifPresent(lexemeBuilder::addInflection);
             } else {
                 //this sets genders for nouns with gender-specific inflections (Ex: 1st & 2nd, not 3rd)
-                setCanonicalGender(formNode, lexemeBuilder);
+                setNounCanonicalFormAndGender(formNode, lexemeBuilder);
             }
         }
     }
-    //finds
-    void setCanonicalGender(JsonNode formNode, LexemeBuilder lexemeBuilder){
+
+    /**
+     * sets canonical form and gender for nouns
+     * @param formNode
+     * @param lexemeBuilder
+     */
+    void setNounCanonicalFormAndGender(JsonNode formNode, LexemeBuilder lexemeBuilder){
         JsonNode tags = formNode.path(TAGS.get());
         for (int i = 0; i < tags.size(); i++) {
             //if first tag is CANONICAL then next is gender
             if (CANONICAL.name().equalsIgnoreCase(tags.get(i).asText()) && i + 1 < tags.size()) {
-
-                // Use LexicalTagResolver instead of direct factory access
+                lexemeBuilder.setCanonicalForm(formNode.path(FORM.get()).asText());
                 lexicalTagResolver.applyToLexeme(tags.get(i + 1).asText(), lexemeBuilder, logger);
             }
         }
@@ -181,6 +213,8 @@ class WiktionaryLexicalDataParser {
                 } catch (IllegalArgumentException | IllegalStateException ex) {
                     logger.trace("Skipping invalid form: {}", ex.getMessage());
                 }
+            } else {
+                addCanonicalForm(formNode, lexemeBuilder);
             }
         }
     }
