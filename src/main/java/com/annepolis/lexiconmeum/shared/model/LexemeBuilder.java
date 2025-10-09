@@ -14,6 +14,7 @@ public class LexemeBuilder {
 
     private final UUID id;
     private final String lemma;
+    private String canonicalForm;
     private final PartOfSpeech partOfSpeech;
     private final String etymologyNumber;
     private GrammaticalGender gender;
@@ -43,6 +44,14 @@ public class LexemeBuilder {
 
     public String getLemma() {
         return lemma;
+    }
+
+    public String getCanonicalForm() {
+        return canonicalForm;
+    }
+
+    public void setCanonicalForm(String canonicalForm) {
+        this.canonicalForm = canonicalForm;
     }
 
     public PartOfSpeech getPartOfSpeech(){

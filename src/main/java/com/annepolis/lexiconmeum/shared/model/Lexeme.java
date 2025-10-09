@@ -15,7 +15,12 @@ import java.util.*;
 public class Lexeme {
 
     private final UUID id;
+
+    // word without macrons
     private final String lemma;
+
+    // Canonical form with macrons
+    private final String canonicalForm;
     private final PartOfSpeech partOfSpeech;
     private final PartOfSpeechDetails partOfSpeechDetails;
     private final String etymologyNumber;
@@ -32,6 +37,7 @@ public class Lexeme {
         this.senses = builder.getSenses();
         this.inflectionClasses = builder.getInflectionClasses();
         this.partOfSpeechDetails = builder.getPartOfSpeechDetails();
+        this.canonicalForm = builder.getCanonicalForm();
     }
 
     public UUID getId() {
@@ -39,6 +45,10 @@ public class Lexeme {
     }
 
     public String getLemma() { return lemma; }
+
+    public String getCanonicalForm() {
+        return canonicalForm == null ? getLemma() : canonicalForm;
+    }
 
     public PartOfSpeech getPartOfSpeech() {
         return partOfSpeech;

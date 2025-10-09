@@ -6,12 +6,14 @@ import java.util.Arrays;
 import java.util.Optional;
 
 public enum PartOfSpeech {
-    NOUN("noun", "declension"),
-    VERB("verb", "conjugation"),
-    ADVERB("adv", ""),
     ADJECTIVE("adj", "declension"),
+    ADVERB("adv", ""),
+    CONJUNCTION("conj", ""),
+    NOUN("noun", "declension"),
     PREPOSITION("prep", ""),
-    POSTPOSITION("postp", "");
+    POSTPOSITION("postp", ""),
+    VERB("verb", "conjugation");
+
 
     private final String tag;
     private final String inflectionType;
