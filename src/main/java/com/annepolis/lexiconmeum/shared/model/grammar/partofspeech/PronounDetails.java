@@ -1,6 +1,6 @@
 package com.annepolis.lexiconmeum.shared.model.grammar.partofspeech;
 
-public record DeterminerDetails( SyntacticSubtype syntacticSubtype)
+public record PronounDetails( SyntacticSubtype syntacticSubtype)
         implements SubtypeDetails {
 
     @Override

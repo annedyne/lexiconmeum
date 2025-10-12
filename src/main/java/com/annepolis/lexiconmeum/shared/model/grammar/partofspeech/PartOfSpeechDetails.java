@@ -1,5 +1,5 @@
 package com.annepolis.lexiconmeum.shared.model.grammar.partofspeech;
 
-public sealed interface PartOfSpeechDetails permits AdjectiveDetails, DeterminerDetails, NounDetails, PrepositionDetails { }
+public sealed interface PartOfSpeechDetails permits AdjectiveDetails, NounDetails, PrepositionDetails, SubtypeDetails { }
 
 

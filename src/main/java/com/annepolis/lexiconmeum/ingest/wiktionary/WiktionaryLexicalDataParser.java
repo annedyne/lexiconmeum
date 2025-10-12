@@ -98,7 +98,7 @@ class WiktionaryLexicalDataParser {
         addSenses(root.path(SENSES.get()), builder);
 
         return switch (partOfSpeech) {
-            case ADJECTIVE, DETERMINER -> buildLexemeWithForms(builder, root, this::addAdjectiveForms);
+            case ADJECTIVE, DETERMINER, PRONOUN -> buildLexemeWithForms(builder, root, this::addAdjectiveForms);
             case ADVERB, PREPOSITION, POSTPOSITION -> buildLexemeWithOutForms(builder);
             case CONJUNCTION -> buildLexemeWithForms(builder, root, this::findAndAddCanonicalForm);
             case NOUN -> buildLexemeWithForms(builder, root, this::addDeclensionForms);
@@ -142,7 +142,7 @@ class WiktionaryLexicalDataParser {
             try {
                 for (JsonNode tag : formNode.path(TAGS.get())) {
                     if(CANONICAL.name().equalsIgnoreCase(tag.asText())){
-                        lexemeBuilder.setCanonicalForm(formNode.path(FORM.get()).asText());
+                        lexemeBuilder.addCanonicalForm(formNode.path(FORM.get()).asText());
                         break;
                     }
                 }
@@ -155,7 +155,7 @@ class WiktionaryLexicalDataParser {
         try {
             for (JsonNode tag : formNode.path(TAGS.get())) {
                 if(CANONICAL.name().equalsIgnoreCase(tag.asText())){
-                    lexemeBuilder.setCanonicalForm(formNode.path(FORM.get()).asText());
+                    lexemeBuilder.addCanonicalForm(formNode.path(FORM.get()).asText());
                     break;
                 }
             }
@@ -172,6 +172,8 @@ class WiktionaryLexicalDataParser {
                     } catch (IllegalArgumentException | IllegalStateException ex) {
                         logger.trace("Skipping invalid form: {}", ex.getMessage());
                     }
+                } else {
+                    addCanonicalForm(formNode, lexemeBuilder);
                 }
 
             }
@@ -199,7 +201,7 @@ class WiktionaryLexicalDataParser {
         for (int i = 0; i < tags.size(); i++) {
             //if first tag is CANONICAL then next is gender
             if (CANONICAL.name().equalsIgnoreCase(tags.get(i).asText()) && i + 1 < tags.size()) {
-                lexemeBuilder.setCanonicalForm(formNode.path(FORM.get()).asText());
+                lexemeBuilder.addCanonicalForm(formNode.path(FORM.get()).asText());
                 lexicalTagResolver.applyToLexeme(tags.get(i + 1).asText(), lexemeBuilder, logger);
             }
         }

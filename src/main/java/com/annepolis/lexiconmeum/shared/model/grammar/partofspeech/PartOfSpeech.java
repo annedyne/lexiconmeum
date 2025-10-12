@@ -13,6 +13,7 @@ public enum PartOfSpeech {
     NOUN("noun", "declension"),
     PREPOSITION("prep", ""),
     POSTPOSITION("postp", ""),
+    PRONOUN("pron", "declension"),
     VERB("verb", "conjugation");
 
 

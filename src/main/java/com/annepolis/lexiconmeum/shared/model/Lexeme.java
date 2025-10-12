@@ -20,7 +20,7 @@ public class Lexeme {
     private final String lemma;
 
     // Canonical form with macrons
-    private final String canonicalForm;
+    private final List<String> canonicalForms;
     private final PartOfSpeech partOfSpeech;
     private final PartOfSpeechDetails partOfSpeechDetails;
     private final String etymologyNumber;
@@ -37,7 +37,7 @@ public class Lexeme {
         this.senses = builder.getSenses();
         this.inflectionClasses = builder.getInflectionClasses();
         this.partOfSpeechDetails = builder.getPartOfSpeechDetails();
-        this.canonicalForm = builder.getCanonicalForm();
+        this.canonicalForms = builder.getCanonicalForms();
     }
 
     public UUID getId() {
@@ -47,7 +47,15 @@ public class Lexeme {
     public String getLemma() { return lemma; }
 
     public String getCanonicalForm() {
-        return canonicalForm == null ? getLemma() : canonicalForm;
+        String canonicalForm = lemma;
+        if(canonicalForms != null) {
+            canonicalForm = canonicalForms.isEmpty() ? getLemma() : canonicalForms.get(0);
+        }
+        return canonicalForm;
+    }
+
+    protected List<String> getCanonicalForms() {
+        return canonicalForms;
     }
 
     public PartOfSpeech getPartOfSpeech() {

@@ -24,7 +24,7 @@ import java.util.*;
            @Qualifier("verbPrincipalPartsSectionContributor") LexemeDetailSectionContributor verbPrincipalPartsContributor,
            @Qualifier("nounGenderSectionContributor") LexemeDetailSectionContributor nounGenderSectionContributor,
            @Qualifier("prepositionCaseSectionContributor") LexemeDetailSectionContributor prepositionCaseSectionContributor,
-           @Qualifier("determinerSubclassSectionContributor") LexemeDetailSectionContributor determinerSubclassSectionContributor
+           @Qualifier("subtypeSectionContributor") LexemeDetailSectionContributor subtypeSectionContributor
 
            // Add/remove contributors as needed
     ) {
@@ -57,7 +57,13 @@ import java.util.*;
         pipelines.get(PartOfSpeech.DETERMINER).addAll(List.of(
                 inflectionTableContributor,
                 inflectionClassContributor,
-                determinerSubclassSectionContributor
+                subtypeSectionContributor
+        ));
+
+        pipelines.get(PartOfSpeech.PRONOUN).addAll(List.of(
+                inflectionTableContributor,
+                inflectionClassContributor,
+                subtypeSectionContributor
         ));
 
         pipelines.get(PartOfSpeech.PREPOSITION).addAll(List.of(
@@ -80,6 +86,7 @@ import java.util.*;
         mappers.put(PartOfSpeech.NOUN, lexemeDeclensionMapper);
         mappers.put(PartOfSpeech.ADJECTIVE, lexemeAgreementMapper);
         mappers.put(PartOfSpeech.DETERMINER, lexemeAgreementMapper);
+        mappers.put(PartOfSpeech.PRONOUN, lexemeAgreementMapper);
         return mappers;
     }
 
@@ -89,7 +96,8 @@ import java.util.*;
                 PartOfSpeech.VERB,
                 PartOfSpeech.NOUN,
                 PartOfSpeech.ADJECTIVE,
-                PartOfSpeech.DETERMINER
+                PartOfSpeech.DETERMINER,
+                PartOfSpeech.PRONOUN
         );
     }
 

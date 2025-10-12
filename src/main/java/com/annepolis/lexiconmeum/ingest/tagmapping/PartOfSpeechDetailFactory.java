@@ -40,7 +40,17 @@ public enum PartOfSpeechDetailFactory {
 
     DEMONSTRATIVE(Set.of("demonstrative"), builder ->  {
         // determiners of demonstrative subtype have three gender termination types
-        DeterminerDetails determinerDetails = new DeterminerDetails(AdjectiveTerminationType.THREE_TERMINATION, SyntacticSubtype.DEMONSTRATIVE);
+        DeterminerDetails determinerDetails = new DeterminerDetails(SyntacticSubtype.DEMONSTRATIVE);
+        builder.setPartOfSpeechDetails(determinerDetails);
+    }),
+
+    RELATIVE(Set.of("relative"), builder ->  {
+        PronounDetails pronounDetails = new PronounDetails(SyntacticSubtype.RELATIVE);
+        builder.setPartOfSpeechDetails(pronounDetails);
+    }),
+
+    INTERROGATIVE(Set.of("interrogative"), builder ->  {
+        DeterminerDetails determinerDetails = new DeterminerDetails(SyntacticSubtype.INTERROGATIVE);
         builder.setPartOfSpeechDetails(determinerDetails);
     }),
 
