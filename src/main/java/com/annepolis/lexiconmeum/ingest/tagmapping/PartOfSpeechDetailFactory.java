@@ -3,10 +3,7 @@ package com.annepolis.lexiconmeum.ingest.tagmapping;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
-import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveDetails;
-import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveTerminationType;
-import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.NounDetails;
-import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PrepositionDetails;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.*;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
@@ -39,6 +36,22 @@ public enum PartOfSpeechDetailFactory {
     THREE_TERMINATION(Set.of("three-termination"), builder ->  {
         AdjectiveDetails adjectiveDetails = new AdjectiveDetails(AdjectiveTerminationType.THREE_TERMINATION);
         builder.setPartOfSpeechDetails(adjectiveDetails);
+    }),
+
+    DEMONSTRATIVE(Set.of("demonstrative"), builder ->  {
+        // determiners of demonstrative subtype have three gender termination types
+        DeterminerDetails determinerDetails = new DeterminerDetails(SyntacticSubtype.DEMONSTRATIVE);
+        builder.setPartOfSpeechDetails(determinerDetails);
+    }),
+
+    RELATIVE(Set.of("relative"), builder ->  {
+        PronounDetails pronounDetails = new PronounDetails(SyntacticSubtype.RELATIVE);
+        builder.setPartOfSpeechDetails(pronounDetails);
+    }),
+
+    INTERROGATIVE(Set.of("interrogative"), builder ->  {
+        DeterminerDetails determinerDetails = new DeterminerDetails(SyntacticSubtype.INTERROGATIVE);
+        builder.setPartOfSpeechDetails(determinerDetails);
     }),
 
     GOVERNED_CASE_ACCUSATIVE(Set.of("with-accusative"), builder ->  {

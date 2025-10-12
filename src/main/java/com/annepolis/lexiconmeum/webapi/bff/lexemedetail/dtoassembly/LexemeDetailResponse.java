@@ -3,6 +3,7 @@ package com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.SyntacticSubtype;
 import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection.InflectionTableDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -18,6 +19,9 @@ public class LexemeDetailResponse {
     String lemma;
     UUID lexemeId;
     PartOfSpeech partOfSpeech;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    SyntacticSubtype syntacticSubtype;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     GrammaticalGender grammaticalGender;
@@ -51,6 +55,14 @@ public class LexemeDetailResponse {
 
     public void setPartOfSpeech(PartOfSpeech partOfSpeech) {
         this.partOfSpeech = partOfSpeech;
+    }
+
+    public SyntacticSubtype getSyntacticSubtype() {
+        return syntacticSubtype;
+    }
+
+    public void setSyntacticSubtype(SyntacticSubtype syntacticSubtype) {
+        this.syntacticSubtype = syntacticSubtype;
     }
 
     public UUID getLexemeId() {

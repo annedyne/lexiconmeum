@@ -1,6 +1,5 @@
 package com.annepolis.lexiconmeum.shared.model;
 
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
 import com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeechDetails;
@@ -14,10 +13,9 @@ public class LexemeBuilder {
 
     private final UUID id;
     private final String lemma;
-    private String canonicalForm;
+    private final List<String> canonicalForms = new ArrayList<>();
     private final PartOfSpeech partOfSpeech;
     private final String etymologyNumber;
-    private GrammaticalGender gender;
     private PartOfSpeechDetails partOfSpeechDetails;
     private final List<Sense> senses = new ArrayList<>();
     private final Map<String, Inflection> inflectionIndex = new HashMap<>();
@@ -46,12 +44,12 @@ public class LexemeBuilder {
         return lemma;
     }
 
-    public String getCanonicalForm() {
-        return canonicalForm;
+    public List<String> getCanonicalForms() {
+        return canonicalForms;
     }
 
-    public void setCanonicalForm(String canonicalForm) {
-        this.canonicalForm = canonicalForm;
+    public void addCanonicalForm(String canonicalForm) {
+        this.canonicalForms.add(canonicalForm);
     }
 
     public PartOfSpeech getPartOfSpeech(){
@@ -60,11 +58,6 @@ public class LexemeBuilder {
 
     public String getEtymologyNumber() {
         return etymologyNumber;
-    }
-
-    public LexemeBuilder setGender(GrammaticalGender gender){
-        this.gender = gender;
-        return this;
     }
 
     public PartOfSpeechDetails getPartOfSpeechDetails() {
@@ -123,7 +116,5 @@ public class LexemeBuilder {
 
         return new Lexeme(this);
     }
-
-
 
 }
