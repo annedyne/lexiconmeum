@@ -9,6 +9,7 @@ public enum PartOfSpeech {
     ADJECTIVE("adj", "declension"),
     ADVERB("adv", ""),
     CONJUNCTION("conj", ""),
+    DETERMINER("det", "declension"),
     NOUN("noun", "declension"),
     PREPOSITION("prep", ""),
     POSTPOSITION("postp", ""),

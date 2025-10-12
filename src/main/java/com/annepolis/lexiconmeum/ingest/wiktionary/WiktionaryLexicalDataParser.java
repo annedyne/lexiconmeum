@@ -98,7 +98,7 @@ class WiktionaryLexicalDataParser {
         addSenses(root.path(SENSES.get()), builder);
 
         return switch (partOfSpeech) {
-            case ADJECTIVE -> buildLexemeWithForms(builder, root, this::addAdjectiveForms);
+            case ADJECTIVE, DETERMINER -> buildLexemeWithForms(builder, root, this::addAdjectiveForms);
             case ADVERB, PREPOSITION, POSTPOSITION -> buildLexemeWithOutForms(builder);
             case CONJUNCTION -> buildLexemeWithForms(builder, root, this::findAndAddCanonicalForm);
             case NOUN -> buildLexemeWithForms(builder, root, this::addDeclensionForms);

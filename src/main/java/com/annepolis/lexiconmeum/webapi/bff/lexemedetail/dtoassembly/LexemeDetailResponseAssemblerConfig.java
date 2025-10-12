@@ -23,7 +23,8 @@ import java.util.*;
            @Qualifier("nounPrincipalPartsSectionContributor") LexemeDetailSectionContributor nounPrincipalPartsContributor,
            @Qualifier("verbPrincipalPartsSectionContributor") LexemeDetailSectionContributor verbPrincipalPartsContributor,
            @Qualifier("nounGenderSectionContributor") LexemeDetailSectionContributor nounGenderSectionContributor,
-           @Qualifier("prepositionCaseSectionContributor") LexemeDetailSectionContributor prepositionCaseSectionContributor
+           @Qualifier("prepositionCaseSectionContributor") LexemeDetailSectionContributor prepositionCaseSectionContributor,
+           @Qualifier("determinerSubclassSectionContributor") LexemeDetailSectionContributor determinerSubclassSectionContributor
 
            // Add/remove contributors as needed
     ) {
@@ -53,6 +54,12 @@ import java.util.*;
                 inflectionClassContributor
         ));
 
+        pipelines.get(PartOfSpeech.DETERMINER).addAll(List.of(
+                inflectionTableContributor,
+                inflectionClassContributor,
+                determinerSubclassSectionContributor
+        ));
+
         pipelines.get(PartOfSpeech.PREPOSITION).addAll(List.of(
                 prepositionCaseSectionContributor
         ));
@@ -72,15 +79,17 @@ import java.util.*;
         mappers.put(PartOfSpeech.VERB, conjugationTableMapper);
         mappers.put(PartOfSpeech.NOUN, lexemeDeclensionMapper);
         mappers.put(PartOfSpeech.ADJECTIVE, lexemeAgreementMapper);
+        mappers.put(PartOfSpeech.DETERMINER, lexemeAgreementMapper);
         return mappers;
     }
 
     @Bean
-    Set<PartOfSpeech> inflectionClassPartOfSpeechs() {
+    Set<PartOfSpeech> inflectionClassPartsOfSpeech() {
         return EnumSet.of(
                 PartOfSpeech.VERB,
                 PartOfSpeech.NOUN,
-                PartOfSpeech.ADJECTIVE
+                PartOfSpeech.ADJECTIVE,
+                PartOfSpeech.DETERMINER
         );
     }
 

@@ -21,6 +21,7 @@ public class DelegatingSearchableFormsExtractorConfig {
         formsExtractors.put(PartOfSpeech.ADJECTIVE, inflectedFormsProvider);
         formsExtractors.put(PartOfSpeech.ADVERB, uninflectedFormsProvider);
         formsExtractors.put(PartOfSpeech.CONJUNCTION, uninflectedFormsProvider);
+        formsExtractors.put(PartOfSpeech.DETERMINER, inflectedFormsProvider);
         formsExtractors.put(PartOfSpeech.NOUN, inflectedFormsProvider);
         formsExtractors.put(PartOfSpeech.PREPOSITION, uninflectedFormsProvider);
         formsExtractors.put(PartOfSpeech.POSTPOSITION, uninflectedFormsProvider);
