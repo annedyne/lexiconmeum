@@ -19,6 +19,8 @@ import org.springframework.stereotype.Component;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -31,6 +33,17 @@ class WiktionaryLexicalDataParser {
 
     static final Logger logger = LogManager.getLogger(WiktionaryLexicalDataParser.class);
 
+    private static class LogMsg {
+        private static final String SKIPPING_NON_LEMMA = "Skipping non-lemma entry for: {}";
+        private static final String SKIPPING_INVALID_FORM = "Skipping invalid form: {}";
+        private static final String UNSUPPORTED_POS = "Unsupported partOfSpeech: {}";
+        private static final String FAILED_TO_BUILD = "Failed to build lexeme: {}";
+        private static final String CANONICAL_NOT_FOUND = "Canonical Form Not Found: {}";
+        private static final String JSONL_FORMAT_ERROR = "Check that JSONL is correctly formatted and not 'prettified'";
+
+        private LogMsg() {} // Prevent instantiation
+    }
+    
     private static final Set<String> FORM_BLACKLIST = Set.of(
             "no-table-tags",
             "la-ndecl",
@@ -71,7 +84,7 @@ class WiktionaryLexicalDataParser {
                 JsonNode root = mapper.readTree(line);
                 buildLexeme(root).ifPresent(consumer);
             } catch(JsonEOFException eofException) {
-                logger.error("Check that JSONL is correctly formatted and not 'prettified'", eofException);
+                logger.error(LogMsg.JSONL_FORMAT_ERROR, eofException);
                 throw eofException;
             }
         }
@@ -81,7 +94,29 @@ class WiktionaryLexicalDataParser {
         return br.readLine();
     }
 
+
+    private boolean isValidLemmaEntry(JsonNode root) {
+        JsonNode headTemplates = root.path("head_templates");
+
+        if (!headTemplates.isArray() || headTemplates.isEmpty()) {
+            return false;
+        }
+
+        // Get the template name from the first head template
+        String templateName = headTemplates.get(0).path("name").asText("");
+
+        // Filter out generic "head" templates and form-specific templates
+        return (!"head".equals(templateName) && !templateName.contains("form"));
+    }
+
     private Optional<Lexeme> buildLexeme(JsonNode root) {
+
+        // Only build valid full lemma entries
+        if (!isValidLemmaEntry(root)) {
+            logger.trace(LogMsg.SKIPPING_NON_LEMMA, () -> root.path(WORD.get()).asText());
+            return Optional.empty();
+        }
+
         String lemma = root.path(WORD.get()).asText();
         String posTag = root.path(PART_OF_SPEECH.get()).asText();
         String etymologyNumber = normalizeEtymologyNumber(root.path(ETYMOLOGY_NUMBER.get()).asText());
@@ -104,7 +139,7 @@ class WiktionaryLexicalDataParser {
             case NOUN -> buildLexemeWithForms(builder, root, this::addDeclensionForms);
             case VERB -> buildLexemeWithForms(builder, root, this::addConjugationForms);
             default -> {
-                logger.trace("Unsupported partOfSpeech: {}", partOfSpeech);
+                logger.trace(LogMsg.UNSUPPORTED_POS, partOfSpeech);
                 yield Optional.empty();
             }
         };
@@ -118,7 +153,7 @@ class WiktionaryLexicalDataParser {
         try {
             return Optional.of(builder.build());
         } catch (Exception ex) {
-            logger.warn("Failed to build lexeme: {}", ex.getMessage());
+            logger.warn(LogMsg.FAILED_TO_BUILD, ex.getMessage());
             return Optional.empty();
         }
     }
@@ -132,7 +167,7 @@ class WiktionaryLexicalDataParser {
         try {
             return Optional.of(builder.build());
         } catch (Exception ex) {
-            logger.warn("Failed to build lexeme: {}", ex.getMessage());
+            logger.warn(LogMsg.FAILED_TO_BUILD, ex.getMessage());
             return Optional.empty();
         }
     }
@@ -147,7 +182,7 @@ class WiktionaryLexicalDataParser {
                     }
                 }
             } catch (IllegalArgumentException | IllegalStateException ex) {
-                logger.trace("Canonical Form Not Found: {}", ex.getMessage());
+                logger.trace(LogMsg.CANONICAL_NOT_FOUND, ex.getMessage());
             }
         }
     }
@@ -160,7 +195,7 @@ class WiktionaryLexicalDataParser {
                 }
             }
         } catch (IllegalArgumentException | IllegalStateException ex) {
-            logger.trace("Skipping invalid form: {}", ex.getMessage());
+            logger.trace(LogMsg.SKIPPING_INVALID_FORM, ex.getMessage());
         }
     }
 
@@ -170,7 +205,7 @@ class WiktionaryLexicalDataParser {
                     try {
                         lexemeBuilder.addInflection(buildAgreement(formNode));
                     } catch (IllegalArgumentException | IllegalStateException ex) {
-                        logger.trace("Skipping invalid form: {}", ex.getMessage());
+                        logger.trace(LogMsg.SKIPPING_INVALID_FORM, ex.getMessage());
                     }
                 } else {
                     addCanonicalForm(formNode, lexemeBuilder);
@@ -178,7 +213,6 @@ class WiktionaryLexicalDataParser {
 
             }
     }
-
 
     private void addDeclensionForms(JsonNode formsNode, LexemeBuilder lexemeBuilder) {
         for (JsonNode formNode : formsNode) {
@@ -213,7 +247,7 @@ class WiktionaryLexicalDataParser {
                 try {
                     buildConjugation(formNode).ifPresent(lexemeBuilder::addInflection);
                 } catch (IllegalArgumentException | IllegalStateException ex) {
-                    logger.trace("Skipping invalid form: {}", ex.getMessage());
+                    logger.trace(LogMsg.SKIPPING_INVALID_FORM, ex.getMessage());
                 }
             } else {
                 addCanonicalForm(formNode, lexemeBuilder);
@@ -242,46 +276,48 @@ class WiktionaryLexicalDataParser {
     }
 
     Optional<Conjugation> buildConjugation(JsonNode formNode){
-
-        boolean hasBlacklisted = false;
-        for (JsonNode t : formNode.path(TAGS.get())) {
-            if (TAG_BLACKLIST.contains(t.asText())) { hasBlacklisted = true; break; }
-        }
-        if (hasBlacklisted){
+        if (hasBlacklistedTag(formNode)) {
             return Optional.empty();
         }
 
         Conjugation.Builder builder = new Conjugation.Builder(formNode.path(FORM.get()).asText());
-
-        boolean seenFuture = false;
-        boolean seenPerfect = false;
-
-        for (JsonNode tagNode : formNode.path(TAGS.get())) {
-            String tag = tagNode.asText();
-
-            if (GrammaticalTense.FUTURE.name().equalsIgnoreCase(tag)) {
-                seenFuture = true;
-            } else if (GrammaticalTense.PERFECT.name().equalsIgnoreCase(tag)) {
-                seenPerfect = true;
-            } else {
-                // Apply non-compound-tense tags immediately
-                lexicalTagResolver.applyToInflection(tag, builder, logger);
-            }
-        }
-
-        // Transform Future and Perfect tag combo to compound tense
-        if (seenFuture && seenPerfect) {
-            lexicalTagResolver.applyToInflection(GrammaticalTense.FUTURE_PERFECT.name(), builder, logger);
-        } else {
-            if (seenFuture) {
-                lexicalTagResolver.applyToInflection(GrammaticalTense.FUTURE.name(), builder, logger);
-            }
-            if (seenPerfect) {
-                lexicalTagResolver.applyToInflection(GrammaticalTense.PERFECT.name(), builder, logger);
-            }
+        List<String> tags = collectTags(formNode);
+        
+        replaceCompoundTense(tags);
+        
+        for (String tag : tags){
+            lexicalTagResolver.applyToInflection(tag, builder, logger);
         }
 
         return Optional.of(builder.build());
+    }
+
+    private boolean hasBlacklistedTag(JsonNode formNode) {
+        for (JsonNode tagNode : formNode.path(TAGS.get())) {
+            if (TAG_BLACKLIST.contains(tagNode.asText())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private List<String> collectTags(JsonNode formNode) {
+        List<String> tags = new ArrayList<>();
+        for (JsonNode tag : formNode.path(TAGS.get())) {
+            tags.add(tag.asText().toLowerCase());
+        }
+        return tags;
+    }
+
+    private void replaceCompoundTense(List<String> tags) {
+        String future = GrammaticalTense.FUTURE.name().toLowerCase();
+        String perfect = GrammaticalTense.PERFECT.name().toLowerCase();
+        
+        if (tags.contains(future) && tags.contains(perfect)) {
+            tags.remove(future);
+            tags.remove(perfect);
+            tags.add(GrammaticalTense.FUTURE_PERFECT.name().toLowerCase());
+        }
     }
 
     private boolean isDeclensionForm(JsonNode formNode){
