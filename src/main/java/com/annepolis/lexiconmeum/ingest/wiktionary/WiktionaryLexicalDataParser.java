@@ -96,42 +96,46 @@ class WiktionaryLexicalDataParser {
 
 
     private boolean isValidLemmaEntry(JsonNode root) {
-        JsonNode headTemplates = root.path("head_templates");
+        JsonNode headTemplates = root.path(HEAD_TEMPLATES.get());
 
         if (!headTemplates.isArray() || headTemplates.isEmpty()) {
             return false;
         }
 
         // Get the template name from the first head template
-        String templateName = headTemplates.get(0).path("name").asText("");
+        String templateName = headTemplates.get(0).path(NAME.get()).asText("");
 
         // Filter out generic "head" templates and form-specific templates
-        return (!"head".equals(templateName) && !templateName.contains("form"));
+        return (!HEAD.get().equals(templateName) && !templateName.contains(FORM.get()));
     }
 
     private Optional<Lexeme> buildLexeme(JsonNode root) {
 
-        // Only build valid full lemma entries
+        // Only build valid lemma entries
         if (!isValidLemmaEntry(root)) {
             logger.trace(LogMsg.SKIPPING_NON_LEMMA, () -> root.path(WORD.get()).asText());
             return Optional.empty();
         }
 
+        // Get primary keys
         String lemma = root.path(WORD.get()).asText();
         String posTag = root.path(PART_OF_SPEECH.get()).asText();
         String etymologyNumber = normalizeEtymologyNumber(root.path(ETYMOLOGY_NUMBER.get()).asText());
 
+        // Validate POS against White-list
         Optional<PartOfSpeech> optionalPartOfSpeech = PartOfSpeech.resolveWithWarning(posTag, logger);
-
         if (optionalPartOfSpeech.isEmpty()) {
             return Optional.empty();
         }
         PartOfSpeech partOfSpeech = optionalPartOfSpeech.get();
 
+        // Initialize builder with necessary unique identifiers
         LexemeBuilder builder = new LexemeBuilder(lemma, partOfSpeech, etymologyNumber);
 
+        // Add sense nodes
         addSenses(root.path(SENSES.get()), builder);
 
+        // Parse inflected forms and other POS-specific info
         return switch (partOfSpeech) {
             case ADJECTIVE, DETERMINER, PRONOUN -> buildLexemeWithForms(builder, root, this::addAdjectiveForms);
             case ADVERB, PREPOSITION, POSTPOSITION -> buildLexemeWithOutForms(builder);
@@ -145,10 +149,41 @@ class WiktionaryLexicalDataParser {
         };
     }
 
+    // Build sense nodes and add to builder
+    private void addSenses(JsonNode sensesNode, LexemeBuilder lexemeBuilder) {
+        if (sensesNode.isArray()) {
+            for (JsonNode senseNode : sensesNode) {
+                lexemeBuilder.addSense(buildSense(senseNode, lexemeBuilder));
+            }
+        }
+    }
+
+    private Sense buildSense(JsonNode senseNode, LexemeBuilder lexemeBuilder) {
+        Sense.Builder builder = new Sense.Builder();
+        JsonNode tags = senseNode.path(TAGS.get());
+        if(tags.isArray() && !tags.isEmpty()){
+            for(JsonNode tag : tags){
+                // Route all sense-level tags through the facade
+                lexicalTagResolver.applyToLexeme(tag.asText(), lexemeBuilder, logger);
+            }
+        }
+
+        JsonNode glosses = senseNode.path(GLOSSES.get());
+        if (glosses.isArray() && !glosses.isEmpty()) {
+
+            for(JsonNode gloss: glosses){
+                builder.addGloss(gloss.asText());
+            }
+        }
+        return builder.build();
+    }
+
+    // Default to etymologyNumber of 1 to ensure identifier consistency
     public static String normalizeEtymologyNumber(String ety) {
         return ety == null || ety.isBlank() ? "1" : ety;
     }
 
+    // Build non-inflected forms
     private Optional<Lexeme> buildLexemeWithOutForms(LexemeBuilder builder){
         try {
             return Optional.of(builder.build());
@@ -158,6 +193,7 @@ class WiktionaryLexicalDataParser {
         }
     }
 
+    // Build inflected forms
     private Optional<Lexeme> buildLexemeWithForms(
             LexemeBuilder builder,
             JsonNode root,
@@ -172,6 +208,7 @@ class WiktionaryLexicalDataParser {
         }
     }
 
+    // Find canonical form (same as lemma but with enclitics) and add to builder
     private void findAndAddCanonicalForm(JsonNode formsNode, LexemeBuilder lexemeBuilder){
         for (JsonNode formNode : formsNode) {
             try {
@@ -186,6 +223,8 @@ class WiktionaryLexicalDataParser {
             }
         }
     }
+
+    // Add canonical form to the builder
     private void addCanonicalForm(JsonNode formNode, LexemeBuilder lexemeBuilder) {
         try {
             for (JsonNode tag : formNode.path(TAGS.get())) {
@@ -198,6 +237,8 @@ class WiktionaryLexicalDataParser {
             logger.trace(LogMsg.SKIPPING_INVALID_FORM, ex.getMessage());
         }
     }
+
+    // ---------------------------------- POS SPECIFIC FORM HANDLERS ---------------------------------- //
 
     private void addAdjectiveForms(JsonNode formsNode, LexemeBuilder lexemeBuilder) {
             for (JsonNode formNode : formsNode) {
@@ -214,6 +255,29 @@ class WiktionaryLexicalDataParser {
             }
     }
 
+    // Build adjective inflected form
+    Agreement buildAgreement(JsonNode formNode) {
+        Agreement.Builder builder = new Agreement.Builder(formNode.path(FORM.get()).asText());
+
+        for (JsonNode tag : formNode.path(TAGS.get())) {
+            lexicalTagResolver.applyToInflection(tag.asText(), builder, logger);
+        }
+
+        return builder.build();
+    }
+
+    // Find and set canonical form and gender of nouns
+    void setNounCanonicalFormAndGender(JsonNode formNode, LexemeBuilder lexemeBuilder){
+        JsonNode tags = formNode.path(TAGS.get());
+        for (int i = 0; i < tags.size(); i++) {
+            //if first tag is CANONICAL then next is gender
+            if (CANONICAL.name().equalsIgnoreCase(tags.get(i).asText()) && i + 1 < tags.size()) {
+                lexemeBuilder.addCanonicalForm(formNode.path(FORM.get()).asText());
+                lexicalTagResolver.applyToLexeme(tags.get(i + 1).asText(), lexemeBuilder, logger);
+            }
+        }
+    }
+
     private void addDeclensionForms(JsonNode formsNode, LexemeBuilder lexemeBuilder) {
         for (JsonNode formNode : formsNode) {
             if (isDeclensionForm(formNode)) {
@@ -225,20 +289,22 @@ class WiktionaryLexicalDataParser {
         }
     }
 
-    /**
-     * sets canonical form and gender for nouns
-     * @param formNode
-     * @param lexemeBuilder
-     */
-    void setNounCanonicalFormAndGender(JsonNode formNode, LexemeBuilder lexemeBuilder){
-        JsonNode tags = formNode.path(TAGS.get());
-        for (int i = 0; i < tags.size(); i++) {
-            //if first tag is CANONICAL then next is gender
-            if (CANONICAL.name().equalsIgnoreCase(tags.get(i).asText()) && i + 1 < tags.size()) {
-                lexemeBuilder.addCanonicalForm(formNode.path(FORM.get()).asText());
-                lexicalTagResolver.applyToLexeme(tags.get(i + 1).asText(), lexemeBuilder, logger);
-            }
+    Optional<Declension> buildDeclension(JsonNode formNode, ParseMode mode) {
+        Declension.Builder builder = new Declension.Builder(formNode.path(FORM.get()).asText());
+
+        for (JsonNode tag : formNode.path(TAGS.get())) {
+            lexicalTagResolver.applyToInflection(tag.asText(), builder, logger);
         }
+
+        return new SafeBuilder<>(DECLENSION.get(), builder::build).build(logger, mode);
+    }
+
+    // Filter out form nodes in black-list
+    private boolean isDeclensionForm(JsonNode formNode){
+        String formValue = formNode.path(FORM.get()).asText();
+
+        return DECLENSION.get().equalsIgnoreCase(formNode.path(SOURCE.get()).asText())
+                && !FORM_BLACKLIST.contains(formValue);
     }
 
     private void addConjugationForms(JsonNode formsNode, LexemeBuilder lexemeBuilder) {
@@ -254,27 +320,6 @@ class WiktionaryLexicalDataParser {
             }
         }
     }
-
-    Agreement buildAgreement(JsonNode formNode) {
-        Agreement.Builder builder = new Agreement.Builder(formNode.path(FORM.get()).asText());
-
-        for (JsonNode tag : formNode.path(TAGS.get())) {
-            lexicalTagResolver.applyToInflection(tag.asText(), builder, logger);
-        }
-
-        return builder.build();
-    }
-
-    Optional<Declension> buildDeclension(JsonNode formNode, ParseMode mode) {
-        Declension.Builder builder = new Declension.Builder(formNode.path(FORM.get()).asText());
-
-        for (JsonNode tag : formNode.path(TAGS.get())) {
-            lexicalTagResolver.applyToInflection(tag.asText(), builder, logger);
-        }
-
-        return new SafeBuilder<>("Declension", builder::build).build(logger, mode);
-    }
-
     Optional<Conjugation> buildConjugation(JsonNode formNode){
         if (hasBlacklistedTag(formNode)) {
             return Optional.empty();
@@ -309,6 +354,7 @@ class WiktionaryLexicalDataParser {
         return tags;
     }
 
+    // Replace two separate tense tags with compound
     private void replaceCompoundTense(List<String> tags) {
         String future = GrammaticalTense.FUTURE.name().toLowerCase();
         String perfect = GrammaticalTense.PERFECT.name().toLowerCase();
@@ -320,13 +366,7 @@ class WiktionaryLexicalDataParser {
         }
     }
 
-    private boolean isDeclensionForm(JsonNode formNode){
-        String formValue = formNode.path(FORM.get()).asText();
-
-        return DECLENSION.get().equalsIgnoreCase(formNode.path(SOURCE.get()).asText())
-                && !FORM_BLACKLIST.contains(formValue);
-    }
-
+    // Filter out form nodes in black-list
     private boolean isConjugationForm(JsonNode formNode){
         String formValue = formNode.path(FORM.get()).asText();
 
@@ -335,34 +375,4 @@ class WiktionaryLexicalDataParser {
                 && !formValue.contains("+"); //for passive of compound tenses, wiktionary
                                              // doesn't include person so excluding for now
     }
-
-    private void addSenses(JsonNode sensesNode, LexemeBuilder lexemeBuilder) {
-        if (sensesNode.isArray()) {
-            for (JsonNode senseNode : sensesNode) {
-                lexemeBuilder.addSense(buildSense(senseNode, lexemeBuilder));
-            }
-        }
-    }
-
-    private Sense buildSense(JsonNode senseNode, LexemeBuilder lexemeBuilder) {
-        Sense.Builder builder = new Sense.Builder();
-        JsonNode tags = senseNode.path(TAGS.get());
-        if(tags.isArray() && !tags.isEmpty()){
-            for(JsonNode tag : tags){
-                // Route all sense-level tags through the facade
-                lexicalTagResolver.applyToLexeme(tag.asText(), lexemeBuilder, logger);
-            }
-        }
-
-        JsonNode glosses = senseNode.path(GLOSSES.get());
-        if (glosses.isArray() && !glosses.isEmpty()) {
-
-            for(JsonNode gloss: glosses){
-                builder.addGloss(gloss.asText());
-            }
-        }
-        return builder.build();
-    }
-
-
 }
