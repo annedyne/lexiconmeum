@@ -1,7 +1,7 @@
 logging:
   level:
     com.annepolis.lexiconmeum: DEBUG
-    com.annepolis.lexiconmeum.shared.data.load.WiktionaryLexicalDataParser: DEBUG
+    com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataParser: DEBUG
 app:
   load:
     data-file: file:/opt/lexiconmeum/data/lexicalData.jsonl
