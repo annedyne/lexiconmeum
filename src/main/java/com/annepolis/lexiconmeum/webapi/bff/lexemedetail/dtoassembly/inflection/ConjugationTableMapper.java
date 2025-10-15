@@ -13,43 +13,57 @@ import java.util.stream.Collectors;
 @Component
 public class ConjugationTableMapper implements InflectionTableMapper {
 
-     Comparator<ConjugationTableDTO> conjugationTableDTOComparator =
-            Comparator.comparing(this::resolveVoiceOrder)
-                    .thenComparing(this::resolveMoodOrder);
-
-    private int resolveVoiceOrder(ConjugationTableDTO dto) {
-        try {
-            return GrammaticalVoice.valueOf(dto.getVoice()).ordinal();
-        } catch (Exception e) {
-            return Integer.MAX_VALUE;
-        }
-    }
-
-    private int resolveMoodOrder(ConjugationTableDTO dto) {
-        String mood = dto.getMood();
-        if (mood == null) return Integer.MAX_VALUE;
-        try {
-            return GrammaticalMood.valueOf(mood.toUpperCase()).ordinal();
-        } catch (IllegalArgumentException e) {
-            return Integer.MAX_VALUE - 1;
-        }
-    }
+    // Comparator orders individual tense groups by natural enum order
+    Comparator<ConjugationTableDTO> conjugationTableDTOComparator =
+        Comparator.comparing(
+                (ConjugationTableDTO dto) -> GrammaticalVoice.valueOf(dto.getVoice()),
+                Comparator.nullsLast(Comparator.naturalOrder())
+        )
+        .thenComparing(
+                dto -> GrammaticalMood.valueOf(dto.getMood().toUpperCase()),
+                Comparator.nullsLast(Comparator.naturalOrder())
+        );
 
     record MoodVoiceKey(GrammaticalMood mood, GrammaticalVoice voice) {}
 
     @Override
     public ConjugationGroupDTO toInflectionTableDTO(Lexeme lexeme) {
 
+        // Process and extract conjugations from Lexeme
         List<Conjugation> conjugations = extractConjugations(lexeme);
+
+        // Group my Mood and Voice
         Map<MoodVoiceKey, List<Conjugation>> conjugationsByMoodAndVoice = groupConjugationsByMoodAndVoice(conjugations);
 
+        // Create and populate the DTOs
         List<ConjugationTableDTO> tableDTOs = generateDTOs(conjugationsByMoodAndVoice);
 
+        // Sort tense groups by voice then mood
         List<ConjugationTableDTO> sorted = tableDTOs.stream()
                 .sorted(conjugationTableDTOComparator)
                 .toList();
 
         return new ConjugationGroupDTO(sorted);
+    }
+
+    List<Conjugation> extractConjugations(Lexeme lexeme){
+        List<Conjugation> conjugations = lexeme.getInflections().stream()
+                .filter(Conjugation.class::isInstance)
+                .map(Conjugation.class::cast)
+                .toList();
+
+        if (conjugations.isEmpty()) {
+            throw new IllegalArgumentException("Lexeme contains no conjugation forms.");
+        }
+        return conjugations;
+    }
+
+    Map<MoodVoiceKey, List<Conjugation>> groupConjugationsByMoodAndVoice(List<Conjugation> conjugations){
+        return conjugations.stream()
+                .filter(c -> c.getMood() != null && c.getVoice() != null)
+                .collect(Collectors.groupingBy(
+                        c -> new MoodVoiceKey(c.getMood(), c.getVoice())
+                ));
     }
 
     List<ConjugationTableDTO> generateDTOs(Map<MoodVoiceKey, List<Conjugation>> byMoodAndVoiceList){
@@ -61,43 +75,19 @@ public class ConjugationTableMapper implements InflectionTableMapper {
             List<ConjugationTableDTO.TenseDTO> tenseDTOs = createTenseDTOs(byTense);
 
             MoodVoiceKey moodAndVoiceInfo = moodAndVoiceEntry.getKey();
-            tableDTOs.add(populateNewConjugationDTO(moodAndVoiceInfo, tenseDTOs));
+            tableDTOs.add(createConjugationDTO(moodAndVoiceInfo, tenseDTOs));
         }
         return tableDTOs;
     }
 
-    ConjugationTableDTO populateNewConjugationDTO(MoodVoiceKey moodAndVoiceInfo, List<ConjugationTableDTO.TenseDTO> tenseDTOs){
-        ConjugationTableDTO dto = new ConjugationTableDTO();
-        dto.setMood(moodAndVoiceInfo.mood().getHistoricalName());
-        dto.setVoice(moodAndVoiceInfo.voice().name());
-        dto.setTenses(tenseDTOs);
-        return dto;
-    }
-
-    List<Conjugation> extractConjugations(Lexeme lexeme){
-        List<Conjugation> conjugations = lexeme.getInflections().stream()
-               .filter(Conjugation.class::isInstance)
-               .map(Conjugation.class::cast)
-               .toList();
-
-       if (conjugations.isEmpty()) {
-           throw new IllegalArgumentException("Lexeme contains no conjugation forms.");
-       }
-       return conjugations;
-   }
-
-   Map<MoodVoiceKey, List<Conjugation>> groupConjugationsByMoodAndVoice(List<Conjugation> conjugations){
-       return conjugations.stream()
-               .filter(c -> c.getMood() != null && c.getVoice() != null)
-               .collect(Collectors.groupingBy(
-                       c -> new MoodVoiceKey(c.getMood(), c.getVoice())
-               ));
-   }
-
+    // Map forms for each tense to their respective GrammaticalTense in enum order
     Map<GrammaticalTense, List<String>> groupByTense(List<Conjugation> groupConjugations) {
         return groupConjugations.stream()
+                .sorted(Comparator.comparing(Conjugation::getNumber, Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(Conjugation::getPerson, Comparator.nullsLast(Comparator.naturalOrder())))
                 .collect(Collectors.groupingBy(
                         Conjugation::getTense,
+                        // TreeMap keeps order of GrammaticalTense enum
                         TreeMap::new,
                         Collectors.mapping(Conjugation::getForm, Collectors.toList())
                 ));
@@ -113,5 +103,13 @@ public class ConjugationTableMapper implements InflectionTableMapper {
                     return dto;
                 })
                 .toList();
+    }
+
+    ConjugationTableDTO createConjugationDTO(MoodVoiceKey moodAndVoiceInfo, List<ConjugationTableDTO.TenseDTO> tenseDTOs){
+        ConjugationTableDTO dto = new ConjugationTableDTO();
+        dto.setMood(moodAndVoiceInfo.mood().getHistoricalName());
+        dto.setVoice(moodAndVoiceInfo.voice().name());
+        dto.setTenses(tenseDTOs);
+        return dto;
     }
 }
