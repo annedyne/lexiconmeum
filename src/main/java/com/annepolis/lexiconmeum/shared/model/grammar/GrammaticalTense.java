@@ -1,5 +1,6 @@
 package com.annepolis.lexiconmeum.shared.model.grammar;
 
+// Order is important (affects api response)
 public enum GrammaticalTense {
 
     PRESENT("Present","Simple Present"),

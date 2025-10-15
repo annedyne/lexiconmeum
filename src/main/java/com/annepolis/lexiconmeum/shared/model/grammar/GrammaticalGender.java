@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.Optional;
 
 public enum GrammaticalGender {
-    FEMININE("feminine"),
     MASCULINE("masculine"),
+    FEMININE("feminine"),
     NEUTER("neuter");
 
     private final String tag;
