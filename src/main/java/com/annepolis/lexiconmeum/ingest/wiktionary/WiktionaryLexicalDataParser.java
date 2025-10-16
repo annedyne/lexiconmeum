@@ -36,6 +36,7 @@ class WiktionaryLexicalDataParser {
     private static class LogMsg {
         private static final String SKIPPING_NON_LEMMA = "Skipping non-lemma entry for: {}";
         private static final String SKIPPING_INVALID_FORM = "Skipping invalid form: {}";
+        private static final String UNEXPECTED_INFLECTION_SOURCE = "Found an unexpected inflection source {} in form: {}";
         private static final String UNSUPPORTED_POS = "Unsupported partOfSpeech: {}";
         private static final String FAILED_TO_BUILD = "Failed to build lexeme: {}";
         private static final String CANONICAL_NOT_FOUND = "Canonical Form Not Found: {}";
@@ -303,8 +304,20 @@ class WiktionaryLexicalDataParser {
     private boolean isDeclensionForm(JsonNode formNode){
         String formValue = formNode.path(FORM.get()).asText();
 
-        return DECLENSION.get().equalsIgnoreCase(formNode.path(SOURCE.get()).asText())
-                && !FORM_BLACKLIST.contains(formValue);
+        if(FORM_BLACKLIST.contains(formValue)){
+            return false;
+        }
+        if (!formNode.has(SOURCE.get())) {
+            return false;
+        }
+        String source = formNode.path(SOURCE.get()).asText();
+
+        // wrong inflection table header or pos in wiktionary data
+       if( !DECLENSION.get().equalsIgnoreCase(source) &&
+               !INFLECTION.get().equalsIgnoreCase(source)){
+           logger.trace(LogMsg.UNEXPECTED_INFLECTION_SOURCE, source, formValue);
+       }
+        return true;
     }
 
     private void addConjugationForms(JsonNode formsNode, LexemeBuilder lexemeBuilder) {

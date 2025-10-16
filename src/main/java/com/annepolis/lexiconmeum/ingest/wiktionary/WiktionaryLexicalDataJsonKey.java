@@ -11,6 +11,7 @@ public enum WiktionaryLexicalDataJsonKey {
     GLOSSES("glosses"),
     HEAD("head"),
     HEAD_TEMPLATES("head_templates"),
+    INFLECTION("inflection"),
     NAME("name"),
     NOUN("noun"),
     PART_OF_SPEECH("pos"),
