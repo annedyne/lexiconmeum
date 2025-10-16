@@ -9,10 +9,13 @@ A staged development plan to balance MVP delivery, engineering quality, and lear
 **Goal:** Deliver a usable, professional-feeling interface that serves basic learner needs.
 
 - [ ] Add support for all word types (e.g. adjectives, adverbs, etc.)
+    - [x] nouns
+    - [x] verbs
     - [x] adjectives
     - [x] adverbs
     - [x] prepositions 
     - [x] conjunctions
+    - [x] pronouns 
 - [ ] Complete verb support (add passive voice and any missing tenses/moods)
 - [ ] Include positive, comparative, and superlative adjective forms in a single detail response 
 - [ ] Fix dropdown arrow navigation in search field
