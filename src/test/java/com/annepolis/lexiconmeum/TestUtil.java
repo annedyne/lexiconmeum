@@ -46,10 +46,7 @@ public class TestUtil {
         .addInflection(getNewTestDeclension( PLURAL, VOCATIVE,  "amīcī"))
         .addInflection(getNewTestDeclension( PLURAL, GENITIVE,  "amīcōrum"))
         .addInflection(getNewTestDeclension( PLURAL, ABLATIVE, "amīcīs"))
-        .addInflection(getNewTestDeclension( PLURAL, DATIVE, "amīcīs"))
-
-         .setGender(GrammaticalGender.MASCULINE).build();
-
+        .addInflection(getNewTestDeclension( PLURAL, DATIVE, "amīcīs")).build();
     }
 
 

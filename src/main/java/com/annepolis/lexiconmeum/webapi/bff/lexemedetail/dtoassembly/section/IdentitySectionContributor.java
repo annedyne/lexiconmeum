@@ -14,7 +14,7 @@ class IdentitySectionContributor implements LexemeDetailSectionContributor {
     public void contribute(Lexeme lexeme, LexemeDetailResponse dto) {
         dto.setLexemeId(lexeme.getId());
         dto.setPartOfSpeech(lexeme.getPartOfSpeech());
-        dto.setLemma(lexeme.getLemma());
+        dto.setLemma(lexeme.getCanonicalForm());
     }
 }
 

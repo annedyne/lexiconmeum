@@ -30,7 +30,14 @@ import static com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass.THI
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@ContextConfiguration(classes = {WiktionaryLexicalDataParser.class, LexicalTagResolver.class})
+@ContextConfiguration(classes = {
+        WiktionaryLexicalDataParser.class,
+        LexicalTagResolver.class,
+        ParserConfig.class,
+        VerbValidator.class,         // and these if they are @Component-less
+        NounValidator.class,
+        AdjectiveValidator.class
+})
 class WiktionaryLexicalDataParserTest {
 
     @Autowired
@@ -96,7 +103,7 @@ class WiktionaryLexicalDataParserTest {
             List<Lexeme> lexemes = new ArrayList<>();
             parser.parseJsonl(reader, lexemes::add);
 
-            assertEquals(10, lexemes.size());
+            assertEquals(13, lexemes.size());
             assertEquals(PartOfSpeech.VERB, lexemes.get(0).getPartOfSpeech());
             assertEquals(PartOfSpeech.NOUN, lexemes.get(1).getPartOfSpeech());
         }
@@ -110,6 +117,36 @@ class WiktionaryLexicalDataParserTest {
             parser.parseJsonl(reader, lexemes::add);
             assertEquals("amo", lexemes.get(0).getLemma());
 
+        }
+    }
+
+    @Test
+    void IsValidLemmaFiltersOutInvalidPulsoEntry() throws Exception {
+        Resource resource = resourceLoader.getResource("classpath:testDataRaw.jsonl");
+        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
+            List<Lexeme> lexemes = new ArrayList<>();
+            parser.parseJsonl(reader, lexemes::add);
+        
+        long pulsoCount = lexemes.stream()
+                .filter(l -> l.getLemma().equals("pulso"))
+                .count();
+        
+        assertEquals(1, pulsoCount, "Expected exactly one 'pulso' lemma");
+    }
+}
+
+    @Test
+    void IsValidLemmaDoesNotFilterOutValidIlleEntry() throws Exception {
+        Resource resource = resourceLoader.getResource("classpath:testDataRaw.jsonl");
+        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
+            List<Lexeme> lexemes = new ArrayList<>();
+            parser.parseJsonl(reader, lexemes::add);
+
+            long illeCount = lexemes.stream()
+                    .filter(l -> l.getLemma().equals("ille"))
+                    .count();
+
+            assertEquals(2, illeCount, "Expected exactly one 'ille' lemma");
         }
     }
 

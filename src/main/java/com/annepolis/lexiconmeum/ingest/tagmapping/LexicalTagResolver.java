@@ -25,7 +25,6 @@ public final class LexicalTagResolver {
                 });
     }
 
-    // Single resolution step that hides Optional juggling from callers.
     public Optional<java.util.function.Consumer<LexemeBuilder>> resolve(String tag) {
         // Try POS detail factory
         Optional<PartOfSpeechDetailFactory> posOpt = PartOfSpeechDetailFactory.fromTag(tag);
