@@ -14,15 +14,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -32,9 +31,10 @@ import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJ
 class WiktionaryLexicalDataParser {
 
     static final Logger logger = LogManager.getLogger(WiktionaryLexicalDataParser.class);
+    private static final Marker NON_LEMMA = MarkerManager.getMarker("NON_LEMMA");
 
-    private static class LogMsg {
-        private static final String SKIPPING_NON_LEMMA = "Skipping non-lemma entry for: {}";
+        private static class LogMsg {
+        private static final String SKIPPING_NON_LEMMA = "Skipping non-lemma entry for: {} {}";
         private static final String SKIPPING_INVALID_FORM = "Skipping invalid form: {}";
         private static final String UNEXPECTED_INFLECTION_SOURCE = "Found an unexpected inflection source {} in form: {}";
         private static final String UNSUPPORTED_POS = "Unsupported partOfSpeech: {}";
@@ -62,8 +62,8 @@ class WiktionaryLexicalDataParser {
     private final ObjectMapper mapper = new ObjectMapper();
     private ParseMode parseMode;
 
-    // Inject the resolver instead of instantiating it
     private final LexicalTagResolver lexicalTagResolver;
+    private final Map<PartOfSpeech, PartOfSpeechValidator> wiktionaryPosValidators;
 
     public ParseMode getParseMode() {
         return parseMode;
@@ -73,8 +73,9 @@ class WiktionaryLexicalDataParser {
         this.parseMode = parseMode;
     }
 
-    WiktionaryLexicalDataParser(LexicalTagResolver lexicalTagResolver) {
+    WiktionaryLexicalDataParser(LexicalTagResolver lexicalTagResolver, Map<PartOfSpeech, PartOfSpeechValidator> wiktionaryPosValidators) {
         this.lexicalTagResolver = lexicalTagResolver;
+        this.wiktionaryPosValidators = wiktionaryPosValidators;
     }
 
     public void parseJsonl(Reader reader, Consumer<Lexeme> consumer) throws IOException {
@@ -95,29 +96,25 @@ class WiktionaryLexicalDataParser {
         return br.readLine();
     }
 
-
-    private boolean isValidLemmaEntry(JsonNode root) {
+    private boolean isValidLemmaEntry(JsonNode root, PartOfSpeech pos) {
         JsonNode headTemplates = root.path(HEAD_TEMPLATES.get());
 
         if (!headTemplates.isArray() || headTemplates.isEmpty()) {
             return false;
         }
 
-        // Get the template name from the first head template
-        String templateName = headTemplates.get(0).path(NAME.get()).asText("");
+        // Run POS-specific validator if present
+        PartOfSpeechValidator validator = wiktionaryPosValidators.get(pos);
+        if (validator != null && !validator.validate(root)) {
+            logger.debug(NON_LEMMA, "pos : {} ", pos::name );
 
-        // Filter out generic "head" templates and form-specific templates
-        return (!HEAD.get().equals(templateName) && !templateName.contains(FORM.get()));
+            return false;
+        }
+
+        return true;
     }
 
     private Optional<Lexeme> buildLexeme(JsonNode root) {
-
-        // Only build valid lemma entries
-        if (!isValidLemmaEntry(root)) {
-            logger.trace(LogMsg.SKIPPING_NON_LEMMA, () -> root.path(WORD.get()).asText());
-            return Optional.empty();
-        }
-
         // Get primary keys
         String lemma = root.path(WORD.get()).asText();
         String posTag = root.path(PART_OF_SPEECH.get()).asText();
@@ -129,6 +126,12 @@ class WiktionaryLexicalDataParser {
             return Optional.empty();
         }
         PartOfSpeech partOfSpeech = optionalPartOfSpeech.get();
+
+        // Only build valid lemma entries
+        if (!isValidLemmaEntry(root, partOfSpeech)) {
+            logger.trace(LogMsg.SKIPPING_NON_LEMMA, () -> posTag, () -> root.path(WORD.get()).asText());
+            return Optional.empty();
+        }
 
         // Initialize builder with necessary unique identifiers
         LexemeBuilder builder = new LexemeBuilder(lemma, partOfSpeech, etymologyNumber);
@@ -220,7 +223,7 @@ class WiktionaryLexicalDataParser {
                     }
                 }
             } catch (IllegalArgumentException | IllegalStateException ex) {
-                logger.trace(LogMsg.CANONICAL_NOT_FOUND, ex.getMessage());
+               logger.trace(LogMsg.CANONICAL_NOT_FOUND, ex.getMessage());
             }
         }
     }
@@ -235,7 +238,7 @@ class WiktionaryLexicalDataParser {
                 }
             }
         } catch (IllegalArgumentException | IllegalStateException ex) {
-            logger.trace(LogMsg.SKIPPING_INVALID_FORM, ex.getMessage());
+           logger.trace(LogMsg.SKIPPING_INVALID_FORM, ex.getMessage());
         }
     }
 
@@ -247,7 +250,7 @@ class WiktionaryLexicalDataParser {
                     try {
                         lexemeBuilder.addInflection(buildAgreement(formNode));
                     } catch (IllegalArgumentException | IllegalStateException ex) {
-                        logger.trace(LogMsg.SKIPPING_INVALID_FORM, ex.getMessage());
+                       logger.trace(LogMsg.SKIPPING_INVALID_FORM, ex.getMessage());
                     }
                 } else {
                     addCanonicalForm(formNode, lexemeBuilder);
@@ -315,7 +318,7 @@ class WiktionaryLexicalDataParser {
         // wrong inflection table header or pos in wiktionary data
        if( !DECLENSION.get().equalsIgnoreCase(source) &&
                !INFLECTION.get().equalsIgnoreCase(source)){
-           logger.trace(LogMsg.UNEXPECTED_INFLECTION_SOURCE, source, formValue);
+          logger.trace(LogMsg.UNEXPECTED_INFLECTION_SOURCE, source, formValue);
        }
         return true;
     }
@@ -326,7 +329,7 @@ class WiktionaryLexicalDataParser {
                 try {
                     buildConjugation(formNode).ifPresent(lexemeBuilder::addInflection);
                 } catch (IllegalArgumentException | IllegalStateException ex) {
-                    logger.trace(LogMsg.SKIPPING_INVALID_FORM, ex.getMessage());
+                   logger.trace(LogMsg.SKIPPING_INVALID_FORM, ex.getMessage());
                 }
             } else {
                 addCanonicalForm(formNode, lexemeBuilder);
