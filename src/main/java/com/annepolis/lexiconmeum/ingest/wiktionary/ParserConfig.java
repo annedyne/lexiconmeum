@@ -11,12 +11,12 @@ import java.util.Map;
 public class ParserConfig {
 
     @Bean
-    public Map<PartOfSpeech, PartOfSpeechValidator> wiktionaryPosValidators(
-            VerbValidator verbValidator,
-            NounValidator nounValidator,
-            AdjectiveValidator adjectiveValidator
+    public Map<PartOfSpeech, PartOfSpeechParser> wiktionaryPosValidators(
+            VerbParser verbValidator,
+            NounParser nounValidator,
+            AdjectiveParser adjectiveValidator
     ) {
-        Map<PartOfSpeech, PartOfSpeechValidator> map = new EnumMap<>(PartOfSpeech.class);
+        Map<PartOfSpeech, PartOfSpeechParser> map = new EnumMap<>(PartOfSpeech.class);
         map.put(PartOfSpeech.VERB, verbValidator);
         map.put(PartOfSpeech.NOUN, nounValidator);
         map.put(PartOfSpeech.ADJECTIVE, adjectiveValidator);

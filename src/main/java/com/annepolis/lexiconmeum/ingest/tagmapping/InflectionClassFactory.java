@@ -24,7 +24,10 @@ public enum InflectionClassFactory {
         builder.addInflectionClass(InflectionClass.FOURTH)),
 
     FIFTH(Set.of("declension-5"), builder ->
-        builder.addInflectionClass(InflectionClass.FIFTH));
+        builder.addInflectionClass(InflectionClass.FIFTH)),
+
+    IRREGULAR(Set.of("irreg"), builder ->
+            builder.addInflectionClass(InflectionClass.FIFTH));
 
     private final Set<String> tags;
     private final Consumer<LexemeBuilder> setter;

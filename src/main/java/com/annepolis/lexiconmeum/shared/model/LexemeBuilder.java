@@ -8,6 +8,7 @@ import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.UnaryOperator;
 
 public class LexemeBuilder {
 
@@ -77,16 +78,30 @@ public class LexemeBuilder {
         return senses;
     }
 
-    public LexemeBuilder addInflection(Inflection inflection){
+    public LexemeBuilder addInflection(Inflection inflection) {
+        // Default: if inflection exists, it will be set as alternative
+        //          if it doesn't, it will get added to index
+        return addInflection(inflection, existing ->
+                existing.toBuilder()
+                        .setAlternativeForm(inflection.getForm())
+                        .build()
+        );
+    }
+
+    /**
+     * Adds an inflection to the lexeme. If an inflection with the same key already exists,
+     * the provided merge function is called to update it.
+     *
+     * @param inflection the inflection to add
+     * @param mergeFunction function that takes the existing inflection and returns the merged result.
+     *                      The incoming inflection is available in the closure.
+     */
+    public LexemeBuilder addInflection(Inflection inflection, UnaryOperator<Inflection> mergeFunction) {
         String key = InflectionKey.of(inflection);
         if (inflectionIndex.containsKey(key)) {
             Inflection existing = inflectionIndex.get(key);
-            Inflection updated = existing
-                    .toBuilder()
-                    .setAlternativeForm(inflection.getForm())
-                    .build();
-
-            inflectionIndex.put(key, updated);
+            Inflection merged = mergeFunction.apply(existing);
+            inflectionIndex.put(key, merged);
         } else {
             inflectionIndex.put(key, inflection);
         }

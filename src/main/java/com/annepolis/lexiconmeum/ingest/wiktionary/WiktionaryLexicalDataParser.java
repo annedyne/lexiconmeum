@@ -4,10 +4,8 @@ import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.Sense;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
-import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.inflection.Declension;
 import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -21,7 +19,9 @@ import org.springframework.stereotype.Component;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.*;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -33,9 +33,9 @@ class WiktionaryLexicalDataParser {
     static final Logger logger = LogManager.getLogger(WiktionaryLexicalDataParser.class);
     private static final Marker NON_LEMMA = MarkerManager.getMarker("NON_LEMMA");
 
-        private static class LogMsg {
+    static class LogMsg {
         private static final String SKIPPING_NON_LEMMA = "Skipping non-lemma entry for: {} {}";
-        private static final String SKIPPING_INVALID_FORM = "Skipping invalid form: {}";
+        static final String SKIPPING_INVALID_FORM = "Skipping invalid form: {}";
         private static final String UNEXPECTED_INFLECTION_SOURCE = "Found an unexpected inflection source {} in form: {}";
         private static final String UNSUPPORTED_POS = "Unsupported partOfSpeech: {}";
         private static final String FAILED_TO_BUILD = "Failed to build lexeme: {}";
@@ -63,7 +63,7 @@ class WiktionaryLexicalDataParser {
     private ParseMode parseMode;
 
     private final LexicalTagResolver lexicalTagResolver;
-    private final Map<PartOfSpeech, PartOfSpeechValidator> wiktionaryPosValidators;
+    private final Map<PartOfSpeech, PartOfSpeechParser> wiktionaryPosValidators;
 
     public ParseMode getParseMode() {
         return parseMode;
@@ -73,7 +73,7 @@ class WiktionaryLexicalDataParser {
         this.parseMode = parseMode;
     }
 
-    WiktionaryLexicalDataParser(LexicalTagResolver lexicalTagResolver, Map<PartOfSpeech, PartOfSpeechValidator> wiktionaryPosValidators) {
+    WiktionaryLexicalDataParser(LexicalTagResolver lexicalTagResolver, Map<PartOfSpeech, PartOfSpeechParser> wiktionaryPosValidators  ) {
         this.lexicalTagResolver = lexicalTagResolver;
         this.wiktionaryPosValidators = wiktionaryPosValidators;
     }
@@ -104,7 +104,7 @@ class WiktionaryLexicalDataParser {
         }
 
         // Run POS-specific validator if present
-        PartOfSpeechValidator validator = wiktionaryPosValidators.get(pos);
+        PartOfSpeechParser validator = wiktionaryPosValidators.get(pos);
         if (validator != null && !validator.validate(root)) {
             logger.debug(NON_LEMMA, "pos : {} ", pos::name );
 
@@ -138,6 +138,7 @@ class WiktionaryLexicalDataParser {
 
         // Add sense nodes
         addSenses(root.path(SENSES.get()), builder);
+        PartOfSpeechParser partOfSpeechParser = wiktionaryPosValidators.get(partOfSpeech);
 
         // Parse inflected forms and other POS-specific info
         return switch (partOfSpeech) {
@@ -145,7 +146,7 @@ class WiktionaryLexicalDataParser {
             case ADVERB, PREPOSITION, POSTPOSITION -> buildLexemeWithOutForms(builder);
             case CONJUNCTION -> buildLexemeWithForms(builder, root, this::findAndAddCanonicalForm);
             case NOUN -> buildLexemeWithForms(builder, root, this::addDeclensionForms);
-            case VERB -> buildLexemeWithForms(builder, root, this::addConjugationForms);
+            case VERB -> buildLexemeWithForms(builder, root, partOfSpeechParser::addInflections);
             default -> {
                 logger.trace(LogMsg.UNSUPPORTED_POS, partOfSpeech);
                 yield Optional.empty();
@@ -323,72 +324,4 @@ class WiktionaryLexicalDataParser {
         return true;
     }
 
-    private void addConjugationForms(JsonNode formsNode, LexemeBuilder lexemeBuilder) {
-        for (JsonNode formNode : formsNode) {
-            if (isConjugationForm(formNode)) {
-                try {
-                    buildConjugation(formNode).ifPresent(lexemeBuilder::addInflection);
-                } catch (IllegalArgumentException | IllegalStateException ex) {
-                   logger.trace(LogMsg.SKIPPING_INVALID_FORM, ex.getMessage());
-                }
-            } else {
-                addCanonicalForm(formNode, lexemeBuilder);
-            }
-        }
-    }
-    Optional<Conjugation> buildConjugation(JsonNode formNode){
-        if (hasBlacklistedTag(formNode)) {
-            return Optional.empty();
-        }
-
-        Conjugation.Builder builder = new Conjugation.Builder(formNode.path(FORM.get()).asText());
-        List<String> tags = collectTags(formNode);
-        
-        replaceCompoundTense(tags);
-        
-        for (String tag : tags){
-            lexicalTagResolver.applyToInflection(tag, builder, logger);
-        }
-
-        return Optional.of(builder.build());
-    }
-
-    private boolean hasBlacklistedTag(JsonNode formNode) {
-        for (JsonNode tagNode : formNode.path(TAGS.get())) {
-            if (TAG_BLACKLIST.contains(tagNode.asText())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private List<String> collectTags(JsonNode formNode) {
-        List<String> tags = new ArrayList<>();
-        for (JsonNode tag : formNode.path(TAGS.get())) {
-            tags.add(tag.asText().toLowerCase());
-        }
-        return tags;
-    }
-
-    // Replace two separate tense tags with compound
-    private void replaceCompoundTense(List<String> tags) {
-        String future = GrammaticalTense.FUTURE.name().toLowerCase();
-        String perfect = GrammaticalTense.PERFECT.name().toLowerCase();
-        
-        if (tags.contains(future) && tags.contains(perfect)) {
-            tags.remove(future);
-            tags.remove(perfect);
-            tags.add(GrammaticalTense.FUTURE_PERFECT.name().toLowerCase());
-        }
-    }
-
-    // Filter out form nodes in black-list
-    private boolean isConjugationForm(JsonNode formNode){
-        String formValue = formNode.path(FORM.get()).asText();
-
-        return CONJUGATION.get().equalsIgnoreCase(formNode.path(SOURCE.get()).asText())
-                && !FORM_BLACKLIST.contains(formValue)
-                && !formValue.contains("+"); //for passive of compound tenses, wiktionary
-                                             // doesn't include person so excluding for now
-    }
 }
