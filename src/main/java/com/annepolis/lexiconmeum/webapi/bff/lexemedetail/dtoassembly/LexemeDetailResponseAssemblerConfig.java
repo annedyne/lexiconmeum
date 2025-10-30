@@ -39,7 +39,8 @@ import java.util.*;
         pipelines.get(PartOfSpeech.VERB).addAll(List.of(
                 inflectionTableContributor,
                 verbPrincipalPartsContributor,
-                inflectionClassContributor
+                inflectionClassContributor,
+                subtypeSectionContributor
         ));
 
         pipelines.get(PartOfSpeech.NOUN).addAll(List.of(

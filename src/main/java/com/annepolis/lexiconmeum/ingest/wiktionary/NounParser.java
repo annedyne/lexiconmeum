@@ -7,7 +7,7 @@ import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJ
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.NAME;
 
 @Component
-public class NounValidator implements PartOfSpeechValidator {
+public class NounParser implements PartOfSpeechParser {
 
     public static final String VALID_HEAD_TEMPLATE_NAME = "la-noun";
 

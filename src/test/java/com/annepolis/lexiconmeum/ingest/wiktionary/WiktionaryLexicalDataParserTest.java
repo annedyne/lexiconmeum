@@ -1,6 +1,7 @@
 package com.annepolis.lexiconmeum.ingest.wiktionary;
 
 import com.annepolis.lexiconmeum.TestUtil;
+import com.annepolis.lexiconmeum.ingest.tagmapping.EsseFormProvider;
 import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
@@ -34,9 +35,10 @@ import static org.junit.jupiter.api.Assertions.*;
         WiktionaryLexicalDataParser.class,
         LexicalTagResolver.class,
         ParserConfig.class,
-        VerbValidator.class,         // and these if they are @Component-less
-        NounValidator.class,
-        AdjectiveValidator.class
+        VerbParser.class,         // and these if they are @Component-less
+        NounParser.class,
+        AdjectiveParser.class,
+        EsseFormProvider.class
 })
 class WiktionaryLexicalDataParserTest {
 
@@ -57,11 +59,36 @@ class WiktionaryLexicalDataParserTest {
         return verbLexemes;
     }
 
+    private void parseVerbLexemes() throws IOException {
+        Resource resource = resourceLoader.getResource("classpath:testDataVerb.jsonl");
+        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
+            verbLexemes = new ArrayList<>();
+            parser.parseJsonl(reader, lexeme -> {
+                if (lexeme.getInflections().get(0) instanceof Conjugation) {
+                    verbLexemes.add(lexeme);
+                }
+            });
+
+        }
+    }
+
     public List<Lexeme> getNounLexemes() throws IOException {
         if(nounLexemes == null) {
             parseNounLexemes();
         }
         return nounLexemes;
+    }
+
+    private void parseNounLexemes() throws IOException {
+        Resource resource = resourceLoader.getResource("classpath:testDataNoun.jsonl");
+        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
+            nounLexemes = new ArrayList<>();
+            parser.parseJsonl(reader, lexeme -> {
+                if (lexeme.getInflections().get(0) instanceof Declension) {
+                    nounLexemes.add(lexeme);
+                }
+            });
+        }
     }
 
     public List<Lexeme> getAdjectiveLexemes() throws IOException {
@@ -70,6 +97,20 @@ class WiktionaryLexicalDataParserTest {
         }
         return adjectiveLexemes;
     }
+
+    private void parseAdjectiveLexemes() throws IOException {
+        Resource resource = resourceLoader.getResource("classpath:testDataAdjective.jsonl");
+        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
+            adjectiveLexemes = new ArrayList<>();
+            parser.parseJsonl(reader, lexeme -> {
+                if (lexeme.getInflections().get(0) instanceof Agreement) {
+                    adjectiveLexemes.add(lexeme);
+                }
+            });
+
+        }
+    }
+
     @Test
     void resourceExists() {
         Resource resource = resourceLoader.getResource("classpath:testDataRaw.jsonl");
@@ -103,7 +144,7 @@ class WiktionaryLexicalDataParserTest {
             List<Lexeme> lexemes = new ArrayList<>();
             parser.parseJsonl(reader, lexemes::add);
 
-            assertEquals(13, lexemes.size());
+            assertEquals(14, lexemes.size());
             assertEquals(PartOfSpeech.VERB, lexemes.get(0).getPartOfSpeech());
             assertEquals(PartOfSpeech.NOUN, lexemes.get(1).getPartOfSpeech());
         }
@@ -242,41 +283,5 @@ class WiktionaryLexicalDataParserTest {
         Assertions.assertNotNull(inflection);
     }
 
-    private void parseNounLexemes() throws IOException {
-        Resource resource = resourceLoader.getResource("classpath:testDataNoun.jsonl");
-        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
-            nounLexemes = new ArrayList<>();
-            parser.parseJsonl(reader, lexeme -> {
-                if (lexeme.getInflections().get(0) instanceof Declension) {
-                    nounLexemes.add(lexeme);
-                }
-            });
-        }
-    }
 
-    private void parseVerbLexemes() throws IOException {
-        Resource resource = resourceLoader.getResource("classpath:testDataVerb.jsonl");
-        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
-            verbLexemes = new ArrayList<>();
-            parser.parseJsonl(reader, lexeme -> {
-                if (lexeme.getInflections().get(0) instanceof Conjugation) {
-                    verbLexemes.add(lexeme);
-                }
-            });
-
-        }
-    }
-
-    private void parseAdjectiveLexemes() throws IOException {
-        Resource resource = resourceLoader.getResource("classpath:testDataAdjective.jsonl");
-        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
-            adjectiveLexemes = new ArrayList<>();
-            parser.parseJsonl(reader, lexeme -> {
-                if (lexeme.getInflections().get(0) instanceof Agreement) {
-                    adjectiveLexemes.add(lexeme);
-                }
-            });
-
-        }
-    }
 }

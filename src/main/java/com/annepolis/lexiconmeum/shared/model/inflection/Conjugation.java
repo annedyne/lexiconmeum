@@ -135,10 +135,10 @@ public class Conjugation implements Inflection {
         private void validateFields() {
             List<String> missing = new ArrayList<>();
 
-            if (mood != GrammaticalMood.INFINITIVE) {
+            /*if (mood != GrammaticalMood.INFINITIVE) {
                 if (person == null) missing.add("person");
                 if (number == null) missing.add("number");
-            }
+            }*/
             if (tense == null) missing.add("tense");
             if (form == null) missing.add("form");
 

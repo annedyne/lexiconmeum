@@ -2,6 +2,7 @@ package com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly;
 
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.MorphologicalSubtype;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.SyntacticSubtype;
 import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection.InflectionTableDTO;
@@ -22,6 +23,9 @@ public class LexemeDetailResponse {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     SyntacticSubtype syntacticSubtype;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    MorphologicalSubtype morphologicalSubtype;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     GrammaticalGender grammaticalGender;
@@ -63,6 +67,14 @@ public class LexemeDetailResponse {
 
     public void setSyntacticSubtype(SyntacticSubtype syntacticSubtype) {
         this.syntacticSubtype = syntacticSubtype;
+    }
+
+    public MorphologicalSubtype getMorphologicalSubtype() {
+        return morphologicalSubtype;
+    }
+
+    public void setMorphologicalSubtype(MorphologicalSubtype morphologicalSubtype) {
+        this.morphologicalSubtype = morphologicalSubtype;
     }
 
     public UUID getLexemeId() {

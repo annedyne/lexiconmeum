@@ -72,6 +72,11 @@ public enum PartOfSpeechDetailFactory {
     GOVERNED_CASE_DATIVE(Set.of("with-dative"), builder ->  {
         PrepositionDetails prepositionDetails = new PrepositionDetails(GrammaticalCase.DATIVE);
         builder.setPartOfSpeechDetails(prepositionDetails);
+    }),
+
+    DEPONENT(Set.of("deponent"), builder ->  {
+        VerbDetails verbDetails = new VerbDetails(MorphologicalSubtype.DEPONENT);
+        builder.setPartOfSpeechDetails(verbDetails);
     });
 
     private final Set<String> tags;
