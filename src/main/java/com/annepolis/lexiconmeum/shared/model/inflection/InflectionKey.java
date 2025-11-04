@@ -23,7 +23,7 @@ public final class InflectionKey {
         }
     }
     public static String buildConjugationKey(Conjugation conjugation) {
-        return joinParts(
+        return joinConjugationParts(
                 conjugation.getVoice(),
                 conjugation.getMood(),
                 conjugation.getTense(),
@@ -32,15 +32,7 @@ public final class InflectionKey {
                 );
     }
 
-    public static String buildDeclensionKey(Declension declension) {
-        return joinDeclensionParts(declension.getGrammaticalCase(), declension.getNumber());
-    }
-
-    public static String buildAgreementKey(Agreement agreement) {
-        return joinAgreementParts(agreement.getGrammaticalCase(), agreement.getNumber(), agreement.getGenders(), agreement.getDegree());
-    }
-
-    public static String joinParts(
+    public static String joinConjugationParts(
             GrammaticalVoice voice,
             GrammaticalMood mood,
             GrammaticalTense tense,
@@ -100,21 +92,33 @@ public final class InflectionKey {
             GrammaticalPerson person,
             GrammaticalNumber number
     ) {
-        return joinParts( voice, mood, tense, person, number );
+        return joinConjugationParts( voice, mood, tense, person, number );
+    }
+
+    public static String buildDeclensionKey(Declension declension) {
+        return joinDeclensionParts(declension.getGrammaticalCase(), declension.getNumber());
     }
 
     public String buildFirstDeclensionPrincipalPartKey(){
         return joinDeclensionParts(GrammaticalCase.NOMINATIVE, GrammaticalNumber.SINGULAR);
     }
+
     public String buildSecondDeclensionPrincipalPartKey(){
         return joinDeclensionParts(GrammaticalCase.GENITIVE, GrammaticalNumber.SINGULAR);
     }
-
     public static String joinDeclensionParts(
             GrammaticalCase grammaticalCase, GrammaticalNumber number ) {
 
         return buildKeyPart(grammaticalCase, true)
-        + buildKeyPart(number);
+                + buildKeyPart(number);
+    }
+
+    public static String buildAgreementKey(Agreement agreement) {
+        return joinAgreementParts(
+                agreement.getGrammaticalCase(),
+                agreement.getNumber(),
+                agreement.getGenders(),
+                agreement.getDegree());
     }
 
     public static String joinAgreementParts(
@@ -127,5 +131,32 @@ public final class InflectionKey {
                 + buildKeyPart(number)
                 + genderPart
                 + buildKeyPart(degree);
+    }
+
+    /**
+     * Builds a key representing a participle set based on the specified grammatical voice and tense.
+     *
+     * @param voice the grammatical voice (e.g., ACTIVE, PASSIVE) to be included in the key
+     * @param tense the grammatical tense (e.g., PRESENT, IMPERFECT) to be included in the key
+     * @return the constructed key as a concatenated string of the voice and tense
+     */
+    public static String buildParticipleSetKey(GrammaticalVoice voice, GrammaticalTense tense) {
+        return buildKeyPart(voice, true) + buildKeyPart(tense);
+    }
+
+
+    /**
+     * Builds a unique key for a participle's inflectional properties.
+     *
+     * @param participle the participle whose inflectional properties are used to build the key
+     * @return a string representing the unique key for the participle's inflectional properties
+     */
+    public static String buildParticipleInflectionKey(Participle participle) {
+        return buildAgreementKey(new Agreement.Builder(participle.getForm())
+                .setGrammaticalCase(participle.getGrammaticalCase())
+                .setNumber(participle.getNumber())
+                .setGenders(participle.getGenders())
+                .setDegree(participle.getDegree())
+                .build());
     }
 }

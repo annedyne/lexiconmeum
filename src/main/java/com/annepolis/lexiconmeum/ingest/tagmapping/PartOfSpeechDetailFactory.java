@@ -75,8 +75,11 @@ public enum PartOfSpeechDetailFactory {
     }),
 
     DEPONENT(Set.of("deponent"), builder ->  {
-        VerbDetails verbDetails = new VerbDetails(MorphologicalSubtype.DEPONENT);
-        builder.setPartOfSpeechDetails(verbDetails);
+       if(builder.getPartOfSpeechDetails() instanceof VerbDetails details) {
+           VerbDetails.Builder detailsBuilder = VerbDetails.Builder.fromVerbDetails(details);
+           detailsBuilder.setMorphologicalSubtype(MorphologicalSubtype.DEPONENT);
+           builder.setPartOfSpeechDetails(detailsBuilder.build());
+       }
     });
 
     private final Set<String> tags;

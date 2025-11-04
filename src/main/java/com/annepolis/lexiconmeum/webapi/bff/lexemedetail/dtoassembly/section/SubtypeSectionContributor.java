@@ -29,7 +29,7 @@ public class SubtypeSectionContributor implements LexemeDetailSectionContributor
             dto.setSyntacticSubtype( details.getSyntacticSubtype());
         }
         if( lexeme.getPartOfSpeechDetails() instanceof VerbDetails details){
-            dto.setMorphologicalSubtype( details.morphologicalSubtype());
+            dto.setMorphologicalSubtype( details.getMorphologicalSubtype());
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.annepolis.lexiconmeum.ingest.wiktionary;
 
+import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.stereotype.Component;
 
@@ -18,5 +19,10 @@ public class AdjectiveParser implements PartOfSpeechParser {
         String templateName = headTemplates.get(0).path(NAME.get()).asText("");
 
         return VALID_HEAD_TEMPLATE_NAME.equalsIgnoreCase(templateName);
+    }
+
+    @Override
+    public void addInflections(LexemeBuilder lexemeBuilder, JsonNode formsNode) {
+
     }
 }

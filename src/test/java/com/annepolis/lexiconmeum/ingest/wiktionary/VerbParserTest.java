@@ -51,16 +51,16 @@ public class VerbParserTest {
     }
 
     @Test
-    void testValidateConfirmsStandardVerbNodeIsValid() throws IOException {
+    void validateConfirmsStandardVerbNodeIsValid() throws IOException {
         JsonNode root = getJsonRoot().get(0);
-        VerbParser parser = new VerbParser(new LexicalTagResolver(),  new EsseFormProvider());
+        VerbParser parser = new VerbParser(new LexicalTagResolver(),  new EsseFormProvider(), new StagedLexemeCache() );
         Assertions.assertTrue(parser.validate(root));
     }
 
 
     @ParameterizedTest
     @MethodSource("expectedCompoundSequorTenseForms")
-    void testGeneratesAllCompoundForms(ConjugationTestCase testCase ) throws IOException {
+    void generatesAllCompoundForms(ConjugationTestCase testCase ) throws IOException {
 
         if (sequorLexemeBuilder == null) {
             JsonNode root = getJsonRoot().stream()
@@ -68,9 +68,9 @@ public class VerbParserTest {
                     .findFirst()
                     .orElseThrow(() -> new AssertionError("Lexeme 'sequor' not found"));
 
-            VerbParser parser = new VerbParser(new LexicalTagResolver(), new EsseFormProvider());
+            VerbParser parser = new VerbParser(new LexicalTagResolver(), new EsseFormProvider(), new StagedLexemeCache());
             sequorLexemeBuilder = new LexemeBuilder("testLemma", PartOfSpeech.VERB, "1");
-            parser.addInflections(root.path(FORMS.get()), sequorLexemeBuilder);
+            parser.addInflections(sequorLexemeBuilder, root.path(FORMS.get()) );
         }
 
         Inflection inflection = sequorLexemeBuilder.getInflections().get(testCase.key);
@@ -94,7 +94,7 @@ public class VerbParserTest {
                         String esseForm = ESSE_FORM_PROVIDER.getForm(mood, tense, number, person);
                         if(esseForm != null) {
                             String expectedForm = generateForm("secūtus", esseForm);
-                            String key = InflectionKey.joinParts(
+                            String key = InflectionKey.joinConjugationParts(
                                     GrammaticalVoice.ACTIVE,
                                     mood,
                                     tense,

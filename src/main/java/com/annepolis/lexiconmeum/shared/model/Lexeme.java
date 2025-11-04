@@ -62,6 +62,10 @@ public class Lexeme {
         return partOfSpeech;
     }
 
+    public String getEtymologyNumber() {
+        return etymologyNumber;
+    }
+
     public PartOfSpeechDetails getPartOfSpeechDetails() {
         return partOfSpeechDetails;
     }
