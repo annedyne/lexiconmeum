@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.FORMS;
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.WORD;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class VerbParserTest {
 
@@ -51,10 +52,23 @@ public class VerbParserTest {
     }
 
     @Test
-    void validateConfirmsStandardVerbNodeIsValid() throws IOException {
-        JsonNode root = getJsonRoot().get(0);
-        VerbParser parser = new VerbParser(new LexicalTagResolver(),  new EsseFormProvider(), new StagedLexemeCache() );
+    void validateConfirmsStandardVerbNodeAmoIsValidVerb() throws IOException {
+        JsonNode root = getJsonRoot().stream()
+                .filter(node -> node.path(WORD.get()).asText().equals("amo"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Node 'amo' not found"));
+        POSVerbParser parser = new POSVerbParser(new LexicalTagResolver(),  new EsseFormProvider());
         Assertions.assertTrue(parser.validate(root));
+    }
+
+    @Test
+    void validateConfirmsStandardParticipleNodeAmansIsNotValidVerb() throws IOException {
+        JsonNode root = getJsonRoot().stream()
+                .filter(node -> node.path(WORD.get()).asText().equals("amans"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Node 'amans' not found"));
+        POSVerbParser parser = new POSVerbParser(new LexicalTagResolver(),  new EsseFormProvider());
+        Assertions.assertFalse(parser.validate(root));
     }
 
 
@@ -68,7 +82,7 @@ public class VerbParserTest {
                     .findFirst()
                     .orElseThrow(() -> new AssertionError("Lexeme 'sequor' not found"));
 
-            VerbParser parser = new VerbParser(new LexicalTagResolver(), new EsseFormProvider(), new StagedLexemeCache());
+            POSVerbParser parser = new POSVerbParser(new LexicalTagResolver(), new EsseFormProvider());
             sequorLexemeBuilder = new LexemeBuilder("testLemma", PartOfSpeech.VERB, "1");
             parser.addInflections(sequorLexemeBuilder, root.path(FORMS.get()) );
         }
@@ -79,7 +93,7 @@ public class VerbParserTest {
         Assertions.assertInstanceOf(Conjugation.class, inflection, "Expected Conjugation but got: " + inflection.getClass());
 
         Conjugation conjugation = (Conjugation) inflection;
-        Assertions.assertEquals(testCase.expectedForm, conjugation.getForm(),
+        assertEquals(testCase.expectedForm, conjugation.getForm(),
                 "Form mismatch for " + testCase.mood + " " + testCase.tense + " " + testCase.number + " " + testCase.person);
 
     }
@@ -141,4 +155,7 @@ public class VerbParserTest {
             return mood + "|" + tense + "|" + number + "|" + person + " -> " + expectedForm;
         }
     }
+
+
+
 }

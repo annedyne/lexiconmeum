@@ -28,12 +28,6 @@ public class ParticipleResolutionService {
     // Thread-safe staging map for participles waiting for their parent verbs
     private final Map<String, List<StagedParticipleData>> stagedParticiples = new ConcurrentHashMap<>();
 
-    private final StagedLexemeCache stagedLexemeCache;
-
-    public ParticipleResolutionService(StagedLexemeCache stagedLexemeCache) {
-        this.stagedLexemeCache = stagedLexemeCache;
-    }
-
     /**
      * Stage a participle for later attachment during finalization.
      * Thread-safe for parallel ingestion.
@@ -46,7 +40,7 @@ public class ParticipleResolutionService {
         ).add(participleData);
 
         logger.debug("Staged participle '{}' for parent verb '{}'",
-                participleData.getBaseForm(), parentLemma);
+                participleData.getParticipleLemma(), parentLemma);
     }
 
     /**
@@ -54,7 +48,7 @@ public class ParticipleResolutionService {
      * Accepts a callback to ingest finalized lexemes.
      * Returns statistics about the finalization process.
      */
-    public FinalizationReport finalizeParticiples(Consumer<Lexeme> reingestCallback) {
+    public FinalizationReport finalizeParticiples(Consumer<Lexeme> reingestCallback,  StagedLexemeCache stagedLexemeCache) {
         logger.info("Starting participle finalization. {} parent verbs have staged participles",
                 stagedParticiples.size());
 
@@ -75,7 +69,7 @@ public class ParticipleResolutionService {
                         participles.size(), parentLemma);
                 participlesUnresolved.addAndGet(participles.size());
                 unresolvedDetails.put(parentLemma, participles.stream()
-                        .map(StagedParticipleData::getBaseForm)
+                        .map(StagedParticipleData::getParticipleLemma)
                         .toList());
                 return;
             }
@@ -93,19 +87,18 @@ public class ParticipleResolutionService {
                     participlesAttached.incrementAndGet();
 
                     logger.trace("Attached participle '{}' ({}) to verb '{}'",
-                            participleData.getBaseForm(),
+                            participleData.getParticipleLemma(),
                             participleData.getParticipleKey(),
                             matchingVerb.getLemma());
                 } else {
-                    logger.warn("Could not match participle '{}' to any verb with lemma '{}'",
-                            participleData.getBaseForm(), parentLemma);
+                    logger.warn("Could not match participle '{}' to any verb with lemma '{}'",participleData.getParticipleLemma(), parentLemma);
+
                     participlesUnresolved.incrementAndGet();
-                    unresolvedDetails.computeIfAbsent(parentLemma, k ->
-                            Collections.synchronizedList(new ArrayList<>())
-                    ).add(participleData.getBaseForm());
+                    unresolvedDetails.computeIfAbsent(
+                            parentLemma, k -> Collections.synchronizedList(new ArrayList<>()))
+                            .add(participleData.getParticipleLemma());
                 }
             }
-
             verbsUpdated.incrementAndGet();
         });
 
@@ -117,30 +110,17 @@ public class ParticipleResolutionService {
         );
 
         logger.info("Participle finalization complete: {}", report.getSummary());
-
-        // Clear staged data
-        stagedParticiples.clear();
-
+        clearStaged();
         return report;
     }
 
-    /**
-     * Get count of staged participles (for monitoring during ingestion)
-     */
     public int getStagedCount() {
-        return stagedParticiples.values().stream()
-                .mapToInt(List::size)
-                .sum();
+        return stagedParticiples.values().stream().mapToInt(List::size).sum();
     }
 
-    /**
-     * Clear all staged participles (useful for testing)
-     */
     public void clearStaged() {
         stagedParticiples.clear();
     }
-
-    // Private helper methods
 
     private Lexeme findMatchingVerb(List<Lexeme> candidateVerbs, StagedParticipleData participleData) {
         if (candidateVerbs.size() == 1) {
@@ -156,17 +136,13 @@ public class ParticipleResolutionService {
     }
 
     private Lexeme attachParticipleToVerb(Lexeme verb, StagedParticipleData participleData) {
-        // Convert Lexeme back to builder
-        LexemeBuilder builder = LexemeBuilder.fromLexeme(verb);
 
-        // Get or create VerbDetails builder
+        LexemeBuilder builder = LexemeBuilder.fromLexeme(verb);
         VerbDetails.Builder verbDetailsBuilder = getOrCreateVerbDetailsBuilder(verb);
 
-        // Add the participle set
         VerbDetails.ParticipleSet participleSet = participleData.toParticipleSet();
         verbDetailsBuilder.addParticipleSet(participleSet);
 
-        // Set updated details and rebuild
         builder.setPartOfSpeechDetails(verbDetailsBuilder.build());
 
         return builder.build();
@@ -174,11 +150,10 @@ public class ParticipleResolutionService {
 
     private VerbDetails.Builder getOrCreateVerbDetailsBuilder(Lexeme verb) {
         if (verb.getPartOfSpeechDetails() instanceof VerbDetails verbDetails) {
-            // Create builder from existing VerbDetails
+
             VerbDetails.Builder vdBuilder = new VerbDetails.Builder();
             vdBuilder.setMorphologicalSubtype(verbDetails.getMorphologicalSubtype());
 
-            // Copy existing participles
             verbDetails.getParticiples().values().forEach(vdBuilder::addParticipleSet);
 
             return vdBuilder;
@@ -188,9 +163,6 @@ public class ParticipleResolutionService {
         return new VerbDetails.Builder();
     }
 
-    /**
-     * Report of finalization results
-     */
     public static class FinalizationReport {
         private final int verbsUpdated;
         private final int participlesAttached;

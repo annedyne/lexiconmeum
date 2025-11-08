@@ -19,12 +19,12 @@ class WiktionaryLexicalDataLoader {
     private final IngestLexemeUseCase ingestLexemeUseCase;
     private final WiktionaryLexicalDataParser parser;
     private final Resource lexicalData;
-    private final WiktionaryStagingService wiktionaryStagingService;
+    private final DefaultWiktionaryStagingService wiktionaryStagingService;
 
 
     public WiktionaryLexicalDataLoader(IngestLexemeUseCase ingestLexemeUseCase,
                                        WiktionaryLexicalDataParser parser,
-                                       LoadProperties loadProperties, WiktionaryStagingService wiktionaryStagingService
+                                       LoadProperties loadProperties, DefaultWiktionaryStagingService wiktionaryStagingService
 
     ) {
         this.ingestLexemeUseCase = ingestLexemeUseCase;

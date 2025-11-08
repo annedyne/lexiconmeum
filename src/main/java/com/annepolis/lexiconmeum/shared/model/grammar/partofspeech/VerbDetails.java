@@ -39,6 +39,12 @@ public final class VerbDetails implements PartOfSpeechDetails {
         return !participles.isEmpty();
     }
 
+
+    public VerbDetails.Builder toBuilder() {
+        VerbDetails.Builder builder = new VerbDetails.Builder().setMorphologicalSubtype(morphologicalSubtype);
+        getParticiples().values().forEach(ps -> builder.addParticipleSet(ps));
+        return builder;
+    }
     /**
      * Builder for constructing VerbDetails incrementally
      */
@@ -50,6 +56,7 @@ public final class VerbDetails implements PartOfSpeechDetails {
         }
 
         public static VerbDetails.Builder fromVerbDetails(VerbDetails details) {
+
             VerbDetails.Builder builder = new VerbDetails.Builder();
             builder.setMorphologicalSubtype(details.getMorphologicalSubtype());
 

@@ -6,7 +6,9 @@ import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.Sense;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
+import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.inflection.Declension;
+import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
 import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,13 +21,13 @@ import org.springframework.stereotype.Component;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.text.Normalizer;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.*;
+import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataKeyWord.FORM_OF;
 
 @Component
 class WiktionaryLexicalDataParser {
@@ -59,8 +61,8 @@ class WiktionaryLexicalDataParser {
     private ParseMode parseMode;
 
     private final LexicalTagResolver lexicalTagResolver;
-    private final Map<PartOfSpeech, PartOfSpeechParser> wiktionaryPosValidators;
-    private final ParticipleResolutionService participleResolutionService;
+    private final Map<PartOfSpeech, PartOfSpeechParser> partOfSpeechParsers;
+    private final WiktionaryStagingService wiktionaryStagingService;
 
     public ParseMode getParseMode() {
         return parseMode;
@@ -71,11 +73,12 @@ class WiktionaryLexicalDataParser {
     }
 
     WiktionaryLexicalDataParser(LexicalTagResolver lexicalTagResolver,
-                                Map<PartOfSpeech, PartOfSpeechParser> wiktionaryPosValidators,
-                                ParticipleResolutionService participleResolutionService  ) {
+                                Map<PartOfSpeech, PartOfSpeechParser> partOfSpeechParsers,
+                                WiktionaryStagingService wiktionaryStagingService
+    ) {
         this.lexicalTagResolver = lexicalTagResolver;
-        this.wiktionaryPosValidators = wiktionaryPosValidators;
-        this.participleResolutionService = participleResolutionService;
+        this.partOfSpeechParsers = partOfSpeechParsers;
+        this.wiktionaryStagingService = wiktionaryStagingService;
     }
 
     public void parseJsonl(Reader reader, Consumer<Lexeme> lexemeConsumer) throws IOException {
@@ -84,7 +87,14 @@ class WiktionaryLexicalDataParser {
         while ((line = readJsonLine(br)) != null) {
             try {
                 JsonNode root = mapper.readTree(line);
-                buildLexeme(root).ifPresent(lexemeConsumer);
+                buildLexeme(root).ifPresent(lexeme -> {
+                    // Stage verbs, directly consume others
+                    if (lexeme.getPartOfSpeech() == PartOfSpeech.VERB) {
+                        wiktionaryStagingService.stageLexeme(lexeme);
+                    } else {
+                        lexemeConsumer.accept(lexeme);
+                    }
+                });
             } catch(JsonEOFException eofException) {
                 logger.error(LogMsg.JSONL_FORMAT_ERROR, eofException);
                 throw eofException;
@@ -104,7 +114,7 @@ class WiktionaryLexicalDataParser {
         }
 
         // Run POS-specific validator if present
-        PartOfSpeechParser validator = wiktionaryPosValidators.get(pos);
+        PartOfSpeechParser validator = partOfSpeechParsers.get(pos);
         if (validator != null && !validator.validate(root)) {
             logger.debug(NON_LEMMA, "pos : {} ", pos::name );
 
@@ -129,7 +139,7 @@ class WiktionaryLexicalDataParser {
 
         // Only build valid lemma entries
         if (!isValidLemmaEntry(root, partOfSpeech)) {
-            // Participles get staged and added to Lexeme at the end
+            // Participles get staged and added to associated parent Lexeme at the end
             if (partOfSpeech == PartOfSpeech.VERB && isParticipleEntry(root)) {
                 handleParticipleEntry(root);
             }
@@ -142,7 +152,7 @@ class WiktionaryLexicalDataParser {
 
         // Add sense nodes
         addSenses(root.path(SENSES.get()), builder);
-        PartOfSpeechParser partOfSpeechParser = wiktionaryPosValidators.get(partOfSpeech);
+        PartOfSpeechParser partOfSpeechParser = partOfSpeechParsers.get(partOfSpeech);
 
         // Parse inflected forms and other POS-specific info
         return switch (partOfSpeech) {
@@ -155,57 +165,6 @@ class WiktionaryLexicalDataParser {
                 yield Optional.empty();
             }
         };
-    }
-
-    /**
-     * Check if this verb entry is actually a participle form entry
-     */
-    private boolean isParticipleEntry(JsonNode root) {
-        // Must have head_templates
-        JsonNode headTemplates = root.path(HEAD_TEMPLATES.get());
-        if (!headTemplates.isArray() || headTemplates.isEmpty()) {
-            return false;
-        }
-
-        // Check template name
-        String templateName = headTemplates.get(0).path(NAME.get()).asText("");
-        if (!WiktionaryLexicalDataKeyWord.TEMPLATE_HEAD_PARTICPLE.get().equals(templateName)) {
-            return false;
-        }
-
-        // Check for participle + form-of tags in senses
-        JsonNode senses = root.path(SENSES.get());
-        if (!senses.isArray() || senses.isEmpty()) {
-            return false;
-        }
-
-        JsonNode tags = senses.get(0).path(TAGS.get());
-        boolean hasParticipleTag = false;
-        boolean hasFormOfTag = false;
-
-        for (JsonNode tag : tags) {
-            String tagValue = tag.asText();
-            if ("participle".equals(tagValue)) hasParticipleTag = true;
-            if ("form-of".equals(tagValue)) hasFormOfTag = true;
-        }
-
-        return hasParticipleTag && hasFormOfTag;
-    }
-    /**
-     * Handle a participle entry by staging it for later attachment
-     */
-    private void handleParticipleEntry(JsonNode root) {
-        try {
-            PartOfSpeechParser verbParser = wiktionaryPosValidators.get(PartOfSpeech.VERB);
-            if (verbParser instanceof VerbParser vp) {
-                StagedParticipleData participleData = vp.parseParticipleEntry(root);
-                participleResolutionService.stageParticiple(participleData);
-            } else {
-                logger.warn("VerbParser not available for participle entry");
-            }
-        } catch (Exception e) {
-            logger.error("Error parsing participle entry: {}", root.path(WORD.get()).asText(), e);
-        }
     }
 
     // Build sense nodes and add to builder
@@ -299,6 +258,8 @@ class WiktionaryLexicalDataParser {
 
     // ---------------------------------- POS SPECIFIC FORM HANDLERS ---------------------------------- //
 
+    // ---------------------------------- ADJECTIVE HANDLERS ---------------------------------- //
+
     private void addAdjectiveForms(JsonNode formsNode, LexemeBuilder lexemeBuilder) {
             for (JsonNode formNode : formsNode) {
                 if(isDeclensionForm(formNode)) {
@@ -324,6 +285,8 @@ class WiktionaryLexicalDataParser {
 
         return builder.build();
     }
+
+    // ---------------------------------- NOUN HANDLERS ---------------------------------- //
 
     // Find and set canonical form and gender of nouns
     void setNounCanonicalFormAndGender(JsonNode formNode, LexemeBuilder lexemeBuilder){
@@ -378,4 +341,103 @@ class WiktionaryLexicalDataParser {
         return true;
     }
 
+    // ---------------------------------- PARTICIPLE HANDLERS ---------------------------------- //
+
+    /**
+     * Check if this verb entry is actually a participle form entry
+     */
+    protected boolean isParticipleEntry(JsonNode root) {
+        // Must have head_templates
+        JsonNode headTemplates = root.path(HEAD_TEMPLATES.get());
+        if (!headTemplates.isArray() || headTemplates.isEmpty()) {
+            return false;
+        }
+
+        // Check template name
+        String templateName = headTemplates.get(0).path(NAME.get()).asText("");
+        if (!WiktionaryLexicalDataKeyWord.TEMPLATE_HEAD_PARTICPLE.get().equals(templateName)) {
+            return false;
+        }
+        return true;
+    }
+    /**
+     * Handle a participle entry by staging it for later attachment
+     */
+    private void handleParticipleEntry(JsonNode root) {
+        try {
+            StagedParticipleData participleData = parseParticipleEntry(root);
+            wiktionaryStagingService.stageParticiple(participleData);
+
+        } catch (Exception e) {
+            logger.error("Error parsing participle entry: {}", root.path(WORD.get()).asText(), e);
+        }
+    }
+
+    /**
+     * Parse a participle entry and return staged data.
+     * This is called when processing a participle JSONL entry (not verb inflection data).
+     */
+    public StagedParticipleData parseParticipleEntry(JsonNode root) {
+        // Extract parent verb information from form_of
+        JsonNode formOfArray = root.path(SENSES.get()).get(0).path(FORM_OF.get());
+        if (formOfArray == null || formOfArray.isEmpty()) {
+            throw new IllegalArgumentException("Participle missing form_of data");
+        }
+        
+        // flattening senses and their props for now 
+        String parentLemmaWithMacrons = formOfArray.get(0).path(WORD.get()).asText();
+        String parentLemma = removeMacrons(parentLemmaWithMacrons);
+
+        String participleLemma = root.path(WORD.get()).asText();
+        Conjugation.Builder conjBuilder = new Conjugation.Builder(parentLemmaWithMacrons);
+
+        JsonNode senseNode = root.path(SENSES.get()).get(0);
+        lexicalTagResolver.applyAllToInflection(collectTags(senseNode), conjBuilder, logger);
+
+        // build participle case inflections
+        Map<String, Agreement> inflections = parseParticipleInflections(root);
+
+        return new StagedParticipleData(
+                parentLemma,
+                parentLemmaWithMacrons,
+                conjBuilder.getVoice(),
+                conjBuilder.getTense(),
+                participleLemma,
+                inflections
+        );
+    }
+    String removeMacrons(String text) {
+        return Normalizer.normalize(text, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "");
+    }
+    protected Map<String, Agreement> parseParticipleInflections(JsonNode root) {
+        Map<String, Agreement> inflections = new HashMap<>();
+        JsonNode formsArray = root.path(FORMS.get());
+
+        for (JsonNode formNode : formsArray) {
+            if (!isValidParticipleForm(formNode)) {
+                continue;
+            }
+
+            Agreement agreement = buildAgreement(formNode);
+
+            String key = InflectionKey.buildAgreementKey(agreement);
+            inflections.put(key, agreement);
+        }
+
+        return inflections;
+    }
+
+    boolean isValidParticipleForm(JsonNode formNode){
+        return formNode.path(SOURCE.get()).asText().equals(DECLENSION.get()) 
+                && !FORM_BLACKLIST.contains(formNode.path(FORM.get()).asText());
+    }
+
+    private List<String> collectTags(JsonNode tagParentNode) {
+        List<String> tags = new ArrayList<>();
+        for (JsonNode tag : tagParentNode.path(TAGS.get())) {
+            tags.add(tag.asText().toLowerCase());
+        }
+        return tags;
+    }
 }

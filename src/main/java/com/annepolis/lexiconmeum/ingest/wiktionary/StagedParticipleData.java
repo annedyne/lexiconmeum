@@ -17,7 +17,7 @@ public class StagedParticipleData {
     private final String parentLemmaWithMacrons;  // with macrons from form_of, e.g., "amō"
     private final GrammaticalVoice voice;
     private final GrammaticalTense tense;
-    private final String baseForm;  // e.g., "amans"
+    private final String participleLemma;  // e.g., "amans"
     private final Map<String, Agreement> inflections;
 
     public StagedParticipleData(
@@ -25,13 +25,13 @@ public class StagedParticipleData {
             String parentLemmaWithMacrons,
             GrammaticalVoice voice,
             GrammaticalTense tense,
-            String baseForm,
+            String participleLemma,
             Map<String, Agreement> inflections) {
         this.parentLemma = parentLemma;
         this.parentLemmaWithMacrons = parentLemmaWithMacrons;
         this.voice = voice;
         this.tense = tense;
-        this.baseForm = baseForm;
+        this.participleLemma = participleLemma;
         this.inflections = inflections;
     }
 
@@ -43,18 +43,18 @@ public class StagedParticipleData {
         return parentLemmaWithMacrons;
     }
 
-    public String getBaseForm() {
-        return baseForm;
+    public String getParticipleLemma() {
+        return participleLemma;
     }
 
     public VerbDetails.ParticipleSet toParticipleSet() {
-        return new VerbDetails.ParticipleSet(voice, tense, baseForm, inflections);
+        return new VerbDetails.ParticipleSet(voice, tense, participleLemma, inflections);
     }
 
     @Override
     public String toString() {
         return String.format("StagedParticiple{parent='%s', voice=%s, tense=%s, baseForm='%s'}",
-                parentLemma, voice, tense, baseForm);
+                parentLemma, voice, tense, participleLemma);
     }
 
     public String getParticipleKey() {

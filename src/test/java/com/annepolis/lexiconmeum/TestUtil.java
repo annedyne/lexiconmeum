@@ -10,7 +10,13 @@ import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
 import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.inflection.Declension;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -254,5 +260,23 @@ public class TestUtil {
     private static Agreement buildAgreement(String form, GrammaticalGender gender , GrammaticalNumber number , GrammaticalCase grammaticalCase){
         Agreement.Builder builder = new Agreement.Builder(form);
         return builder.addGender(gender).setNumber(number).setGrammaticalCase(grammaticalCase).build();
+    }
+
+    public static List<JsonNode> getJsonRootNodes() throws IOException {
+        InputStream inputStream = TestUtil.class.getClassLoader()
+                .getResourceAsStream("testDataRaw.jsonl");
+
+        if (inputStream == null) {
+            throw new IOException("Resource not found: testDataVerb.jsonl");
+        }
+
+        List<JsonNode> nodes = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                nodes.add(new ObjectMapper().readTree(line));
+            }
+        }
+        return nodes;
     }
 }

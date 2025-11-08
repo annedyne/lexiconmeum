@@ -5,7 +5,6 @@ import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.grammar.*;
-import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
 import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -14,14 +13,17 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.*;
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataKeyWord.TEMPLATE_HEAD_VERB;
 
 @Component
-public class VerbParser implements PartOfSpeechParser {
-    static final Logger logger = LogManager.getLogger(VerbParser.class);
+public class POSVerbParser implements PartOfSpeechParser {
+    static final Logger logger = LogManager.getLogger(POSVerbParser.class);
 
     private static final Set<String> FORM_BLACKLIST = Set.of(
             "no-table-tags",
@@ -55,12 +57,10 @@ public class VerbParser implements PartOfSpeechParser {
     public static final Set<String> VALID_HEAD_TEMPLATE_NAMES = Set.of(TEMPLATE_HEAD_VERB.get());
     private final LexicalTagResolver lexicalTagResolver;
     private final EsseFormProvider esseFormProvider;
-    private final StagedLexemeCache stagedLexemeCache;
 
-    public VerbParser(LexicalTagResolver lexicalTagResolver, EsseFormProvider esseFormProvider, StagedLexemeCache stagedLexemeCache){
+    public POSVerbParser(LexicalTagResolver lexicalTagResolver, EsseFormProvider esseFormProvider){
         this.lexicalTagResolver = lexicalTagResolver;
         this.esseFormProvider = esseFormProvider;
-        this.stagedLexemeCache = stagedLexemeCache;
     }
 
     @Override
@@ -87,109 +87,13 @@ public class VerbParser implements PartOfSpeechParser {
         JsonNode formsNode = root.path(FORMS.get());
         addInflections( lexemeBuilder, formsNode);
         try {
-            stagedLexemeCache.putLexeme(lexemeBuilder.build());
+            // Return the built lexeme instead of staging it directly
+            return Optional.of(lexemeBuilder.build());
         } catch (Exception ex) {
             logger.warn(WiktionaryLexicalDataParser.LogMsg.FAILED_TO_BUILD, ex.getMessage());
-        }
-        return Optional.empty();
-    }
-
-    /**
-     * Parse a participle entry and return staged data.
-     * This is called when processing a participle JSONL entry (not verb inflection data).
-     */
-    public StagedParticipleData parseParticipleEntry(JsonNode root) {
-        // Extract parent verb information from form_of
-        JsonNode formOfArray = root.path("senses").get(0).path("form_of");
-        if (formOfArray == null || formOfArray.isEmpty()) {
-            throw new IllegalArgumentException("Participle missing form_of data");
+            return Optional.empty();
         }
 
-        String parentLemmaWithMacrons = formOfArray.get(0).path("word").asText();
-        String parentLemma = removeMacrons(parentLemmaWithMacrons);
-
-        // Extract voice and tense from tags
-        JsonNode tags = root.path("senses").get(0).path("tags");
-        GrammaticalVoice voice = extractVoiceFromTags(tags);
-        GrammaticalTense tense = extractTenseFromTags(tags);
-
-        // Get base form (the participle's lemma)
-        String baseForm = root.path("word").asText();
-
-        // Parse all declension forms
-        Map<String, Agreement> inflections = parseParticipleInflections(root);
-
-        return new StagedParticipleData(
-                parentLemma,
-                parentLemmaWithMacrons,
-                voice,
-                tense,
-                baseForm,
-                inflections
-        );
-    }
-
-    private Map<String, Agreement> parseParticipleInflections(JsonNode root) {
-        Map<String, Agreement> inflections = new HashMap<>();
-        JsonNode formsArray = root.path("forms");
-
-        for (JsonNode formNode : formsArray) {
-            // Skip non-declension forms (like comparative, superlative markers)
-            if (!isValidParticipleForm(formNode)) {
-                continue;
-            }
-
-            String form = formNode.path("form").asText();
-            JsonNode tags = formNode.path("tags");
-
-            // Parse grammatical features
-            Agreement.Builder builder = new Agreement.Builder(form);
-
-            // Extract case, number, genders from tags
-            for (JsonNode tag : tags) {
-                String tagValue = tag.asText();
-                // Use existing tag mapping infrastructure
-                lexicalTagResolver.applyToInflection(builder, tagValue, logger);
-            }
-
-            Agreement participle = builder.build();
-            String key = InflectionKey.buildAgreementKey(participle);
-            inflections.put(key, participle);
-        }
-
-        return inflections;
-    }
-
-    boolean isValidParticipleForm(JsonNode formNode){
-        return formNode.path("source").asText().equals("declension") && !FORM_BLACKLIST.contains(formNode.asText());
-    }
-
-    private GrammaticalVoice extractVoiceFromTags(JsonNode tags) {
-        for (JsonNode tag : tags) {
-            String tagValue = tag.asText();
-            if (tagValue.equals("active")) return GrammaticalVoice.ACTIVE;
-            if (tagValue.equals("passive")) return GrammaticalVoice.PASSIVE;
-        }
-        return null;
-    }
-
-    private GrammaticalTense extractTenseFromTags(JsonNode tags) {
-        for (JsonNode tag : tags) {
-            String tagValue = tag.asText();
-            if (tagValue.equals("present")) return GrammaticalTense.PRESENT;
-            if (tagValue.equals("perfect")) return GrammaticalTense.PERFECT;
-            if (tagValue.equals("future")) return GrammaticalTense.FUTURE;
-        }
-        return null;
-    }
-
-    private String removeMacrons(String text) {
-        return text.replace("ā", "a")
-                .replace("ē", "e")
-                .replace("ī", "i")
-                .replace("ō", "o")
-                .replace("ū", "u")
-                .replace("ȳ", "y");
     }
 
     @Override
@@ -213,6 +117,7 @@ public class VerbParser implements PartOfSpeechParser {
             }
         }
     }
+
 
     private void addInflection(LexemeBuilder lexemeBuilder, Optional<Conjugation> optionalConjugation){
         if(optionalConjugation.isPresent()) {

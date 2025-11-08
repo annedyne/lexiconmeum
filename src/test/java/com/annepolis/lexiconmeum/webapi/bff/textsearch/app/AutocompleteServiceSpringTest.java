@@ -38,7 +38,7 @@ class AutocompleteServiceSpringTest {
     @Test
     void getWordsEndingWithReturnsUniqueCachedResults(){
         List<SuggestionResponse> result = underTest.getWordsEndingWith("eris", 10);
-        assertEquals(10, result.size());
+        assertEquals(6, result.size());
 
     }
 
