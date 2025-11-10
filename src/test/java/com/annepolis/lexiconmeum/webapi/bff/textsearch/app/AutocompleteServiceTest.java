@@ -49,6 +49,7 @@ class AutocompleteServiceTest {
             public Lexeme getLexemeOfType(UUID lemmaId, PartOfSpeech expectedType) {
                 return null;
             }
+
         };
     }
 }

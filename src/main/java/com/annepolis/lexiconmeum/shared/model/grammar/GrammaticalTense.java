@@ -10,6 +10,7 @@ public enum GrammaticalTense {
     FUTURE("Future", "Simple Future"),
     FUTURE_PERFECT("Future Perfect","Future Perfect");
 
+
     private final String historicalName;
     private final String alternativeName;
 

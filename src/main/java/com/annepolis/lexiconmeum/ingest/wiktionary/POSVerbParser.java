@@ -2,10 +2,9 @@ package com.annepolis.lexiconmeum.ingest.wiktionary;
 
 import com.annepolis.lexiconmeum.ingest.tagmapping.EsseFormProvider;
 import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
+import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPerson;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
+import com.annepolis.lexiconmeum.shared.model.grammar.*;
 import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -20,10 +19,11 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.*;
+import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataKeyWord.TEMPLATE_HEAD_VERB;
 
 @Component
-public class VerbParser implements PartOfSpeechParser {
-    static final Logger logger = LogManager.getLogger(VerbParser.class);
+public class POSVerbParser implements PartOfSpeechParser {
+    static final Logger logger = LogManager.getLogger(POSVerbParser.class);
 
     private static final Set<String> FORM_BLACKLIST = Set.of(
             "no-table-tags",
@@ -54,12 +54,11 @@ public class VerbParser implements PartOfSpeechParser {
             "PASSIVE|SUBJUNCTIVE|FUTURE_PERFECT"
     );
 
-
-    public static final String VALID_HEAD_TEMPLATE_NAME = "la-verb";
+    public static final Set<String> VALID_HEAD_TEMPLATE_NAMES = Set.of(TEMPLATE_HEAD_VERB.get());
     private final LexicalTagResolver lexicalTagResolver;
     private final EsseFormProvider esseFormProvider;
 
-    public VerbParser(LexicalTagResolver lexicalTagResolver,  EsseFormProvider esseFormProvider){
+    public POSVerbParser(LexicalTagResolver lexicalTagResolver, EsseFormProvider esseFormProvider){
         this.lexicalTagResolver = lexicalTagResolver;
         this.esseFormProvider = esseFormProvider;
     }
@@ -71,7 +70,8 @@ public class VerbParser implements PartOfSpeechParser {
         JsonNode headTemplates = root.path(HEAD_TEMPLATES.get());
         String templateName = headTemplates.get(0).path(NAME.get()).asText("");
 
-        return VALID_HEAD_TEMPLATE_NAME.equalsIgnoreCase(templateName);
+        return VALID_HEAD_TEMPLATE_NAMES.contains(templateName);
+
     }
 
     // Filter out form nodes in the blacklist
@@ -83,7 +83,21 @@ public class VerbParser implements PartOfSpeechParser {
     }
 
     @Override
-    public void addInflections(JsonNode formsNode, LexemeBuilder lexemeBuilder) {
+    public Optional<Lexeme> parsePartOfSpeech(LexemeBuilder lexemeBuilder, JsonNode root){
+        JsonNode formsNode = root.path(FORMS.get());
+        addInflections( lexemeBuilder, formsNode);
+        try {
+            // Return the built lexeme instead of staging it directly
+            return Optional.of(lexemeBuilder.build());
+        } catch (Exception ex) {
+            logger.warn(WiktionaryLexicalDataParser.LogMsg.FAILED_TO_BUILD, ex.getMessage());
+            return Optional.empty();
+        }
+
+    }
+
+    @Override
+    public void addInflections(LexemeBuilder lexemeBuilder, JsonNode formsNode) {
         for (JsonNode formNode : formsNode) {
             try {
                 if (isConjugationForm(formNode)) {
@@ -96,13 +110,14 @@ public class VerbParser implements PartOfSpeechParser {
                 } else {
                     // Canonical just tags a form already in the form array.
                     // so no need to add it again as an inflection
-                    addCanonicalForm(formNode, lexemeBuilder);
+                    addCanonicalForm(lexemeBuilder, formNode);
                 }
             } catch (IllegalArgumentException | IllegalStateException ex) {
                 logger.trace(WiktionaryLexicalDataParser.LogMsg.SKIPPING_INVALID_FORM, ex.getMessage());
             }
         }
     }
+
 
     private void addInflection(LexemeBuilder lexemeBuilder, Optional<Conjugation> optionalConjugation){
         if(optionalConjugation.isPresent()) {
@@ -154,7 +169,7 @@ public class VerbParser implements PartOfSpeechParser {
 
 
     // If this form contains a 'canonical' tag, add it to Lexeme canonical forms 
-    private void addCanonicalForm(JsonNode formNode, LexemeBuilder lexemeBuilder) throws IllegalArgumentException{
+    private void addCanonicalForm(LexemeBuilder lexemeBuilder, JsonNode formNode) throws IllegalArgumentException{
         for (JsonNode tag : formNode.path(TAGS.get())) {
             if(CANONICAL.name().equalsIgnoreCase(tag.asText())){
                 lexemeBuilder.addCanonicalForm(formNode.path(FORM.get()).asText());
@@ -174,7 +189,7 @@ public class VerbParser implements PartOfSpeechParser {
         coalesceCompoundFutureTenseTags(tags);
 
         for (String tag : tags){
-            lexicalTagResolver.applyToInflection(tag, builder, logger);
+            lexicalTagResolver.applyToInflection(builder, tag, logger);
         }
 
         return Optional.of(builder.build());
@@ -206,11 +221,28 @@ public class VerbParser implements PartOfSpeechParser {
     private void coalesceCompoundFutureTenseTags(List<String> tags) {
         String future = GrammaticalTense.FUTURE.name().toLowerCase();
         String perfect = GrammaticalTense.PERFECT.name().toLowerCase();
+        String participle = GrammaticalParticiple.PARTICIPLE.name().toLowerCase();
 
         if (tags.contains(future) && tags.contains(perfect)) {
             tags.remove(future);
             tags.remove(perfect);
             tags.add(GrammaticalTense.FUTURE_PERFECT.name().toLowerCase());
+        }
+        if (tags.contains(participle) ){
+            String present = GrammaticalTense.PRESENT.name().toLowerCase();
+            String active = GrammaticalVoice.ACTIVE.name().toLowerCase();
+            if(tags.contains(GrammaticalTense.PRESENT.name())){
+                tags.remove(participle);
+                tags.remove(present);
+                tags.remove(active);
+                tags.add(GrammaticalParticiple.PRESENT_ACTIVE.name().toLowerCase());
+            }
+
+            if(tags.contains(GrammaticalTense.PERFECT.name())){
+                tags.remove(participle);
+                tags.remove(present);
+                tags.add(GrammaticalParticiple.PRESENT_ACTIVE.name().toLowerCase());
+            }
         }
     }
 }

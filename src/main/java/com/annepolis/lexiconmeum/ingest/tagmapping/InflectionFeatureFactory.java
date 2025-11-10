@@ -1,10 +1,7 @@
 package com.annepolis.lexiconmeum.ingest.tagmapping;
 
 import com.annepolis.lexiconmeum.shared.model.grammar.*;
-import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
-import com.annepolis.lexiconmeum.shared.model.inflection.BuilderHasGrammaticalCase;
-import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
-import com.annepolis.lexiconmeum.shared.model.inflection.InflectionBuilder;
+import com.annepolis.lexiconmeum.shared.model.inflection.*;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
@@ -58,11 +55,15 @@ public enum InflectionFeatureFactory {
     GENDER_FEMININE("feminine", builder -> {
         if (builder instanceof Agreement.Builder agrBuilder) {
             agrBuilder.addGender(GrammaticalGender.FEMININE);
+        } else if (builder instanceof Participle.Builder agrBuilder) {
+            agrBuilder.addGender(GrammaticalGender.FEMININE);
         }
     }),
 
     GENDER_MASCULINE("masculine", builder -> {
         if (builder instanceof Agreement.Builder agrBuilder) {
+            agrBuilder.addGender(GrammaticalGender.MASCULINE);
+        } else if (builder instanceof Participle.Builder agrBuilder) {
             agrBuilder.addGender(GrammaticalGender.MASCULINE);
         }
     }),
@@ -70,11 +71,15 @@ public enum InflectionFeatureFactory {
     GENDER_NEUTER("neuter", builder -> {
         if (builder instanceof Agreement.Builder agrBuilder){
             agrBuilder.addGender(GrammaticalGender.NEUTER);
+        } else if (builder instanceof Participle.Builder agrBuilder) {
+            agrBuilder.addGender(GrammaticalGender.NEUTER);
         }
     }),
 
     DEGREE_POSITIVE("positive", builder -> {
         if (builder instanceof Agreement.Builder agrBuilder){
+            agrBuilder.setDegree(GrammaticalDegree.POSITIVE);
+        } else if (builder instanceof Participle.Builder agrBuilder) {
             agrBuilder.setDegree(GrammaticalDegree.POSITIVE);
         }
     }),
@@ -82,11 +87,15 @@ public enum InflectionFeatureFactory {
     DEGREE_COMPARATIVE("comparative", builder -> {
         if (builder instanceof Agreement.Builder agrBuilder){
             agrBuilder.setDegree(GrammaticalDegree.COMPARATIVE);
+        }  else if (builder instanceof Participle.Builder agrBuilder) {
+            agrBuilder.setDegree(GrammaticalDegree.COMPARATIVE);
         }
     }),
 
     DEGREE_SUPERLATIVE("superlative", builder -> {
         if (builder instanceof Agreement.Builder agrBuilder){
+            agrBuilder.setDegree(GrammaticalDegree.SUPERLATIVE);
+        }  else if (builder instanceof Participle.Builder agrBuilder) {
             agrBuilder.setDegree(GrammaticalDegree.SUPERLATIVE);
         }
     }),
@@ -153,6 +162,13 @@ public enum InflectionFeatureFactory {
             conjBuilder.setTense(GrammaticalTense.FUTURE_PERFECT);
         }
     }),
+
+    PARTICIPLE_PRESENT_ACTIVE("present_participle", builder -> {
+        if(builder instanceof Conjugation.Builder conjBuilder){
+            conjBuilder.setParticiple(GrammaticalParticiple.PRESENT_ACTIVE);
+        }
+    }),
+
 
     MOOD_INDICATIVE("indicative", builder -> {
         if (builder instanceof Conjugation.Builder conjBuilder) {

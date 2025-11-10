@@ -8,13 +8,13 @@ import java.util.EnumMap;
 import java.util.Map;
 
 @Configuration
-public class ParserConfig {
+public class PartOfSpeechParserConfig {
 
     @Bean
     public Map<PartOfSpeech, PartOfSpeechParser> wiktionaryPosValidators(
-            VerbParser verbValidator,
-            NounParser nounValidator,
-            AdjectiveParser adjectiveValidator
+            POSVerbParser verbValidator,
+            POSNounParser nounValidator,
+            POSAdjectiveParser adjectiveValidator
     ) {
         Map<PartOfSpeech, PartOfSpeechParser> map = new EnumMap<>(PartOfSpeech.class);
         map.put(PartOfSpeech.VERB, verbValidator);

@@ -132,4 +132,28 @@ public class LexemeBuilder {
         return new Lexeme(this);
     }
 
+    /**
+     * Create a builder from an existing Lexeme (for rebuilding with modifications)
+     */
+    public static LexemeBuilder fromLexeme(Lexeme lexeme) {
+        LexemeBuilder builder = new LexemeBuilder(
+                lexeme.getLemma(),
+                lexeme.getPartOfSpeech(),
+                lexeme.getEtymologyNumber()
+        );
+
+        // Copy all fields
+        lexeme.getCanonicalForms().forEach(builder::addCanonicalForm);
+        lexeme.getInflections().forEach(builder::addInflection);
+        lexeme.getSenses().forEach(builder::addSense);
+        lexeme.getInflectionClasses().forEach(builder::addInflectionClass);
+
+        if (lexeme.getPartOfSpeechDetails() != null) {
+            builder.setPartOfSpeechDetails(lexeme.getPartOfSpeechDetails());
+        }
+
+        return builder;
+    }
+
+
 }

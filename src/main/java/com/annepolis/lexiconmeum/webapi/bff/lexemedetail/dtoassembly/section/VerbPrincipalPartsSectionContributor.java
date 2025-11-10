@@ -42,7 +42,7 @@ class VerbPrincipalPartsSectionContributor implements LexemeDetailSectionContrib
 
         MorphologicalSubtype subtype;
         if(lexeme.getPartOfSpeechDetails() instanceof VerbDetails details){
-            subtype = details.morphologicalSubtype();
+            subtype = details.getMorphologicalSubtype();
             if(subtype == MorphologicalSubtype.DEPONENT){
                 Optional.ofNullable(index.get(inflectionKey.buildThirdPrincipalPartKey()))
                         .map(Inflection::getForm)

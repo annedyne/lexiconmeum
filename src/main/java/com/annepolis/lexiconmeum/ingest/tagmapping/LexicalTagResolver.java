@@ -50,7 +50,7 @@ public final class LexicalTagResolver {
     }
 
     // Apply a single inflection tag (e.g., person/tense/case/number/etc.)
-    public boolean applyToInflection(String tag, InflectionBuilder builder, Logger logger) {
+    public boolean applyToInflection(InflectionBuilder builder, String tag, Logger logger) {
         String norm = tag == null ? "" : tag.toLowerCase();
         Optional<InflectionFeatureFactory> opt = InflectionFeatureFactory.fromTag(norm);
         if (opt.isPresent()) {
@@ -66,7 +66,7 @@ public final class LexicalTagResolver {
     // Apply many inflection tags
     public void applyAllToInflection(Iterable<String> tags, InflectionBuilder builder, Logger logger) {
         for (String t : tags) {
-            applyToInflection(t, builder, logger);
+            applyToInflection(builder, t, logger);
         }
     }
 
