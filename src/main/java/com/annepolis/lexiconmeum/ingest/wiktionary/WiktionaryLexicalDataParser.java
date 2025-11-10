@@ -4,6 +4,8 @@ import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.Sense;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
 import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
@@ -348,17 +350,14 @@ class WiktionaryLexicalDataParser {
      */
     protected boolean isParticipleEntry(JsonNode root) {
         // Must have head_templates
-        JsonNode headTemplates = root.path(HEAD_TEMPLATES.get());
+       JsonNode headTemplates = root.path(HEAD_TEMPLATES.get());
         if (!headTemplates.isArray() || headTemplates.isEmpty()) {
             return false;
         }
 
         // Check template name
         String templateName = headTemplates.get(0).path(NAME.get()).asText("");
-        if (!WiktionaryLexicalDataKeyWord.TEMPLATE_HEAD_PARTICPLE.get().equals(templateName)) {
-            return false;
-        }
-        return true;
+        return WiktionaryLexicalDataKeyWord.TEMPLATE_HEAD_PARTICPLE.get().equals(templateName);
     }
     /**
      * Handle a participle entry by staging it for later attachment
@@ -378,23 +377,32 @@ class WiktionaryLexicalDataParser {
      * This is called when processing a participle JSONL entry (not verb inflection data).
      */
     public StagedParticipleData parseParticipleEntry(JsonNode root) {
-        // Extract parent verb information from form_of
-        JsonNode formOfArray = root.path(SENSES.get()).get(0).path(FORM_OF.get());
-        if (formOfArray == null || formOfArray.isEmpty()) {
-            throw new IllegalArgumentException("Participle missing form_of data");
-        }
-        
-        // flattening senses and their props for now 
-        String parentLemmaWithMacrons = formOfArray.get(0).path(WORD.get()).asText();
-        String parentLemma = removeMacrons(parentLemmaWithMacrons);
-
         String participleLemma = root.path(WORD.get()).asText();
+
+        // If there is NO 'form_of' the tag, assuming participle is a GERUNDIVE,
+        // and the key for parent Lexeme lookup is GERUNDIVE form
+        String parentLemmaWithMacrons = participleLemma;
+        String parentLemma = participleLemma;
         Conjugation.Builder conjBuilder = new Conjugation.Builder(parentLemmaWithMacrons);
+        List<String> tags = new ArrayList<>();
+        tags.add(GrammaticalVoice.PASSIVE.name().toLowerCase());
+        tags.add(GrammaticalTense.FUTURE.name().toLowerCase());
 
-        JsonNode senseNode = root.path(SENSES.get()).get(0);
-        lexicalTagResolver.applyAllToInflection(collectTags(senseNode), conjBuilder, logger);
+        // Extract parent verb information from form_of if it exists,
+        // and overwrite parent lemma
+        // NB: Assuming the same tags for all senses for now
+        JsonNode formOfArray = root.path(SENSES.get()).get(0).path(FORM_OF.get());
+        if (formOfArray != null && !formOfArray.isEmpty()) {
+            parentLemmaWithMacrons = formOfArray.get(0).path(WORD.get()).asText();
+            parentLemma = removeMacrons(parentLemmaWithMacrons);
 
-        // build participle case inflections
+            JsonNode senseNode = root.path(SENSES.get()).get(0);
+            tags = collectTags(senseNode);
+
+        }
+
+        lexicalTagResolver.applyAllToInflection(tags, conjBuilder, logger);
+                // Build participle case inflections.
         Map<String, Agreement> inflections = parseParticipleInflections(root);
 
         return new StagedParticipleData(
@@ -406,6 +414,7 @@ class WiktionaryLexicalDataParser {
                 inflections
         );
     }
+
     String removeMacrons(String text) {
         return Normalizer.normalize(text, Normalizer.Form.NFD)
                 .replaceAll("\\p{M}", "");

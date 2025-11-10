@@ -42,6 +42,10 @@ public class DefaultWiktionaryStagingService implements WiktionaryStagingService
         participleResolutionService.stageParticiple(participleData);
     }
 
+    private void clearStaged(){
+        stagedLexemeCache.clearStaged();
+    }
+
     /**
      * Called after ALL lexemes have been ingested.
      * Performs finalization tasks like attaching staged participles.
@@ -58,17 +62,15 @@ public class DefaultWiktionaryStagingService implements WiktionaryStagingService
 
         if (report.hasUnresolved()) {
             logger.warn("Finalization completed with {} unresolved participles",
-                    report.getParticiplesUnresolved());
+                    report.participlesUnresolved());
 
             // Log details
-            report.getUnresolvedDetails().forEach((verb, participles) -> {
-                logger.warn("  Verb '{}': {} unresolved - {}",
-                        verb, participles.size(), participles);
-            });
+            report.unresolvedDetails().forEach((verb, participles) -> logger.warn("  Verb '{}': {} unresolved - {}",
+                    verb, participles.size(), participles));
         } else {
             logger.info("All participles successfully resolved");
         }
-
+        clearStaged();
         return report;
     }
 }

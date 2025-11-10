@@ -3,7 +3,6 @@ package com.annepolis.lexiconmeum.ingest.wiktionary;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
-import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.VerbDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +38,7 @@ public class ParticipleResolutionService {
                 Collections.synchronizedList(new ArrayList<>())
         ).add(participleData);
 
-        logger.debug("Staged participle '{}' for parent verb '{}'",
+        logger.trace("Staged participle '{}' for parent verb '{}'",
                 participleData.getParticipleLemma(), parentLemma);
     }
 
@@ -57,12 +56,12 @@ public class ParticipleResolutionService {
         AtomicInteger participlesUnresolved = new AtomicInteger(0);
         Map<String, List<String>> unresolvedDetails = new ConcurrentHashMap<>();
 
-        // Process each verb parent associated with participles staged in parsing phase
+        // Process each verb parent associated with participles staged in the parsing phase
         stagedParticiples.forEach((parentLemma, participles) -> {
             logger.debug("Processing {} participle(s) for verb '{}'", participles.size(), parentLemma);
 
             // attempt to retrieve staged verb lexemes matching verb lemma from verb lemma->participle index
-            List<Lexeme> parentVerbs = stagedLexemeCache.getLexemesByLemmaAndPos(parentLemma, PartOfSpeech.VERB);
+            List<Lexeme> parentVerbs = stagedLexemeCache.getLexemesByLemma(parentLemma);
 
             if (parentVerbs.isEmpty()) {
                 logger.warn("No parent verb found for {} staged participle(s) of '{}'",
@@ -81,11 +80,16 @@ public class ParticipleResolutionService {
                 if (matchingVerb != null) {
                     Lexeme updatedVerb = attachParticipleToVerb(matchingVerb, participleData);
 
+                    // Update the staged cache with the new version
+                    stagedLexemeCache.replaceLexeme(matchingVerb, updatedVerb);
+
                     // Use callback instead of direct sink access
                     reingestCallback.accept(updatedVerb);
 
                     participlesAttached.incrementAndGet();
 
+                    // refresh so the next iteration picks up any updates
+                    parentVerbs = stagedLexemeCache.getLexemesByLemma(parentLemma);
                     logger.trace("Attached participle '{}' ({}) to verb '{}'",
                             participleData.getParticipleLemma(),
                             participleData.getParticipleKey(),
@@ -127,7 +131,7 @@ public class ParticipleResolutionService {
             return candidateVerbs.get(0);
         }
 
-        // Multiple verbs with same lemma - match by canonical form
+        // Multiple verbs with the same lemma - match by canonical form
         String targetCanonical = participleData.getParentLemmaWithMacrons();
         return candidateVerbs.stream()
                 .filter(v -> v.getCanonicalForm().equals(targetCanonical))
@@ -163,43 +167,15 @@ public class ParticipleResolutionService {
         return new VerbDetails.Builder();
     }
 
-    public static class FinalizationReport {
-        private final int verbsUpdated;
-        private final int participlesAttached;
-        private final int participlesUnresolved;
-        private final Map<String, List<String>> unresolvedDetails;
-
-        public FinalizationReport(int verbsUpdated, int participlesAttached,
-                                  int participlesUnresolved, Map<String, List<String>> unresolvedDetails) {
-            this.verbsUpdated = verbsUpdated;
-            this.participlesAttached = participlesAttached;
-            this.participlesUnresolved = participlesUnresolved;
-            this.unresolvedDetails = unresolvedDetails;
-        }
-
-        public int getVerbsUpdated() {
-            return verbsUpdated;
-        }
-
-        public int getParticipleAttached() {
-            return participlesAttached;
-        }
-
-        public int getParticiplesUnresolved() {
-            return participlesUnresolved;
-        }
-
-        public Map<String, List<String>> getUnresolvedDetails() {
-            return unresolvedDetails;
-        }
+    public record FinalizationReport(int verbsUpdated, int participlesAttached, int participlesUnresolved,
+                                     Map<String, List<String>> unresolvedDetails) {
 
         public String getSummary() {
             return String.format("%d verbs updated, %d participles attached, %d unresolved",
-                    verbsUpdated, participlesAttached, participlesUnresolved);
+                        verbsUpdated, participlesAttached, participlesUnresolved);
         }
-
         public boolean hasUnresolved() {
-            return participlesUnresolved > 0;
-        }
+                return participlesUnresolved > 0;
+            }
     }
 }

@@ -10,14 +10,18 @@ import java.util.Map;
 
 /**
  * Holds participle data that cannot yet be linked to its parent verb.
- * Used during ingestion when participles are encountered before their verbs.
+ * Used during ingestion
  */
 public class StagedParticipleData {
-    private final String parentLemma;  // without macrons, e.g., "amo"
-    private final String parentLemmaWithMacrons;  // with macrons from form_of, e.g., "amō"
+
+    // parent Lexeme's lemma
+    private final String parentLemma;
+    private final String parentLemmaWithMacrons;
     private final GrammaticalVoice voice;
     private final GrammaticalTense tense;
-    private final String participleLemma;  // e.g., "amans"
+
+    // first-person singular of participle for a given voice and tense
+    private final String participleLemma;
     private final Map<String, Agreement> inflections;
 
     public StagedParticipleData(
@@ -27,12 +31,17 @@ public class StagedParticipleData {
             GrammaticalTense tense,
             String participleLemma,
             Map<String, Agreement> inflections) {
+
         this.parentLemma = parentLemma;
         this.parentLemmaWithMacrons = parentLemmaWithMacrons;
         this.voice = voice;
         this.tense = tense;
         this.participleLemma = participleLemma;
         this.inflections = inflections;
+    }
+
+    public boolean isGerundive(){
+        return voice == GrammaticalVoice.PASSIVE && tense == GrammaticalTense.FUTURE;
     }
 
     public String getParentLemma() {

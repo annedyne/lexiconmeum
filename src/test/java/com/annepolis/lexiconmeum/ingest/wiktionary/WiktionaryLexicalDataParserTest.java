@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -52,7 +52,7 @@ class WiktionaryLexicalDataParserTest {
 
         EsseFormProvider esseFormProvider = new EsseFormProvider();
 
-        Map<PartOfSpeech, PartOfSpeechParser> partOfSpeechParsers = new HashMap<>();
+        Map<PartOfSpeech, PartOfSpeechParser> partOfSpeechParsers = new EnumMap<>(PartOfSpeech.class);
         partOfSpeechParsers.put(PartOfSpeech.VERB, new POSVerbParser(lexicalTagResolver, esseFormProvider));
         partOfSpeechParsers.put(PartOfSpeech.NOUN, new POSNounParser());
         partOfSpeechParsers.put(PartOfSpeech.ADJECTIVE, new POSAdjectiveParser());
@@ -69,7 +69,7 @@ class WiktionaryLexicalDataParserTest {
         parser.setParseMode(ParseMode.STRICT);
     }
 
-    class WiktionaryStagingServiceStub implements WiktionaryStagingService {
+    static class WiktionaryStagingServiceStub implements WiktionaryStagingService {
 
         public List<Lexeme> stagedLexemes = new ArrayList<>();
         public List<StagedParticipleData> stagedParticiples = new ArrayList<>();
@@ -218,7 +218,7 @@ class WiktionaryLexicalDataParserTest {
         JsonNode root = TestUtil.getJsonRootNodes().stream()
                 .filter(node -> node.path(WORD.get()).asText().equals("amans"))
                 .findFirst()
-                .orElseThrow(() -> new AssertionError("Particple 'amans' not found"));
+                .orElseThrow(() -> new AssertionError("Participle 'amans' not found"));
 
         boolean isParticiple = parser.isParticipleEntry(root);
 
@@ -238,7 +238,7 @@ class WiktionaryLexicalDataParserTest {
     }
 
     @Test
-    void parseParticipleEntryGeneratesExpectedStagedParticipleData() throws IOException {
+    void parseParticipleEntryGeneratesExpectedStagedParticipleDataGivenPresentActiveParticiple() throws IOException {
         JsonNode root = TestUtil.getJsonRootNodes().stream()
                 .filter(node -> node.path(WORD.get()).asText().equals("amans"))
                 .findFirst()
@@ -250,6 +250,23 @@ class WiktionaryLexicalDataParserTest {
         assertEquals("amo", data.getParentLemma());
         assertEquals("ACTIVE|PRESENT", data.getParticipleKey());
         assertEquals("amō", data.getParentLemmaWithMacrons());
+        assertFalse(data.isGerundive());
+    }
+
+    @Test
+    void parseParticipleEntryGeneratesExpectedStagedParticipleDataGivenFuturePassiveParticiple() throws IOException {
+        JsonNode root = TestUtil.getJsonRootNodes().stream()
+                .filter(node -> node.path(WORD.get()).asText().equals("amandus"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Participle 'amandus' not found"));
+
+        StagedParticipleData data = parser.parseParticipleEntry(root);
+
+        assertEquals("amandus", data.getParticipleLemma());
+        assertEquals("amandus", data.getParentLemma());
+        assertEquals("PASSIVE|FUTURE", data.getParticipleKey());
+        assertEquals("amandus", data.getParentLemmaWithMacrons());
+        assertTrue(data.isGerundive());
     }
 
     @Test

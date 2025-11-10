@@ -51,7 +51,7 @@ class WiktionaryLexicalDataLoader {
 
         if (report.hasUnresolved()) {
             logger.warn("Some participles could not be resolved:");
-            report.getUnresolvedDetails().forEach((verb, participles) ->
+            report.unresolvedDetails().forEach((verb, participles) ->
                     logger.warn("  Verb '{}': {}", verb, String.join(", ", participles))
             );
         }
