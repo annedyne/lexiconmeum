@@ -25,7 +25,7 @@ class AutocompleteServiceTest {
 
     @BeforeEach
     void init(@Mock AutocompleteIndex routedAutocompleteIndex){
-        underTest = new AutocompleteService(routedAutocompleteIndex, new SuggestionMapper(), getLexemeProviderStub());
+        underTest = new AutocompleteService(routedAutocompleteIndex, new SuggestionMapper(), getLexemeProviderStub(), new CommonSuggestionParentExtractor());
     }
 
     @Test

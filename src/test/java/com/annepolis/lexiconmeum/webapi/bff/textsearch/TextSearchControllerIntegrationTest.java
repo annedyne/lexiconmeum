@@ -22,8 +22,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {
-                "app.text-search.default-limit=8",
-                "app.text-search.result-limit-max=15"
+                "app.text-search.default-limit=50",
+                "app.text-search.result-limit-max=50"
         }
 )
 @ActiveProfiles("test")
