@@ -22,8 +22,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {
-                "app.text-search.default-limit=8",
-                "app.text-search.result-limit-max=15"
+                "app.text-search.default-limit=50",
+                "app.text-search.result-limit-max=50"
         }
 )
 @ActiveProfiles("test")
@@ -110,6 +110,6 @@ class TextSearchControllerIntegrationTest {
         // Make sure it's an array and check its size
         assertTrue(root.isArray(), "Response should be a JSON array");
         logger.info(root.size());
-        assertTrue(root.size() <= 8, "Should return no more than 8 suggestions");
+        assertTrue(root.size() <= 50, "Should return no more than 8 suggestions");
     }
 }

@@ -5,8 +5,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "app.text-search")
 public class TextSearchProperties {
 
-    private int defaultLimit = 8;
-    private int resultLimitMax = 20;
+    private int defaultLimit = 50;
+    private int resultLimitMax = 100;
 
 
     public int getDefaultLimit() {
