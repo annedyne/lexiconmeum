@@ -8,7 +8,10 @@ import java.util.UUID;
 @Component
 public class SuggestionMapper {
 
-    SuggestionResponse toResponse(String word, UUID lexemeId, PartOfSpeech partOfSpeech){
-        return new SuggestionResponse(word, lexemeId, partOfSpeech);
+    // find all matches
+    // get Lexemes
+    // only return Lexeme and don't repeat so put in map
+    SuggestionResponse toResponse(String word, UUID lexemeId, PartOfSpeech partOfSpeech, String displayParent){
+        return new SuggestionResponse(word, lexemeId, partOfSpeech, displayParent);
     }
 }
