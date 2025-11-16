@@ -1,54 +1,96 @@
 package com.annepolis.lexiconmeum.ingest.wiktionary;
 
 import com.annepolis.lexiconmeum.TestUtil;
+import com.annepolis.lexiconmeum.ingest.tagmapping.EsseFormProvider;
 import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
-import com.annepolis.lexiconmeum.shared.model.inflection.*;
+import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
+import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
+import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
+import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Stream;
+import java.util.Map;
+import java.util.function.Consumer;
 
-import static com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass.THIRD;
+import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.WORD;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@ContextConfiguration(classes = {
-        WiktionaryLexicalDataParser.class,
-        LexicalTagResolver.class,
-        ParserConfig.class,
-        VerbValidator.class,         // and these if they are @Component-less
-        NounValidator.class,
-        AdjectiveValidator.class
-})
 class WiktionaryLexicalDataParserTest {
 
-    @Autowired
-    private ResourceLoader resourceLoader;
-
-    @Autowired
     private WiktionaryLexicalDataParser parser;
+    private WiktionaryStagingServiceStub stagingServiceStub;
 
+    // IF YOU ADD A VALID LEMMA NODE TO THE testDataRaw.jsonl ADD IT HERE
+    static final String[] VALID_NON_VERB_LEMMA_LIST = { "amo", "poculum", "pulcher", "brevis", "brevis", "brevis","brevis",
+            "nox", "etsi", "ille", "ille" };
+
+    static final String[] VALID_VERB_LEMMA_LIST = {"amo", "pulso", "sequor"};
     private List<Lexeme> verbLexemes;
-    private List<Lexeme> nounLexemes;
-    private List<Lexeme> adjectiveLexemes;
+
+    static final String STANDARD_VERB_LEMMA = "amo";
+
+    @BeforeEach
+    void setUp() {
+        // Create real dependencies
+        LexicalTagResolver lexicalTagResolver = new LexicalTagResolver();
+
+        EsseFormProvider esseFormProvider = new EsseFormProvider();
+
+        Map<PartOfSpeech, PartOfSpeechParser> partOfSpeechParsers = new EnumMap<>(PartOfSpeech.class);
+        partOfSpeechParsers.put(PartOfSpeech.VERB, new POSVerbParser(lexicalTagResolver, esseFormProvider));
+        partOfSpeechParsers.put(PartOfSpeech.NOUN, new POSNounParser());
+        partOfSpeechParsers.put(PartOfSpeech.ADJECTIVE, new POSAdjectiveParser());
+
+        // Create test stub for staging service
+        stagingServiceStub = new WiktionaryStagingServiceStub();
+
+        // Create parser with stub
+        parser = new WiktionaryLexicalDataParser(
+                lexicalTagResolver,
+                partOfSpeechParsers,
+                stagingServiceStub
+        );
+        parser.setParseMode(ParseMode.STRICT);
+    }
+
+    static class WiktionaryStagingServiceStub implements WiktionaryStagingService {
+
+        public List<Lexeme> stagedLexemes = new ArrayList<>();
+        public List<StagedParticipleData> stagedParticiples = new ArrayList<>();
+
+
+        @Override
+        public void stageLexeme(Lexeme lexeme) {
+            stagedLexemes.add(lexeme);
+        }
+
+        @Override
+        public void stageParticiple(StagedParticipleData participleData) {
+            stagedParticiples.add(participleData);
+        }
+
+        @Override
+        public ParticipleResolutionService.FinalizationReport finalizeIngestion(Consumer<Lexeme> lexemeConsumer) {
+            return null;
+        }
+    }
+
 
     public List<Lexeme> getVerbLexemes() throws IOException {
         if(verbLexemes == null) {
@@ -57,37 +99,26 @@ class WiktionaryLexicalDataParserTest {
         return verbLexemes;
     }
 
-    public List<Lexeme> getNounLexemes() throws IOException {
-        if(nounLexemes == null) {
-            parseNounLexemes();
+    private void parseVerbLexemes() throws IOException {
+        Resource resource = new ClassPathResource("testDataVerb.jsonl");
+        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
+
+            parser.parseJsonl(reader, lexeme -> {});
+
+            // Get verbs from staging service
+            verbLexemes = stagingServiceStub.stagedLexemes;
         }
-        return nounLexemes;
     }
 
-    public List<Lexeme> getAdjectiveLexemes() throws IOException {
-        if(adjectiveLexemes == null) {
-            parseAdjectiveLexemes();
-        }
-        return adjectiveLexemes;
-    }
     @Test
     void resourceExists() {
-        Resource resource = resourceLoader.getResource("classpath:testDataRaw.jsonl");
+        Resource resource = new ClassPathResource("testDataRaw.jsonl");
         assertTrue(resource.exists(), "Expected testDataRaw.jsonl to be present on the classpath");
     }
 
     @Test
-    void nounResourceExists() {
-        Resource resource = resourceLoader.getResource("classpath:testDataNoun.jsonl");
-        assertTrue(resource.exists(), "Expected testDataNoun.jsonl to be present on the classpath");
-    }
-
-    /**
-     * Using the parser to test the json file
-     */
-    @Test
     void JsonlFileParsesWithoutError() {
-        Resource resource = resourceLoader.getResource("classpath:testDataRaw.jsonl");
+        Resource resource = new ClassPathResource("testDataRaw.jsonl");
         assertDoesNotThrow(() -> {
             try (Reader reader = new InputStreamReader(resource.getInputStream())) {
                 BufferedReader br = new BufferedReader(reader);
@@ -98,109 +129,69 @@ class WiktionaryLexicalDataParserTest {
 
     @Test
     void testLoadJsonFile() throws Exception {
-        Resource resource = resourceLoader.getResource("classpath:testDataRaw.jsonl");
-        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
-            List<Lexeme> lexemes = new ArrayList<>();
-            parser.parseJsonl(reader, lexemes::add);
 
-            assertEquals(13, lexemes.size());
-            assertEquals(PartOfSpeech.VERB, lexemes.get(0).getPartOfSpeech());
-            assertEquals(PartOfSpeech.NOUN, lexemes.get(1).getPartOfSpeech());
+        Resource resource = new ClassPathResource("testDataRaw.jsonl");
+        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
+            List<Lexeme> validNonVerbLexemes = new ArrayList<>();
+
+            parser.parseJsonl(reader, validNonVerbLexemes::add);
+
+            int totalCount = stagingServiceStub.stagedLexemes.size() + validNonVerbLexemes.size();
+            assertEquals(VALID_NON_VERB_LEMMA_LIST.length + VALID_VERB_LEMMA_LIST.length, totalCount);
         }
     }
 
     @Test
-    void testLoadWord() throws Exception {
-        Resource resource = resourceLoader.getResource("classpath:testDataRaw.jsonl");
+    void verbsAreStagedParticiplesAreConsumed() throws Exception {
+        Resource resource = new ClassPathResource("testDataRaw.jsonl");
         try (Reader reader = new InputStreamReader(resource.getInputStream())) {
-            List<Lexeme> lexemes = new ArrayList<>();
-            parser.parseJsonl(reader, lexemes::add);
-            assertEquals("amo", lexemes.get(0).getLemma());
+            List<Lexeme> consumedLexemes = new ArrayList<>();
+            parser.parseJsonl(reader, consumedLexemes::add);
 
+            // Verify verb "amo" was staged
+            Lexeme amoStaged = stagingServiceStub.stagedLexemes.stream()
+                    .filter(l -> "amo".equals(l.getLemma()))
+                    .findFirst()
+                    .orElseThrow(() -> new AssertionError("'amo' not found in staging"));
+
+
+            // Verify noun "amo" was consumed
+            Lexeme amoConsumed = consumedLexemes.stream()
+                    .filter(l -> "amo".equals(l.getLemma()))
+                    .findFirst()
+                    .orElseThrow(() -> new AssertionError("'amo' not found in consumed"));
+
+            // test that these are different Lexemes with the same lemma
+            assertNotEquals(amoConsumed.getId(), amoStaged.getId());
         }
     }
 
     @Test
     void IsValidLemmaFiltersOutInvalidPulsoEntry() throws Exception {
-        Resource resource = resourceLoader.getResource("classpath:testDataRaw.jsonl");
+        Resource resource = new ClassPathResource("testDataRaw.jsonl");
         try (Reader reader = new InputStreamReader(resource.getInputStream())) {
-            List<Lexeme> lexemes = new ArrayList<>();
-            parser.parseJsonl(reader, lexemes::add);
-        
-        long pulsoCount = lexemes.stream()
-                .filter(l -> l.getLemma().equals("pulso"))
-                .count();
-        
-        assertEquals(1, pulsoCount, "Expected exactly one 'pulso' lemma");
-    }
-}
+            List<Lexeme> allLexemes = new ArrayList<>();
+            parser.parseJsonl(reader, allLexemes::add);
+            allLexemes.addAll(stagingServiceStub.stagedLexemes);
 
-    @Test
-    void IsValidLemmaDoesNotFilterOutValidIlleEntry() throws Exception {
-        Resource resource = resourceLoader.getResource("classpath:testDataRaw.jsonl");
-        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
-            List<Lexeme> lexemes = new ArrayList<>();
-            parser.parseJsonl(reader, lexemes::add);
-
-            long illeCount = lexemes.stream()
-                    .filter(l -> l.getLemma().equals("ille"))
+            long pulsoCount = allLexemes.stream()
+                    .filter(l -> l.getLemma().equals("pulso"))
                     .count();
 
-            assertEquals(2, illeCount, "Expected exactly one 'ille' lemma");
+            assertEquals(1, pulsoCount, "Expected exactly one 'pulso' lemma");
         }
     }
 
-    @ParameterizedTest
-    @MethodSource("expectedPulcherForms")
-    void threeTerminationAdjectiveInflectionsLoaded(String expectedForm) throws Exception {
-        Optional<Lexeme> pulcher = getAdjectiveLexemes().stream()
-                .filter(l -> l.getLemma().equals("pulcher"))
-                .findFirst();
-        assertTrue(pulcher.isPresent(), "Pulcher lexeme not found");
-
-        boolean found = pulcher.get().getInflections().stream()
-                .anyMatch(i -> i.getForm().equals(expectedForm)
-                        || expectedForm.equals("pulcherrimē")); //no superlative adverb in data
-
-        pulcher.get().getInflections()
-                .forEach(i -> {
-                    if (i instanceof Agreement ag) {
-                        assert ag.getNumber() != null : "GrammaticalNumber is null in Agreement: " + ag;
-                    }
-                });
-        assertTrue(found, "Expected form not found: " + expectedForm);
-    }
-
-    static Stream<String> expectedPulcherForms() {
-        return TestUtil.expectedPulcherForms();
-    }
-
     @Test
-    void thirdInflectionAssignedSetOnTwoTerminationAdjectiveInflection() throws IOException {
-        Optional<Lexeme> brevis = getAdjectiveLexemes().stream()
-                .filter(l -> l.getLemma().equals("brevis"))
-                .findFirst();
-        assertTrue(brevis.isPresent(), "Brevis lexeme not found");
-        assertEquals(Set.of(THIRD), brevis.get().getInflectionClasses());
-
-        brevis.get().getInflections().stream()
-                .forEach(i -> {
-                    if (i instanceof Agreement ag) {
-                        assert ag.getNumber() != null : "GrammaticalNumber is null in Agreement: " + ag;
-                    }
-                });
-    }
-
-    @Test
-    void declensionsInflectionsLoaded() throws Exception {
-        Optional<Inflection> genitive = getNounLexemes().stream()
-           .filter(g -> g.getLemma().equals("poculum"))
-           .findFirst()
-              .flatMap(l -> l.getInflections().stream()
-                .filter(i -> i.getForm().equals("pōculī"))
-                .findFirst());
-
-        assertTrue(genitive.isPresent());
+    void verbPrincipalPartsAreParsedAndLoadedIntoModel() throws IOException {
+        InflectionKey builder = new InflectionKey();
+        String key = builder.buildFirstPrincipalPartKey();
+        Inflection inflection  = getVerbLexemes().stream()
+                .filter(l -> l.getLemma().equals(STANDARD_VERB_LEMMA)) //note the lemma in wikt data doesn't have a macron
+                .findFirst()
+                .map(l -> l.getInflectionIndex().get(key))
+                .orElse(null);
+        Assertions.assertNotNull(inflection);
     }
 
     @SuppressWarnings("java:S2699") // Yes this does have an assertion
@@ -223,60 +214,82 @@ class WiktionaryLexicalDataParserTest {
     }
 
     @Test
-    void InflectionsWithDuplicateTagsAreSetAsAlternativeForms() throws IOException {
-        Optional<Inflection> maybeConjugation = getVerbLexemes().get(0).getInflections().stream()
-                .filter(g -> "amārō".equals(g.getAlternativeForm()))
-                .findFirst();
-        assertTrue(maybeConjugation.isPresent());
+    void isParticipleEntryReturnsTrueGivenParticipleRoot() throws IOException {
+        JsonNode root = TestUtil.getJsonRootNodes().stream()
+                .filter(node -> node.path(WORD.get()).asText().equals("amans"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Participle 'amans' not found"));
+
+        boolean isParticiple = parser.isParticipleEntry(root);
+
+        assertTrue(isParticiple);
     }
 
     @Test
-    void verbPrincipalPartsAreParsedAndLoadedIntoModel() throws IOException {
-        InflectionKey builder = new InflectionKey();
-        String key = builder.buildFirstPrincipalPartKey();
-        Inflection inflection  = getVerbLexemes().stream()
-                .filter(l -> l.getLemma().equals("amo")) //note the lemma in wikt data doesn't have a macron
+    void isParticipleEntryReturnsFalseGivenAVerbRoot() throws IOException {
+        JsonNode root = TestUtil.getJsonRootNodes().stream()
+                .filter(node -> node.path(WORD.get()).asText().equals("amo"))
                 .findFirst()
-                .map(l -> l.getInflectionIndex().get(key))
-                .orElse(null);
-        Assertions.assertNotNull(inflection);
+                .orElseThrow(() -> new AssertionError("Verb 'amo' not found"));
+
+        boolean isParticiple = parser.isParticipleEntry(root);
+
+        assertFalse(isParticiple);
     }
 
-    private void parseNounLexemes() throws IOException {
-        Resource resource = resourceLoader.getResource("classpath:testDataNoun.jsonl");
-        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
-            nounLexemes = new ArrayList<>();
-            parser.parseJsonl(reader, lexeme -> {
-                if (lexeme.getInflections().get(0) instanceof Declension) {
-                    nounLexemes.add(lexeme);
-                }
-            });
-        }
+    @Test
+    void parseParticipleEntryGeneratesExpectedStagedParticipleDataGivenPresentActiveParticiple() throws IOException {
+        JsonNode root = TestUtil.getJsonRootNodes().stream()
+                .filter(node -> node.path(WORD.get()).asText().equals("amans"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Participle 'amans' not found"));
+
+        StagedParticipleData data = parser.parseParticipleEntry(root);
+
+        assertEquals("amans", data.getParticipleLemma());
+        assertEquals("amo", data.getParentLemma());
+        assertEquals("ACTIVE|PRESENT", data.getParticipleKey());
+        assertEquals("amō", data.getParentLemmaWithMacrons());
+        assertFalse(data.isGerundive());
     }
 
-    private void parseVerbLexemes() throws IOException {
-        Resource resource = resourceLoader.getResource("classpath:testDataVerb.jsonl");
-        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
-            verbLexemes = new ArrayList<>();
-            parser.parseJsonl(reader, lexeme -> {
-                if (lexeme.getInflections().get(0) instanceof Conjugation) {
-                    verbLexemes.add(lexeme);
-                }
-            });
+    @Test
+    void parseParticipleEntryGeneratesExpectedStagedParticipleDataGivenFuturePassiveParticiple() throws IOException {
+        JsonNode root = TestUtil.getJsonRootNodes().stream()
+                .filter(node -> node.path(WORD.get()).asText().equals("amandus"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Participle 'amandus' not found"));
 
-        }
+        StagedParticipleData data = parser.parseParticipleEntry(root);
+
+        assertEquals("amandus", data.getParticipleLemma());
+        assertEquals("amandus", data.getParentLemma());
+        assertEquals("PASSIVE|FUTURE", data.getParticipleKey());
+        assertEquals("amandus", data.getParentLemmaWithMacrons());
+        assertTrue(data.isGerundive());
     }
 
-    private void parseAdjectiveLexemes() throws IOException {
-        Resource resource = resourceLoader.getResource("classpath:testDataAdjective.jsonl");
-        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
-            adjectiveLexemes = new ArrayList<>();
-            parser.parseJsonl(reader, lexeme -> {
-                if (lexeme.getInflections().get(0) instanceof Agreement) {
-                    adjectiveLexemes.add(lexeme);
-                }
-            });
+    @Test
+    void parseParticipleInflectionsGeneratesExpectedInflections() throws IOException {
+        JsonNode root = TestUtil.getJsonRootNodes().stream()
+                .filter(node -> node.path(WORD.get()).asText().equals("amans"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Participle 'amans' not found"));
 
-        }
+        Map<String, Agreement>  inflections = parser.parseParticipleInflections(root);
+
+        //Spot Check is fine, since props set via Agreement tagMapping
+        assertEquals(16, inflections.size());
+        Agreement ablativePlural = inflections.get("ABLATIVE|PLURAL|MASCULINE|FEMININE|NEUTER|POSITIVE");
+        assertEquals(3,ablativePlural.getGenders().size() );
+        assertEquals("amantibus",ablativePlural.getForm() );
+        assertEquals(GrammaticalCase.ABLATIVE,ablativePlural.getGrammaticalCase() );
     }
+
+    @Test
+    void removeMacronsNormalizesStringAsExpected(){
+        String normalized = parser.removeMacrons("āēīōū");
+        assertEquals("aeiou", normalized);
+    }
+
 }

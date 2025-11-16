@@ -8,6 +8,7 @@ import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.UnaryOperator;
 
 public class LexemeBuilder {
 
@@ -77,16 +78,30 @@ public class LexemeBuilder {
         return senses;
     }
 
-    public LexemeBuilder addInflection(Inflection inflection){
+    public LexemeBuilder addInflection(Inflection inflection) {
+        // Default: if inflection exists, it will be set as alternative
+        //          if it doesn't, it will get added to index
+        return addInflection(inflection, existing ->
+                existing.toBuilder()
+                        .setAlternativeForm(inflection.getForm())
+                        .build()
+        );
+    }
+
+    /**
+     * Adds an inflection to the lexeme. If an inflection with the same key already exists,
+     * the provided merge function is called to update it.
+     *
+     * @param inflection the inflection to add
+     * @param mergeFunction function that takes the existing inflection and returns the merged result.
+     *                      The incoming inflection is available in the closure.
+     */
+    public LexemeBuilder addInflection(Inflection inflection, UnaryOperator<Inflection> mergeFunction) {
         String key = InflectionKey.of(inflection);
         if (inflectionIndex.containsKey(key)) {
             Inflection existing = inflectionIndex.get(key);
-            Inflection updated = existing
-                    .toBuilder()
-                    .setAlternativeForm(inflection.getForm())
-                    .build();
-
-            inflectionIndex.put(key, updated);
+            Inflection merged = mergeFunction.apply(existing);
+            inflectionIndex.put(key, merged);
         } else {
             inflectionIndex.put(key, inflection);
         }
@@ -116,5 +131,29 @@ public class LexemeBuilder {
 
         return new Lexeme(this);
     }
+
+    /**
+     * Create a builder from an existing Lexeme (for rebuilding with modifications)
+     */
+    public static LexemeBuilder fromLexeme(Lexeme lexeme) {
+        LexemeBuilder builder = new LexemeBuilder(
+                lexeme.getLemma(),
+                lexeme.getPartOfSpeech(),
+                lexeme.getEtymologyNumber()
+        );
+
+        // Copy all fields
+        lexeme.getCanonicalForms().forEach(builder::addCanonicalForm);
+        lexeme.getInflections().forEach(builder::addInflection);
+        lexeme.getSenses().forEach(builder::addSense);
+        lexeme.getInflectionClasses().forEach(builder::addInflectionClass);
+
+        if (lexeme.getPartOfSpeechDetails() != null) {
+            builder.setPartOfSpeechDetails(lexeme.getPartOfSpeechDetails());
+        }
+
+        return builder;
+    }
+
 
 }

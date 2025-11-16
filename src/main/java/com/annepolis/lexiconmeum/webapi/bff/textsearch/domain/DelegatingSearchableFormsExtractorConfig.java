@@ -14,7 +14,9 @@ public class DelegatingSearchableFormsExtractorConfig {
     @Bean
     public DelegatingSearchableFormsExtractor defaultSearchableFormsExtractor(
             SearchableInflectedFormsExtractor inflectedFormsProvider,
-            SearchableUninflectedFormsExtractor uninflectedFormsProvider
+            SearchableUninflectedFormsExtractor uninflectedFormsProvider,
+            SearchableVerbFormsExtractor verbFormsProvider
+
     ){
         Map<PartOfSpeech, SearchableFormsExtractor> formsExtractors = new EnumMap<>(PartOfSpeech.class);
 
@@ -26,7 +28,9 @@ public class DelegatingSearchableFormsExtractorConfig {
         formsExtractors.put(PartOfSpeech.PREPOSITION, uninflectedFormsProvider);
         formsExtractors.put(PartOfSpeech.POSTPOSITION, uninflectedFormsProvider);
         formsExtractors.put(PartOfSpeech.PRONOUN, inflectedFormsProvider);
-        formsExtractors.put(PartOfSpeech.VERB, inflectedFormsProvider);
+
+        // Verbs use specialized extractor with participle support
+        formsExtractors.put(PartOfSpeech.VERB, verbFormsProvider);
 
         Set<PartOfSpeech> missing = EnumSet.allOf(PartOfSpeech.class);
         missing.removeAll(formsExtractors.keySet());

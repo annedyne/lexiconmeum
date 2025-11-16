@@ -14,6 +14,7 @@ public class Conjugation implements Inflection {
     private final GrammaticalTense tense;
     private final GrammaticalPerson person;
     private final GrammaticalNumber number;
+    private final GrammaticalParticiple participle;
 
 
     public Conjugation(Builder builder){
@@ -22,6 +23,7 @@ public class Conjugation implements Inflection {
         this.tense = builder.getTense();
         this.person = builder.getPerson();
         this.number = builder.getNumber();
+        this.participle = builder.getParticiple();
         this.form = builder.getForm();
         this.alternativeForm = builder.getAlternativeForm();
     }
@@ -44,6 +46,7 @@ public class Conjugation implements Inflection {
                 .setPerson(person)
                 .setNumber(number)
                 .setMood(mood)
+                .setParticiple(participle)
                 .setAlternativeForm(alternativeForm);
     }
 
@@ -52,6 +55,7 @@ public class Conjugation implements Inflection {
     public GrammaticalPerson getPerson() { return person;}
     public GrammaticalNumber getNumber() { return number; }
     public GrammaticalMood getMood() { return mood; }
+    public GrammaticalParticiple getParticiple() {return participle; }
 
     public static class Builder implements InflectionBuilder {
 
@@ -60,6 +64,7 @@ public class Conjugation implements Inflection {
         private GrammaticalTense tense;
         private GrammaticalPerson person;
         private GrammaticalNumber number;
+        private GrammaticalParticiple participle;
 
         private final String form;
         private String alternativeForm;
@@ -113,6 +118,15 @@ public class Conjugation implements Inflection {
             return this;
         }
 
+        public GrammaticalParticiple getParticiple() {
+            return participle;
+        }
+
+        public Conjugation.Builder setParticiple(GrammaticalParticiple participle) {
+            this.participle = participle;
+            return this;
+        }
+
         public String getForm() {
             return form;
         }
@@ -135,10 +149,6 @@ public class Conjugation implements Inflection {
         private void validateFields() {
             List<String> missing = new ArrayList<>();
 
-            if (mood != GrammaticalMood.INFINITIVE) {
-                if (person == null) missing.add("person");
-                if (number == null) missing.add("number");
-            }
             if (tense == null) missing.add("tense");
             if (form == null) missing.add("form");
 

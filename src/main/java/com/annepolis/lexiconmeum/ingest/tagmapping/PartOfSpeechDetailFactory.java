@@ -4,7 +4,9 @@ import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.*;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.MarkerManager;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -55,24 +57,58 @@ public enum PartOfSpeechDetailFactory {
     }),
 
     GOVERNED_CASE_ACCUSATIVE(Set.of("with-accusative"), builder ->  {
-        PrepositionDetails prepositionDetails = new PrepositionDetails(GrammaticalCase.ACCUSATIVE);
-        builder.setPartOfSpeechDetails(prepositionDetails);
+        if( PartOfSpeech.PREPOSITION == builder.getPartOfSpeech() || PartOfSpeech.POSTPOSITION == builder.getPartOfSpeech() ) {
+            PrepositionDetails prepositionDetails = new PrepositionDetails(GrammaticalCase.ACCUSATIVE);
+            builder.setPartOfSpeechDetails(prepositionDetails);
+        } else {
+            LogManager.getLogger(PartOfSpeechDetailFactory.class).debug(MarkerManager.getMarker("POS_FACTORY"),
+                    "gov case accusative lemma: {} pos : {} ", builder::getLemma, builder::getPartOfSpeech );
+        }
     }),
 
     GOVERNED_CASE_ABLATIVE(Set.of("with-ablative"), builder ->  {
-        PrepositionDetails prepositionDetails = new PrepositionDetails(GrammaticalCase.ABLATIVE);
-        builder.setPartOfSpeechDetails(prepositionDetails);
+        if( PartOfSpeech.PREPOSITION == builder.getPartOfSpeech() || PartOfSpeech.POSTPOSITION == builder.getPartOfSpeech()) {
+            PrepositionDetails prepositionDetails = new PrepositionDetails(GrammaticalCase.ABLATIVE);
+            builder.setPartOfSpeechDetails(prepositionDetails);
+        } else {
+            LogManager.getLogger(PartOfSpeechDetailFactory.class).debug(MarkerManager.getMarker("POS_FACTORY"),
+                    "gov case ablative lemma: {} pos : {} ", builder::getLemma, builder::getPartOfSpeech );
+        }
     }),
 
     GOVERNED_CASE_GENITIVE(Set.of("with-genitive"), builder ->  {
-        PrepositionDetails prepositionDetails = new PrepositionDetails(GrammaticalCase.GENITIVE);
-        builder.setPartOfSpeechDetails(prepositionDetails);
+        if( PartOfSpeech.PREPOSITION == builder.getPartOfSpeech() || PartOfSpeech.POSTPOSITION == builder.getPartOfSpeech()) {
+            PrepositionDetails prepositionDetails = new PrepositionDetails(GrammaticalCase.GENITIVE);
+            builder.setPartOfSpeechDetails(prepositionDetails);
+        } else {
+            LogManager.getLogger(PartOfSpeechDetailFactory.class).debug(MarkerManager.getMarker("POS_FACTORY"),
+                    "gov case genitive lemma: {} pos : {} ", builder::getLemma, builder::getPartOfSpeech );
+        }
     }),
 
     GOVERNED_CASE_DATIVE(Set.of("with-dative"), builder ->  {
-        PrepositionDetails prepositionDetails = new PrepositionDetails(GrammaticalCase.DATIVE);
-        builder.setPartOfSpeechDetails(prepositionDetails);
+        if( PartOfSpeech.PREPOSITION == builder.getPartOfSpeech() || PartOfSpeech.POSTPOSITION == builder.getPartOfSpeech()) {
+            PrepositionDetails prepositionDetails = new PrepositionDetails(GrammaticalCase.DATIVE);
+            builder.setPartOfSpeechDetails(prepositionDetails);
+        } else {
+            LogManager.getLogger(PartOfSpeechDetailFactory.class).debug(MarkerManager.getMarker("POS_FACTORY"),
+                    "gov case dative pos : {} ", builder::getPartOfSpeech );
+
+        }
+    }),
+
+    DEPONENT(Set.of("deponent"), builder ->  {
+       if( builder.getPartOfSpeechDetails() instanceof VerbDetails details) {
+           details.toBuilder().setMorphologicalSubtype(MorphologicalSubtype.DEPONENT);
+           builder.setPartOfSpeechDetails(details);
+       } else if(builder.getPartOfSpeechDetails() == null){
+           VerbDetails.Builder vdBuilder = new VerbDetails.Builder();
+           vdBuilder.setMorphologicalSubtype(MorphologicalSubtype.DEPONENT);
+           builder.setPartOfSpeechDetails(vdBuilder.build());
+       }
     });
+
+    private static final Logger logger = LogManager.getLogger(PartOfSpeechDetailFactory.class);
 
     private final Set<String> tags;
     private final Consumer<LexemeBuilder> setter;

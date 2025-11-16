@@ -27,6 +27,6 @@ public class DelegatingSearchableFormsExtractor implements SearchableFormsExtrac
             throw new IllegalStateException("No SearchableFormsExtractor configured for partOfSpeech: " + partOfSpeech);
         }
 
-        return formsProviders.get(lexeme.getPartOfSpeech()).getSearchableForms(lexeme);
+        return delegate.getSearchableForms(lexeme);
     }
 }
