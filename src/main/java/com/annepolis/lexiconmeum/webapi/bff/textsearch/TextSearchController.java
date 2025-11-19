@@ -1,6 +1,6 @@
 package com.annepolis.lexiconmeum.webapi.bff.textsearch;
 
-import com.annepolis.lexiconmeum.webapi.bff.textsearch.app.AutocompleteService;
+import com.annepolis.lexiconmeum.webapi.bff.textsearch.app.AutocompleteUseCase;
 import com.annepolis.lexiconmeum.webapi.bff.textsearch.app.SuggestionResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,11 +16,11 @@ import static com.annepolis.lexiconmeum.webapi.ApiRoutes.SUFFIX;
 @RequestMapping("${api.base-path}")
 public class TextSearchController {
 
-    private final AutocompleteService textSearchService;
+    private final AutocompleteUseCase textSearchService;
     private final TextSearchProperties searchProperties;
 
 
-    public TextSearchController(AutocompleteService textSearchService, TextSearchProperties searchProperties ){
+    public TextSearchController(AutocompleteUseCase textSearchService, TextSearchProperties searchProperties ){
         this.textSearchService = textSearchService;
         this.searchProperties = searchProperties;
     }
