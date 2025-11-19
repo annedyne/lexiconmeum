@@ -142,7 +142,7 @@ class WiktionaryLexicalDataParser {
         // Only build valid lemma entries
         if (!isValidLemmaEntry(root, partOfSpeech)) {
             // Participles get staged and added to associated parent Lexeme at the end
-            if (partOfSpeech == PartOfSpeech.VERB && isParticipleEntry(root)) {
+            if (isParticipleEntry(root)) {
                 handleParticipleEntry(root);
             }
             logger.trace(LogMsg.SKIPPING_NON_LEMMA, () -> posTag, () -> root.path(WORD.get()).asText());
