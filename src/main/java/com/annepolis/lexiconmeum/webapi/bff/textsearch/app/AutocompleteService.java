@@ -4,13 +4,11 @@ import com.annepolis.lexiconmeum.shared.LexemeReader;
 import com.annepolis.lexiconmeum.webapi.bff.textsearch.domain.FormMatch;
 import com.annepolis.lexiconmeum.webapi.bff.textsearch.index.AutocompleteIndex;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-@Service
 public class AutocompleteService implements AutocompleteUseCase {
 
     private final AutocompleteIndex index;
