@@ -85,6 +85,16 @@ public final class InflectionKey {
         );
     }
 
+    public String buildFourthPrincipalPartKey() {
+        return buildConjugationPrincipalPartKey(
+                GrammaticalVoice.PASSIVE,
+                GrammaticalMood.INDICATIVE,
+                GrammaticalTense.PERFECT,
+                GrammaticalPerson.FIRST,
+                GrammaticalNumber.SINGULAR
+        );
+    }
+
     private static String buildConjugationPrincipalPartKey(
             GrammaticalVoice voice,
             GrammaticalMood mood,
