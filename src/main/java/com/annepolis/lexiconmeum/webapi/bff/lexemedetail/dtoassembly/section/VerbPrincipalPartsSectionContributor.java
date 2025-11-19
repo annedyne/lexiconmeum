@@ -40,20 +40,22 @@ class VerbPrincipalPartsSectionContributor implements LexemeDetailSectionContrib
                 .filter(f -> !f.isBlank())
                 .ifPresent(dto::addPrincipalPart);
 
+
+        Optional.ofNullable(index.get(inflectionKey.buildThirdPrincipalPartKey()))
+                .map(Inflection::getForm)
+                .filter(f -> !f.isBlank())
+                .ifPresent(dto::addPrincipalPart);
+
         MorphologicalSubtype subtype;
         if(lexeme.getPartOfSpeechDetails() instanceof VerbDetails details){
             subtype = details.getMorphologicalSubtype();
-            if(subtype == MorphologicalSubtype.DEPONENT){
-                Optional.ofNullable(index.get(inflectionKey.buildThirdPrincipalPartKey()))
+            if(subtype != MorphologicalSubtype.DEPONENT){
+                Optional.ofNullable(index.get(inflectionKey.buildFourthPrincipalPartKey()))
                         .map(Inflection::getForm)
                         .filter(f -> !f.isBlank())
                         .ifPresent(dto::addPrincipalPart);
             }
         }
-        Optional.ofNullable(index.get(inflectionKey.buildThirdPrincipalPartKey()))
-                .map(Inflection::getForm)
-                .filter(f -> !f.isBlank())
-                .ifPresent(dto::addPrincipalPart);
     }
 }
 

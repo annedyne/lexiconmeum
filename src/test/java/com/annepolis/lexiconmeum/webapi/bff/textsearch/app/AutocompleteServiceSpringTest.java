@@ -13,9 +13,9 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 class AutocompleteServiceSpringTest {
 
-    private final AutocompleteService underTest;
+    private final AutocompleteUseCase underTest;
 
-    AutocompleteServiceSpringTest(AutocompleteService textSearchService) {
+    AutocompleteServiceSpringTest(AutocompleteUseCase textSearchService) {
         this.underTest = textSearchService;
     }
 
