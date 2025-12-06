@@ -63,7 +63,6 @@ git commit -am "Prepare release 0.1.1"
     - Title: Release 0.1.1
     - Description:  Summary, deployment notes, testing status
 
-
 4. tag after merge
 ```bash
 # Replace 0.1.1 with the actual current version

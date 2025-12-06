@@ -16,5 +16,5 @@ public interface PartOfSpeechParser {
 
     default void addInflections(LexemeBuilder lexemeBuilder, JsonNode formsNode){
         // do nothing by default
-    };
+    }
 }

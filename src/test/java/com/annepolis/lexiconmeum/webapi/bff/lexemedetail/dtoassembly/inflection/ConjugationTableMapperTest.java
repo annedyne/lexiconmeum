@@ -16,21 +16,20 @@ class ConjugationTableMapperTest {
     void toConjugationTablesMoodsMappedInOrder(){
         ConjugationTableMapper mapper = new ConjugationTableMapper();
         Lexeme lexeme = TestUtil.getNewTestVerbLexeme();
-        ConjugationGroupDTO groupDTO = mapper.toInflectionTableDTO(lexeme);
-        assertEquals(GrammaticalMood.INDICATIVE.getHistoricalName(), groupDTO.getConjugationTableDTOList().get(0).getMood());
-        assertEquals(GrammaticalMood.SUBJUNCTIVE.getHistoricalName(), groupDTO.getConjugationTableDTOList().get(1).getMood());
-        assertEquals(GrammaticalMood.INFINITIVE.getHistoricalName(), groupDTO.getConjugationTableDTOList().get(2).getMood());
-        assertEquals(GrammaticalMood.INDICATIVE.getHistoricalName(), groupDTO.getConjugationTableDTOList().get(3).getMood());
-        assertEquals(GrammaticalVoice.PASSIVE.name(), groupDTO.getConjugationTableDTOList().get(3).getVoice());
+        List<ConjugationTableDTO> conjugationTableDTOS = mapper.toInflectionTableDTO(lexeme);
+        assertEquals(GrammaticalMood.INDICATIVE.getHistoricalName(), conjugationTableDTOS.get(0).getMood());
+        assertEquals(GrammaticalMood.SUBJUNCTIVE.getHistoricalName(), conjugationTableDTOS.get(1).getMood());
+        assertEquals(GrammaticalMood.INFINITIVE.getHistoricalName(), conjugationTableDTOS.get(2).getMood());
+        assertEquals(GrammaticalMood.INDICATIVE.getHistoricalName(), conjugationTableDTOS.get(3).getMood());
+        assertEquals(GrammaticalVoice.PASSIVE.name(), conjugationTableDTOS.get(3).getVoice());
     }
 
     @Test
     void forms_inNumberAndPerson_Ascending(){
         ConjugationTableMapper mapper = new ConjugationTableMapper();
         Lexeme lexeme = TestUtil.getNewTestVerbLexeme();
-        ConjugationGroupDTO groupDTO = mapper.toInflectionTableDTO(lexeme);
 
-        List<ConjugationTableDTO> tableDTOS =  groupDTO.getConjugationTableDTOList();
+        List<ConjugationTableDTO> tableDTOS = mapper.toInflectionTableDTO(lexeme);
         assertEquals("amō", tableDTOS.get(0).getTenses().get(0).getForms().get(0));
         assertEquals("amās", tableDTOS.get(0).getTenses().get(0).getForms().get(1));
         assertEquals("amat", tableDTOS.get(0).getTenses().get(0).getForms().get(2));
@@ -43,9 +42,9 @@ class ConjugationTableMapperTest {
     void toConjugationTableMapsAllFormsInGivenLexemeTense(){
         ConjugationTableMapper mapper = new ConjugationTableMapper();
         Lexeme lexeme = TestUtil.getNewTestVerbLexeme();
-        ConjugationGroupDTO groupDTO = mapper.toInflectionTableDTO(lexeme);
+        List<ConjugationTableDTO> tableDTOS = mapper.toInflectionTableDTO(lexeme);
 
-        ConjugationTableDTO activeIndicative = groupDTO.getConjugationTableDTOList().stream()
+        ConjugationTableDTO activeIndicative = tableDTOS.stream()
                 .filter(g -> g.getVoice().equals("ACTIVE") && g.getMood().equals("Indicative"))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Missing ACTIVE/Indicative group"));
