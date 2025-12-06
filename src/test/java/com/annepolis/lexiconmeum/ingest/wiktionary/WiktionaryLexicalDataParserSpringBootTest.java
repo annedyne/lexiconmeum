@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
         POSVerbParser.class,         // and these if they are @Component-less
         POSNounParser.class,
         POSAdjectiveParser.class,
+        POSParticipleParser.class,
         EsseFormProvider.class,
         DefaultWiktionaryStagingService.class,
         StagedLexemeCache.class,

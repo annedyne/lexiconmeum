@@ -5,10 +5,9 @@ import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.ParticipleDeclensionSet;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.VerbDetails;
 import org.junit.jupiter.api.Test;
-
-import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -35,29 +34,41 @@ class ParticipleResolutionServiceTest {
         StagedLexemeCache stagedLexemeCache = new StagedLexemeCache();
         stagedLexemeCache.putLexeme(parentLexeme);
 
-        StagedParticipleData spd = new StagedParticipleData(
+        StagedParticipleData perfectPassive = new StagedParticipleData(
                 parentLemma,
                 parentLemmaWithMacrons,
-                GrammaticalVoice.ACTIVE,
-                GrammaticalTense.PRESENT,
-                "amans",
-                new HashMap<>());
+                new ParticipleDeclensionSet.Builder(
+                        GrammaticalVoice.PASSIVE,
+                        GrammaticalTense.PERFECT,
+                        "amata"
+                ).build());
 
-        StagedParticipleData spd2 = new StagedParticipleData(
+        StagedParticipleData presentActive = new StagedParticipleData(
                 parentLemma,
                 parentLemmaWithMacrons,
-                GrammaticalVoice.ACTIVE,
-                GrammaticalTense.FUTURE,
-                "amaturus",
-                new HashMap<>());
+                new ParticipleDeclensionSet.Builder(
+                        GrammaticalVoice.ACTIVE,
+                        GrammaticalTense.PRESENT,
+                        "amans"
+                ).build());
+
+        StagedParticipleData futureActive = new StagedParticipleData(
+                parentLemma,
+                parentLemmaWithMacrons,
+                new ParticipleDeclensionSet.Builder(
+                        GrammaticalVoice.ACTIVE,
+                        GrammaticalTense.FUTURE,
+                        "amaturus"
+                ).build());
 
         StagedParticipleData gerundive = new StagedParticipleData(
                 parentLemma,
                 parentLemmaWithMacrons,
-                GrammaticalVoice.PASSIVE,
-                GrammaticalTense.FUTURE,
-                "amandus",
-                new HashMap<>());
+                new ParticipleDeclensionSet.Builder(
+                        GrammaticalVoice.PASSIVE,
+                        GrammaticalTense.FUTURE,
+                        "amandus"
+                ).build());
 
         // Stage the two test participles.
         underTest.stageParticiple(perfectPassive);
@@ -85,7 +96,7 @@ class ParticipleResolutionServiceTest {
             throw new AssertionError("No participles found");
         }
 
-       assertEquals(3, getNumParticiples());
+       assertEquals(4, getNumParticiples());
     }
 
     int getNumParticiples(){

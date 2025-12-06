@@ -163,8 +163,7 @@ public class ParticipleResolutionService {
         LexemeBuilder builder = LexemeBuilder.fromLexeme(verb);
         VerbDetails.Builder verbDetailsBuilder = getOrCreateVerbDetailsBuilder(verb);
 
-        VerbDetails.ParticipleSet participleSet = participleData.toParticipleSet();
-        verbDetailsBuilder.addParticipleSet(participleSet);
+        verbDetailsBuilder.addParticipleSet(participleData.getParticipleDeclensionSet());
 
         builder.setPartOfSpeechDetails(verbDetailsBuilder.build());
 

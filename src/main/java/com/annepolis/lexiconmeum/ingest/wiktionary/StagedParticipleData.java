@@ -1,12 +1,7 @@
 package com.annepolis.lexiconmeum.ingest.wiktionary;
 
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice;
-import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.VerbDetails;
-import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.ParticipleDeclensionSet;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
-
-import java.util.Map;
 
 /**
  * Holds participle data that cannot yet be linked to its parent verb.
@@ -19,28 +14,15 @@ public class StagedParticipleData {
     private final String parentLemmaWithMacrons;
     private final ParticipleDeclensionSet participleDeclensionSet;
 
-    // first-person singular of participle for a given voice and tense
-    private final String participleLemma;
-    private final Map<String, Agreement> inflections;
-
     public StagedParticipleData(
-            String parentLemma,
-            String parentLemmaWithMacrons,
-            GrammaticalVoice voice,
-            GrammaticalTense tense,
-            String participleLemma,
-            Map<String, Agreement> inflections) {
+            final String parentLemma,
+            final String parentLemmaWithMacrons,
+            ParticipleDeclensionSet participleDeclensionSet
+    ){
 
         this.parentLemma = parentLemma;
         this.parentLemmaWithMacrons = parentLemmaWithMacrons;
-        this.voice = voice;
-        this.tense = tense;
-        this.participleLemma = participleLemma;
-        this.inflections = inflections;
-    }
-
-    public boolean isGerundive(){
-        return voice == GrammaticalVoice.PASSIVE && tense == GrammaticalTense.FUTURE;
+        this.participleDeclensionSet = participleDeclensionSet;
     }
 
     public String getParentLemma() {
@@ -52,11 +34,11 @@ public class StagedParticipleData {
     }
 
     public String getParticipleLemma() {
-        return participleLemma;
+        return participleDeclensionSet.getTenseLemma();
     }
 
-    public VerbDetails.ParticipleSet toParticipleSet() {
-        return new VerbDetails.ParticipleSet(voice, tense, participleLemma, inflections);
+    public ParticipleDeclensionSet getParticipleDeclensionSet(){
+        return participleDeclensionSet;
     }
 
     @Override
@@ -70,7 +52,6 @@ public class StagedParticipleData {
     }
 
     public String getParticipleKey() {
-        return InflectionKey.buildParticipleSetKey(voice, tense);
+        return InflectionKey.buildParticipleSetKey(participleDeclensionSet.getVoice(), participleDeclensionSet.getTense());
     }
-
 }

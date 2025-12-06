@@ -165,7 +165,7 @@ public enum InflectionFeatureFactory {
 
     PARTICIPLE_PRESENT_ACTIVE("present_active", builder -> {
         if(builder instanceof Conjugation.Builder conjBuilder){
-            conjBuilder.setParticiple(GrammaticalParticiple.PRESENT_ACTIVE);
+            conjBuilder.setParticipleTense(GrammaticalParticipleTense.PRESENT_ACTIVE);
         }
     }),
 
