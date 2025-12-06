@@ -231,14 +231,14 @@ public class POSVerbParser implements PartOfSpeechParser {
         if (tags.contains(participle) ){
             String present = GrammaticalTense.PRESENT.name().toLowerCase();
             String active = GrammaticalVoice.ACTIVE.name().toLowerCase();
-            if(tags.contains(GrammaticalTense.PRESENT.name())){
+            if(tags.contains(active) && tags.contains(present)){
                 tags.remove(participle);
                 tags.remove(present);
                 tags.remove(active);
                 tags.add(GrammaticalParticiple.PRESENT_ACTIVE.name().toLowerCase());
             }
 
-            if(tags.contains(GrammaticalTense.PERFECT.name())){
+            if(tags.contains(GrammaticalTense.PERFECT.name().toLowerCase())){
                 tags.remove(participle);
                 tags.remove(present);
                 tags.add(GrammaticalParticiple.PRESENT_ACTIVE.name().toLowerCase());

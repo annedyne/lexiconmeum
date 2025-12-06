@@ -17,11 +17,9 @@ import java.util.Map;
 class DeclensionTableDTO implements InflectionTableDTO {
 
     @JsonIgnore
-    private Map<GrammaticalNumber, Map<GrammaticalCase, String>> table  =
-            new EnumMap<>(GrammaticalNumber.class);
+    private Map<GrammaticalNumber, Map<GrammaticalCase, String>> table  = new EnumMap<>(GrammaticalNumber.class);
 
-    public void setInflectionTable(
-            Map<GrammaticalNumber, Map<GrammaticalCase, String>> table ) {
+    public void setInflectionTable( Map<GrammaticalNumber, Map<GrammaticalCase, String>> table ) {
         this.table = table;
     }
 

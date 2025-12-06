@@ -77,32 +77,6 @@ public final class VerbDetails implements PartOfSpeechDetails {
             return this;
         }
 
-        /**
-         * Add a participle set by components
-         */
-        public Builder addParticipleSet(GrammaticalVoice voice,
-                                        GrammaticalTense tense,
-                                        String baseForm,
-                                        Map<String, Agreement> inflections) {
-            ParticipleSet set = new ParticipleSet(voice, tense, baseForm, inflections);
-            return addParticipleSet(set);
-        }
-
-        /**
-         * Check if a participle set already exists
-         */
-        public boolean hasParticipleSet(GrammaticalVoice voice, GrammaticalTense tense) {
-            String key = InflectionKey.buildParticipleSetKey(voice, tense);
-            return participles.containsKey(key);
-        }
-
-        /**
-         * Get mutable access to participles map (for incremental building)
-         */
-        public Map<String, ParticipleSet> getParticiples() {
-            return participles;
-        }
-
         public VerbDetails build() {
             return new VerbDetails(this);
         }

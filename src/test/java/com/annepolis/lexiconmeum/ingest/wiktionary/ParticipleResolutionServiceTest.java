@@ -60,14 +60,18 @@ class ParticipleResolutionServiceTest {
                 new HashMap<>());
 
         // Stage the two test participles.
-        underTest.stageParticiple(spd);
-        underTest.stageParticiple(spd2);
+        underTest.stageParticiple(perfectPassive);
+        underTest.stageParticiple(presentActive);
+        underTest.stageParticiple(futureActive);
         underTest.stageParticiple(gerundive);
 
         // Call finalize which contains the functionality under test
         underTest.finalizeParticiples(this::setCachedLexeme, stagedLexemeCache);
 
         if(cachedLexeme.getPartOfSpeechDetails() instanceof VerbDetails verbDetails) {
+            verbDetails.getParticipleSet(GrammaticalVoice.PASSIVE, GrammaticalTense.PERFECT)
+                    .orElseThrow(() -> new AssertionError("Present Active Participle not found") );
+
             verbDetails.getParticipleSet(GrammaticalVoice.ACTIVE, GrammaticalTense.PRESENT)
                     .orElseThrow(() -> new AssertionError("Present Active Participle not found") );
 

@@ -17,8 +17,7 @@ public class StagedParticipleData {
     // parent Lexeme's lemma
     private final String parentLemma;
     private final String parentLemmaWithMacrons;
-    private final GrammaticalVoice voice;
-    private final GrammaticalTense tense;
+    private final ParticipleDeclensionSet participleDeclensionSet;
 
     // first-person singular of participle for a given voice and tense
     private final String participleLemma;
@@ -63,7 +62,11 @@ public class StagedParticipleData {
     @Override
     public String toString() {
         return String.format("StagedParticiple{parent='%s', voice=%s, tense=%s, baseForm='%s'}",
-                parentLemma, voice, tense, participleLemma);
+                parentLemma,
+                participleDeclensionSet.getVoice(),
+                participleDeclensionSet.getTense(),
+                participleDeclensionSet.getParticipleTense(),
+                participleDeclensionSet.getTenseLemma());
     }
 
     public String getParticipleKey() {
