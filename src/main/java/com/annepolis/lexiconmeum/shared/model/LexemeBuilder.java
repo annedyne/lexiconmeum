@@ -65,8 +65,9 @@ public class LexemeBuilder {
         return partOfSpeechDetails;
     }
 
-    public void setPartOfSpeechDetails(PartOfSpeechDetails partOfSpeechDetails) {
+    public LexemeBuilder setPartOfSpeechDetails(PartOfSpeechDetails partOfSpeechDetails) {
         this.partOfSpeechDetails = partOfSpeechDetails;
+        return this;
     }
 
     public LexemeBuilder addSense(Sense sense){
@@ -79,8 +80,8 @@ public class LexemeBuilder {
     }
 
     public LexemeBuilder addInflection(Inflection inflection) {
-        // Default: if inflection exists, it will be set as alternative
-        //          if it doesn't, it will get added to index
+        // if an existing inflection (for the same key) already exists,
+        // set current as the alternativeForm
         return addInflection(inflection, existing ->
                 existing.toBuilder()
                         .setAlternativeForm(inflection.getForm())

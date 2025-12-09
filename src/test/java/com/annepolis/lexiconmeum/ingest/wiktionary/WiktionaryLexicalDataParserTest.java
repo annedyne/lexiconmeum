@@ -1,17 +1,13 @@
 package com.annepolis.lexiconmeum.ingest.wiktionary;
 
-import com.annepolis.lexiconmeum.TestUtil;
 import com.annepolis.lexiconmeum.ingest.tagmapping.EsseFormProvider;
 import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
-import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
 import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.WORD;
 import static org.junit.jupiter.api.Assertions.*;
 
 class WiktionaryLexicalDataParserTest {
@@ -57,6 +52,8 @@ class WiktionaryLexicalDataParserTest {
         partOfSpeechParsers.put(PartOfSpeech.NOUN, new POSNounParser());
         partOfSpeechParsers.put(PartOfSpeech.ADJECTIVE, new POSAdjectiveParser());
 
+        POSParticipleParser participleParser = new POSParticipleParser(new LexicalTagResolver());
+
         // Create test stub for staging service
         stagingServiceStub = new WiktionaryStagingServiceStub();
 
@@ -64,6 +61,7 @@ class WiktionaryLexicalDataParserTest {
         parser = new WiktionaryLexicalDataParser(
                 lexicalTagResolver,
                 partOfSpeechParsers,
+                participleParser,
                 stagingServiceStub
         );
         parser.setParseMode(ParseMode.STRICT);
@@ -213,83 +211,5 @@ class WiktionaryLexicalDataParserTest {
         assertEquals(GrammaticalTense.FUTURE_PERFECT, ((Conjugation) tenseTag).getTense());
     }
 
-    @Test
-    void isParticipleEntryReturnsTrueGivenParticipleRoot() throws IOException {
-        JsonNode root = TestUtil.getJsonRootNodes().stream()
-                .filter(node -> node.path(WORD.get()).asText().equals("amans"))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Participle 'amans' not found"));
-
-        boolean isParticiple = parser.isParticipleEntry(root);
-
-        assertTrue(isParticiple);
-    }
-
-    @Test
-    void isParticipleEntryReturnsFalseGivenAVerbRoot() throws IOException {
-        JsonNode root = TestUtil.getJsonRootNodes().stream()
-                .filter(node -> node.path(WORD.get()).asText().equals("amo"))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Verb 'amo' not found"));
-
-        boolean isParticiple = parser.isParticipleEntry(root);
-
-        assertFalse(isParticiple);
-    }
-
-    @Test
-    void parseParticipleEntryGeneratesExpectedStagedParticipleDataGivenPresentActiveParticiple() throws IOException {
-        JsonNode root = TestUtil.getJsonRootNodes().stream()
-                .filter(node -> node.path(WORD.get()).asText().equals("amans"))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Participle 'amans' not found"));
-
-        StagedParticipleData data = parser.parseParticipleEntry(root);
-
-        assertEquals("amans", data.getParticipleLemma());
-        assertEquals("amo", data.getParentLemma());
-        assertEquals("ACTIVE|PRESENT", data.getParticipleKey());
-        assertEquals("amō", data.getParentLemmaWithMacrons());
-        assertFalse(data.isGerundive());
-    }
-
-    @Test
-    void parseParticipleEntryGeneratesExpectedStagedParticipleDataGivenFuturePassiveParticiple() throws IOException {
-        JsonNode root = TestUtil.getJsonRootNodes().stream()
-                .filter(node -> node.path(WORD.get()).asText().equals("amandus"))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Participle 'amandus' not found"));
-
-        StagedParticipleData data = parser.parseParticipleEntry(root);
-
-        assertEquals("amandus", data.getParticipleLemma());
-        assertEquals("amandus", data.getParentLemma());
-        assertEquals("PASSIVE|FUTURE", data.getParticipleKey());
-        assertEquals("amandus", data.getParentLemmaWithMacrons());
-        assertTrue(data.isGerundive());
-    }
-
-    @Test
-    void parseParticipleInflectionsGeneratesExpectedInflections() throws IOException {
-        JsonNode root = TestUtil.getJsonRootNodes().stream()
-                .filter(node -> node.path(WORD.get()).asText().equals("amans"))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Participle 'amans' not found"));
-
-        Map<String, Agreement>  inflections = parser.parseParticipleInflections(root);
-
-        //Spot Check is fine, since props set via Agreement tagMapping
-        assertEquals(16, inflections.size());
-        Agreement ablativePlural = inflections.get("ABLATIVE|PLURAL|MASCULINE|FEMININE|NEUTER|POSITIVE");
-        assertEquals(3,ablativePlural.getGenders().size() );
-        assertEquals("amantibus",ablativePlural.getForm() );
-        assertEquals(GrammaticalCase.ABLATIVE,ablativePlural.getGrammaticalCase() );
-    }
-
-    @Test
-    void removeMacronsNormalizesStringAsExpected(){
-        String normalized = parser.removeMacrons("āēīōū");
-        assertEquals("aeiou", normalized);
-    }
 
 }

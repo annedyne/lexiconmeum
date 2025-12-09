@@ -25,16 +25,6 @@ import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataK
 public class POSVerbParser implements PartOfSpeechParser {
     static final Logger logger = LogManager.getLogger(POSVerbParser.class);
 
-    private static final Set<String> FORM_BLACKLIST = Set.of(
-            "no-table-tags",
-            "la-ndecl",
-            "conjugation-1",
-            "la-conj",
-            "la-adecl",
-            "two-termination",
-            "sigmatic"
-    );
-
     private static final Set<String> TAG_BLACKLIST = Set.of(
             "sigmatic"
     );
@@ -71,7 +61,6 @@ public class POSVerbParser implements PartOfSpeechParser {
         String templateName = headTemplates.get(0).path(NAME.get()).asText("");
 
         return VALID_HEAD_TEMPLATE_NAMES.contains(templateName);
-
     }
 
     // Filter out form nodes in the blacklist
@@ -79,7 +68,7 @@ public class POSVerbParser implements PartOfSpeechParser {
         String formValue = formNode.path(FORM.get()).asText();
 
         return CONJUGATION.get().equalsIgnoreCase(formNode.path(SOURCE.get()).asText())
-                && !FORM_BLACKLIST.contains(formValue);
+                && !ParserConstants.COMMON_FORM_BLACKLIST.contains(formValue);
     }
 
     @Override
@@ -93,7 +82,6 @@ public class POSVerbParser implements PartOfSpeechParser {
             logger.warn(WiktionaryLexicalDataParser.LogMsg.FAILED_TO_BUILD, ex.getMessage());
             return Optional.empty();
         }
-
     }
 
     @Override
@@ -221,7 +209,7 @@ public class POSVerbParser implements PartOfSpeechParser {
     private void coalesceCompoundFutureTenseTags(List<String> tags) {
         String future = GrammaticalTense.FUTURE.name().toLowerCase();
         String perfect = GrammaticalTense.PERFECT.name().toLowerCase();
-        String participle = GrammaticalParticiple.PARTICIPLE.name().toLowerCase();
+        String participle = GrammaticalParticipleTense.PARTICIPLE.name().toLowerCase();
 
         if (tags.contains(future) && tags.contains(perfect)) {
             tags.remove(future);
@@ -231,17 +219,17 @@ public class POSVerbParser implements PartOfSpeechParser {
         if (tags.contains(participle) ){
             String present = GrammaticalTense.PRESENT.name().toLowerCase();
             String active = GrammaticalVoice.ACTIVE.name().toLowerCase();
-            if(tags.contains(GrammaticalTense.PRESENT.name())){
+            if(tags.contains(active) && tags.contains(present)){
                 tags.remove(participle);
                 tags.remove(present);
                 tags.remove(active);
-                tags.add(GrammaticalParticiple.PRESENT_ACTIVE.name().toLowerCase());
+                tags.add(GrammaticalParticipleTense.PRESENT_ACTIVE.name().toLowerCase());
             }
 
-            if(tags.contains(GrammaticalTense.PERFECT.name())){
+            if(tags.contains(GrammaticalTense.PERFECT.name().toLowerCase())){
                 tags.remove(participle);
                 tags.remove(present);
-                tags.add(GrammaticalParticiple.PRESENT_ACTIVE.name().toLowerCase());
+                tags.add(GrammaticalParticipleTense.PRESENT_ACTIVE.name().toLowerCase());
             }
         }
     }

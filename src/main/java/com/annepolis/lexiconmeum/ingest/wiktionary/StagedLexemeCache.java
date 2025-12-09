@@ -77,6 +77,12 @@ public class StagedLexemeCache {
         return lexeme != null ? List.of(lexeme) : List.of();
     }
 
+    public boolean containsKey(String key){
+        return lemmaToLexemesLookup.containsKey(key)
+        || gerundiveFormToLexemeLookup.containsKey(key);
+
+    }
+
     /**
      * Get count of staged participles (for monitoring during ingestion)
      */

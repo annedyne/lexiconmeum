@@ -10,11 +10,21 @@ class ConjugationGroupDTO implements InflectionTableDTO {
     @JsonProperty("conjugations")
     private List<ConjugationTableDTO> conjugationTableDTOList;
 
-    ConjugationGroupDTO(List<ConjugationTableDTO> tableDTOList){
+    @JsonProperty("participles")
+    private List<ParticipleTableDTO> participleTableDTOList;
+
+    ConjugationGroupDTO(List<ConjugationTableDTO> tableDTOList, List<ParticipleTableDTO> participleTableDTOList){
         this.conjugationTableDTOList = tableDTOList;
+        this.participleTableDTOList = participleTableDTOList;
     }
 
     public List<ConjugationTableDTO> getConjugationTableDTOList() {
         return conjugationTableDTOList;
     }
+
+    public List<ParticipleTableDTO> getParticipleDTOList(){
+        return participleTableDTOList;
+    }
+
+
 }
