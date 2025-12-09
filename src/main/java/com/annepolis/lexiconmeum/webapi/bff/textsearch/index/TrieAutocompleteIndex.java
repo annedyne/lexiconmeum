@@ -99,12 +99,13 @@ class TrieAutocompleteIndex implements AutocompleteIndexBackend {
 
         // Navigate down the trie searching for each character of the prefix array
         for (char prefixCharacter : prefix.toCharArray()) {
-            if (!node.getCharacterNodeMap().containsKey(prefixCharacter)) {
-                // If the prefix is not found, return an empty list
+            String normalizedPrefixCharacter = Normalizer.normalize(Character.toString(prefixCharacter), Normalizer.Form.NFD);
+            Character normalizedCharacterKey = normalizedPrefixCharacter.charAt(0);
+
+            if (!node.getCharacterNodeMap().containsKey(normalizedCharacterKey)) {
                 return results;
             }
-            //traverse to down the tree to the next node/char in the prefix
-            node = node.getCharacterNodeMap().get(prefixCharacter);
+            node = node.getCharacterNodeMap().get(normalizedCharacterKey);
         }
 
         // Once we've reached the end of the prefix,
@@ -157,7 +158,7 @@ class TrieAutocompleteIndex implements AutocompleteIndexBackend {
     }
 
     private static class TrieNode {
-        private final Map<Character, TrieNode> characterNodeMap = new HashMap<>();
+        private final Map<Character, TrieNode> characterNodeMap = new TreeMap<>();
         private char content;
         private boolean isEndOfWord;
         private final Set<UUID> lexemeIds = new HashSet<>();
