@@ -59,6 +59,17 @@ class TrieAutocompleteIndexTest {
     }
 
     @Test
+    void matchingIgnoresDiacritics(){
+        TrieAutocompleteIndex underTest = new TrieAutocompleteIndex();
+        Lexeme lexeme = TestUtil.getNewTestNounLexeme();
+        for (Inflection inflection : lexeme.getInflections()){
+            underTest.insert(inflection.getForm(), lexeme.getId());
+        }
+        List<FormMatch> results = underTest.searchForMatchingForms("amīcō", 20);
+        assertEquals(3, results.size());
+    }
+
+    @Test
     void givenSuffixReturnsAllUniqueMatches(){
         TrieAutocompleteIndex underTest = new TrieAutocompleteIndex();
         List<Lexeme> lexemes = TestUtil.getMixedPartOfSpeechTestLexemes();
