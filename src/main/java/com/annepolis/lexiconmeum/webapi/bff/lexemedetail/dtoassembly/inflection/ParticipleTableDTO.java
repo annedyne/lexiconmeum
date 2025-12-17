@@ -8,8 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 public class ParticipleTableDTO implements InflectionTableDTO  {
-   String gender;
-   private List<ParticipleTenseDTO> tenses;
+
+    private String gender;
+    private List<ParticipleTenseDTO> tenses;
 
     public String getGender() {
         return gender;
@@ -23,7 +24,7 @@ public class ParticipleTableDTO implements InflectionTableDTO  {
         this.tenses = tenses;
     }
 
-    @JsonProperty("participles")
+    @JsonProperty("tenses")
     protected List<ParticipleTenseDTO> getTenses() {
         return tenses;
     }
