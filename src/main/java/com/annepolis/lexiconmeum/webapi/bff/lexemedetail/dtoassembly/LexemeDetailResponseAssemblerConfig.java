@@ -1,10 +1,7 @@
 package com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly;
 
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
-import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection.AgreementTableMapper;
-import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection.ConjugationTableMapper;
-import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection.DeclensionTableMapper;
-import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection.InflectionTableMapper;
+import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -78,7 +75,7 @@ import java.util.*;
 
     @Bean
     Map<PartOfSpeech, InflectionTableMapper> inflectionMappers(
-            ConjugationTableMapper conjugationTableMapper,
+            ConjugationGroupMapper conjugationTableMapper,
             DeclensionTableMapper lexemeDeclensionMapper,
             AgreementTableMapper lexemeAgreementMapper
     ) {
@@ -100,6 +97,14 @@ import java.util.*;
                 PartOfSpeech.DETERMINER,
                 PartOfSpeech.PRONOUN
         );
+    }
+
+    @Bean
+    ConjugationGroupMapper conjugationGroupMapper(
+            ConjugationTableMapper conjugationTableMapper,
+            ParticipleTableMapper participleTableMapper
+    ){
+        return new ConjugationGroupMapper(conjugationTableMapper, participleTableMapper);
     }
 
 }

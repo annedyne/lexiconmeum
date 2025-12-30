@@ -65,8 +65,8 @@ public final class LexicalTagResolver {
 
     // Apply many inflection tags
     public void applyAllToInflection(Iterable<String> tags, InflectionBuilder builder, Logger logger) {
-        for (String t : tags) {
-            applyToInflection(builder, t, logger);
+        for (String tag : tags) {
+            applyToInflection(builder, tag, logger);
         }
     }
 

@@ -42,7 +42,7 @@ public class SearchableVerbFormsExtractor implements SearchableFormsExtractor {
     private void extractParticipleForms(VerbDetails verbDetails, Set<String> forms) {
         verbDetails.getParticiples().values().forEach(participleSet -> {
             // Extract each inflected form (and its alternative if present)
-            participleSet.getInflections().values().forEach(participle -> {
+            participleSet.getInflectionIndex().values().forEach(participle -> {
                 Optional.ofNullable(participle.getForm())
                         .filter(s -> !s.isBlank())
                         .ifPresent(forms::add);

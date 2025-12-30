@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -27,6 +28,10 @@ public class ParticipleResolutionService {
     // Thread-safe staging map for participles waiting for their parent verbs
     private final Map<String, List<StagedParticipleData>> stagedParticiples = new ConcurrentHashMap<>();
 
+    // Some participles 'form-of' attribute points to the participle lemma, not the verb lemma
+    // Map them here so they can be traced to the parent verb lemma.
+    private final Map<String, List<String>> participleToParentLemma = new ConcurrentHashMap<>();
+
     /**
      * Stage a participle for later attachment during finalization.
      * Thread-safe for parallel ingestion.
@@ -38,6 +43,9 @@ public class ParticipleResolutionService {
                 Collections.synchronizedList(new ArrayList<>())
         ).add(participleData);
 
+        participleToParentLemma.computeIfAbsent(participleData.getParticipleLemma(),k ->
+                Collections.synchronizedList(new ArrayList<>())
+        ).add(participleData.getParentLemma());
         logger.trace("Staged participle '{}' for parent verb '{}'",
                 participleData.getParticipleLemma(), parentLemma);
     }
@@ -60,8 +68,19 @@ public class ParticipleResolutionService {
         stagedParticiples.forEach((parentLemma, participles) -> {
             logger.debug("Processing {} participle(s) for verb '{}'", participles.size(), parentLemma);
 
-            // attempt to retrieve staged verb lexemes matching verb lemma from verb lemma->participle index
-            List<Lexeme> parentVerbs = stagedLexemeCache.getLexemesByLemma(parentLemma);
+            List<Lexeme> parentVerbs = new ArrayList<>();
+            if(!stagedLexemeCache.containsKey(parentLemma)){
+                // Check for mapping of non-lemma participle parents to participle lemmas to verb lemmas
+                List<String> parentLemmas = participleToParentLemma.computeIfAbsent(parentLemma, k -> new CopyOnWriteArrayList<>());
+                for(String lemma : parentLemmas){
+                    // attempt to retrieve staged verb lexemes matching verb lemma from verb lemma->participle index
+                    parentVerbs.addAll(stagedLexemeCache.getLexemesByLemma(parentLemma)) ;
+                }
+            } else {
+                // attempt to retrieve staged verb lexemes matching verb lemma from verb lemma->participle index
+                parentVerbs = stagedLexemeCache.getLexemesByLemma(parentLemma);
+
+            }
 
             if (parentVerbs.isEmpty()) {
                 logger.warn("No parent verb found for {} staged participle(s) of '{}'",
@@ -144,8 +163,7 @@ public class ParticipleResolutionService {
         LexemeBuilder builder = LexemeBuilder.fromLexeme(verb);
         VerbDetails.Builder verbDetailsBuilder = getOrCreateVerbDetailsBuilder(verb);
 
-        VerbDetails.ParticipleSet participleSet = participleData.toParticipleSet();
-        verbDetailsBuilder.addParticipleSet(participleSet);
+        verbDetailsBuilder.addParticipleSet(participleData.getParticipleDeclensionSet());
 
         builder.setPartOfSpeechDetails(verbDetailsBuilder.build());
 

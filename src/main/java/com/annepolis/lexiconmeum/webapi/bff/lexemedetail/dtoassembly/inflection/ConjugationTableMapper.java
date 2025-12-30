@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-public class ConjugationTableMapper implements InflectionTableMapper {
+public class ConjugationTableMapper {
 
     // Comparator orders individual tense groups by natural enum order
     Comparator<ConjugationTableDTO> conjugationTableDTOComparator =
@@ -26,8 +26,8 @@ public class ConjugationTableMapper implements InflectionTableMapper {
 
     record MoodVoiceKey(GrammaticalMood mood, GrammaticalVoice voice) {}
 
-    @Override
-    public ConjugationGroupDTO toInflectionTableDTO(Lexeme lexeme) {
+
+    public List<ConjugationTableDTO> toInflectionTableDTO(Lexeme lexeme) {
 
         // Process and extract conjugations from Lexeme
         List<Conjugation> conjugations = extractConjugations(lexeme);
@@ -43,7 +43,7 @@ public class ConjugationTableMapper implements InflectionTableMapper {
                 .sorted(conjugationTableDTOComparator)
                 .toList();
 
-        return new ConjugationGroupDTO(sorted);
+        return sorted;
     }
 
     List<Conjugation> extractConjugations(Lexeme lexeme){

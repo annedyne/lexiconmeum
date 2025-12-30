@@ -2,7 +2,7 @@ package com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection
 
 import java.util.List;
 
-class ConjugationTableDTO implements InflectionTableDTO {
+class ConjugationTableDTO implements InflectionTableDTO  {
 
     private String voice;
     private String mood;

@@ -1,0 +1,1187 @@
+{       "participles": {
+  "PASSIVE|PERFECT": {
+    "voice": "PASSIVE",
+    "tense": "PERFECT",
+    "baseForm": "amatus",
+    "inflections": {
+      "ABLATIVE|PLURAL|MASCULINE|FEMININE|NEUTER|POSITIVE": {
+        "form": "amātīs",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE",
+          "FEMININE",
+          "NEUTER"
+        ],
+        "grammaticalCase": "ABLATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "GENITIVE|SINGULAR|FEMININE|POSITIVE": {
+        "form": "amātae",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "GENITIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "NOMINATIVE|PLURAL|NEUTER|POSITIVE": {
+        "form": "amāta",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "NOMINATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "GENITIVE|SINGULAR|MASCULINE|POSITIVE": {
+        "form": "amātī",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "GENITIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "GENITIVE|PLURAL|FEMININE|POSITIVE": {
+        "form": "amātārum",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "GENITIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "ACCUSATIVE|PLURAL|FEMININE|POSITIVE": {
+        "form": "amātās",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "ACCUSATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "ABLATIVE|SINGULAR|NEUTER|POSITIVE": {
+        "form": "amātō",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "ABLATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "NOMINATIVE|SINGULAR|NEUTER|POSITIVE": {
+        "form": "amātum",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "NOMINATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "DATIVE|SINGULAR|NEUTER|POSITIVE": {
+        "form": "amātō",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "DATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "NOMINATIVE|SINGULAR|FEMININE|POSITIVE": {
+        "form": "amāta",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "NOMINATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "VOCATIVE|SINGULAR|NEUTER|POSITIVE": {
+        "form": "amātum",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "VOCATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "DATIVE|PLURAL|MASCULINE|FEMININE|NEUTER|POSITIVE": {
+        "form": "amātīs",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE",
+          "FEMININE",
+          "NEUTER"
+        ],
+        "grammaticalCase": "DATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "GENITIVE|PLURAL|NEUTER|POSITIVE": {
+        "form": "amātōrum",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "GENITIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "DATIVE|SINGULAR|MASCULINE|POSITIVE": {
+        "form": "amātō",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "DATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "ABLATIVE|SINGULAR|MASCULINE|POSITIVE": {
+        "form": "amātō",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "ABLATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "ACCUSATIVE|SINGULAR|FEMININE|POSITIVE": {
+        "form": "amātam",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "ACCUSATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "NOMINATIVE|SINGULAR|MASCULINE|POSITIVE": {
+        "form": "amātus",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "NOMINATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "ACCUSATIVE|PLURAL|NEUTER|POSITIVE": {
+        "form": "amāta",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "ACCUSATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "VOCATIVE|SINGULAR|FEMININE|POSITIVE": {
+        "form": "amāta",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "VOCATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "VOCATIVE|PLURAL|MASCULINE|POSITIVE": {
+        "form": "amātī",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "VOCATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "GENITIVE|PLURAL|MASCULINE|POSITIVE": {
+        "form": "amātōrum",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "GENITIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "GENITIVE|SINGULAR|NEUTER|POSITIVE": {
+        "form": "amātī",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "GENITIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "VOCATIVE|PLURAL|NEUTER|POSITIVE": {
+        "form": "amāta",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "VOCATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "VOCATIVE|SINGULAR|MASCULINE|POSITIVE": {
+        "form": "amāte",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "VOCATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "NOMINATIVE|PLURAL|MASCULINE|POSITIVE": {
+        "form": "amātī",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "NOMINATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "ACCUSATIVE|SINGULAR|MASCULINE|POSITIVE": {
+        "form": "amātum",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "ACCUSATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "VOCATIVE|PLURAL|FEMININE|POSITIVE": {
+        "form": "amātae",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "VOCATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "DATIVE|SINGULAR|FEMININE|POSITIVE": {
+        "form": "amātae",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "DATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "ACCUSATIVE|PLURAL|MASCULINE|POSITIVE": {
+        "form": "amātōs",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "ACCUSATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "ABLATIVE|SINGULAR|FEMININE|POSITIVE": {
+        "form": "amātā",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "ABLATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "ACCUSATIVE|SINGULAR|NEUTER|POSITIVE": {
+        "form": "amātum",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "ACCUSATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "NOMINATIVE|PLURAL|FEMININE|POSITIVE": {
+        "form": "amātae",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "NOMINATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      }
+    },
+    "participleKey": "PASSIVE|PERFECT"
+  },
+  "ACTIVE|FUTURE": {
+    "voice": "ACTIVE",
+    "tense": "FUTURE",
+    "baseForm": "amaturus",
+    "inflections": {
+      "ABLATIVE|PLURAL|MASCULINE|FEMININE|NEUTER|POSITIVE": {
+        "form": "amātūrīs",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE",
+          "FEMININE",
+          "NEUTER"
+        ],
+        "grammaticalCase": "ABLATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "GENITIVE|SINGULAR|FEMININE|POSITIVE": {
+        "form": "amātūrae",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "GENITIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "NOMINATIVE|PLURAL|NEUTER|POSITIVE": {
+        "form": "amātūra",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "NOMINATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "GENITIVE|SINGULAR|MASCULINE|POSITIVE": {
+        "form": "amātūrī",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "GENITIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "GENITIVE|PLURAL|FEMININE|POSITIVE": {
+        "form": "amātūrārum",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "GENITIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "ACCUSATIVE|PLURAL|FEMININE|POSITIVE": {
+        "form": "amātūrās",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "ACCUSATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "ABLATIVE|SINGULAR|NEUTER|POSITIVE": {
+        "form": "amātūrō",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "ABLATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "NOMINATIVE|SINGULAR|NEUTER|POSITIVE": {
+        "form": "amātūrum",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "NOMINATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "DATIVE|SINGULAR|NEUTER|POSITIVE": {
+        "form": "amātūrō",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "DATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "NOMINATIVE|SINGULAR|FEMININE|POSITIVE": {
+        "form": "amātūra",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "NOMINATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "VOCATIVE|SINGULAR|NEUTER|POSITIVE": {
+        "form": "amātūrum",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "VOCATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "DATIVE|PLURAL|MASCULINE|FEMININE|NEUTER|POSITIVE": {
+        "form": "amātūrīs",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE",
+          "FEMININE",
+          "NEUTER"
+        ],
+        "grammaticalCase": "DATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "GENITIVE|PLURAL|NEUTER|POSITIVE": {
+        "form": "amātūrōrum",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "GENITIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "DATIVE|SINGULAR|MASCULINE|POSITIVE": {
+        "form": "amātūrō",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "DATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "ABLATIVE|SINGULAR|MASCULINE|POSITIVE": {
+        "form": "amātūrō",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "ABLATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "ACCUSATIVE|SINGULAR|FEMININE|POSITIVE": {
+        "form": "amātūram",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "ACCUSATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "NOMINATIVE|SINGULAR|MASCULINE|POSITIVE": {
+        "form": "amātūrus",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "NOMINATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "ACCUSATIVE|PLURAL|NEUTER|POSITIVE": {
+        "form": "amātūra",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "ACCUSATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "VOCATIVE|SINGULAR|FEMININE|POSITIVE": {
+        "form": "amātūra",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "VOCATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "VOCATIVE|PLURAL|MASCULINE|POSITIVE": {
+        "form": "amātūrī",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "VOCATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "GENITIVE|PLURAL|MASCULINE|POSITIVE": {
+        "form": "amātūrōrum",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "GENITIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "GENITIVE|SINGULAR|NEUTER|POSITIVE": {
+        "form": "amātūrī",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "GENITIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "VOCATIVE|PLURAL|NEUTER|POSITIVE": {
+        "form": "amātūra",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "VOCATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "VOCATIVE|SINGULAR|MASCULINE|POSITIVE": {
+        "form": "amātūre",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "VOCATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "NOMINATIVE|PLURAL|MASCULINE|POSITIVE": {
+        "form": "amātūrī",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "NOMINATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "ACCUSATIVE|SINGULAR|MASCULINE|POSITIVE": {
+        "form": "amātūrum",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "ACCUSATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "VOCATIVE|PLURAL|FEMININE|POSITIVE": {
+        "form": "amātūrae",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "VOCATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "DATIVE|SINGULAR|FEMININE|POSITIVE": {
+        "form": "amātūrae",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "DATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "ACCUSATIVE|PLURAL|MASCULINE|POSITIVE": {
+        "form": "amātūrōs",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "ACCUSATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "ABLATIVE|SINGULAR|FEMININE|POSITIVE": {
+        "form": "amātūrā",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "ABLATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "ACCUSATIVE|SINGULAR|NEUTER|POSITIVE": {
+        "form": "amātūrum",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "ACCUSATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "NOMINATIVE|PLURAL|FEMININE|POSITIVE": {
+        "form": "amātūrae",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "NOMINATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      }
+    },
+    "participleKey": "ACTIVE|FUTURE"
+  },
+  "ACTIVE|PRESENT": {
+    "voice": "ACTIVE",
+    "tense": "PRESENT",
+    "baseForm": "amans",
+    "inflections": {
+      "ABLATIVE|PLURAL|MASCULINE|FEMININE|NEUTER|POSITIVE": {
+        "form": "amantibus",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE",
+          "FEMININE",
+          "NEUTER"
+        ],
+        "grammaticalCase": "ABLATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "NOMINATIVE|PLURAL|NEUTER|POSITIVE": {
+        "form": "amantia",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "NOMINATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "VOCATIVE|PLURAL|MASCULINE|FEMININE|POSITIVE": {
+        "form": "amantēs",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE",
+          "FEMININE"
+        ],
+        "grammaticalCase": "VOCATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "NOMINATIVE|PLURAL|MASCULINE|FEMININE|POSITIVE": {
+        "form": "amantēs",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE",
+          "FEMININE"
+        ],
+        "grammaticalCase": "NOMINATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "ACCUSATIVE|PLURAL|NEUTER|POSITIVE": {
+        "form": "amantia",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "ACCUSATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "VOCATIVE|SINGULAR|MASCULINE|FEMININE|NEUTER|POSITIVE": {
+        "form": "amāns",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE",
+          "FEMININE",
+          "NEUTER"
+        ],
+        "grammaticalCase": "VOCATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "DATIVE|SINGULAR|MASCULINE|FEMININE|NEUTER|POSITIVE": {
+        "form": "amantī",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE",
+          "FEMININE",
+          "NEUTER"
+        ],
+        "grammaticalCase": "DATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "NOMINATIVE|SINGULAR|MASCULINE|FEMININE|NEUTER|POSITIVE": {
+        "form": "amāns",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE",
+          "FEMININE",
+          "NEUTER"
+        ],
+        "grammaticalCase": "NOMINATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "ABLATIVE|SINGULAR|MASCULINE|FEMININE|NEUTER|POSITIVE": {
+        "form": "amantī",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE",
+          "FEMININE",
+          "NEUTER"
+        ],
+        "grammaticalCase": "ABLATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "GENITIVE|SINGULAR|MASCULINE|FEMININE|NEUTER|POSITIVE": {
+        "form": "amantis",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE",
+          "FEMININE",
+          "NEUTER"
+        ],
+        "grammaticalCase": "GENITIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "VOCATIVE|PLURAL|NEUTER|POSITIVE": {
+        "form": "amantia",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "VOCATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "DATIVE|PLURAL|MASCULINE|FEMININE|NEUTER|POSITIVE": {
+        "form": "amantibus",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE",
+          "FEMININE",
+          "NEUTER"
+        ],
+        "grammaticalCase": "DATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "ACCUSATIVE|PLURAL|MASCULINE|FEMININE|POSITIVE": {
+        "form": "amantīs",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE",
+          "FEMININE"
+        ],
+        "grammaticalCase": "ACCUSATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "ACCUSATIVE|SINGULAR|MASCULINE|FEMININE|POSITIVE": {
+        "form": "amantem",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE",
+          "FEMININE"
+        ],
+        "grammaticalCase": "ACCUSATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "ACCUSATIVE|SINGULAR|NEUTER|POSITIVE": {
+        "form": "amāns",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "ACCUSATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "GENITIVE|PLURAL|MASCULINE|FEMININE|NEUTER|POSITIVE": {
+        "form": "amantium",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE",
+          "FEMININE",
+          "NEUTER"
+        ],
+        "grammaticalCase": "GENITIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      }
+    },
+    "participleKey": "ACTIVE|PRESENT"
+  },
+  "PASSIVE|FUTURE": {
+    "voice": "PASSIVE",
+    "tense": "FUTURE",
+    "baseForm": "amandus",
+    "inflections": {
+      "ABLATIVE|PLURAL|MASCULINE|FEMININE|NEUTER|POSITIVE": {
+        "form": "amandīs",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE",
+          "FEMININE",
+          "NEUTER"
+        ],
+        "grammaticalCase": "ABLATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "GENITIVE|SINGULAR|FEMININE|POSITIVE": {
+        "form": "amandae",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "GENITIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "NOMINATIVE|PLURAL|NEUTER|POSITIVE": {
+        "form": "amanda",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "NOMINATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "GENITIVE|SINGULAR|MASCULINE|POSITIVE": {
+        "form": "amandī",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "GENITIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "GENITIVE|PLURAL|FEMININE|POSITIVE": {
+        "form": "amandārum",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "GENITIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "ACCUSATIVE|PLURAL|FEMININE|POSITIVE": {
+        "form": "amandās",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "ACCUSATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "ABLATIVE|SINGULAR|NEUTER|POSITIVE": {
+        "form": "amandō",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "ABLATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "NOMINATIVE|SINGULAR|NEUTER|POSITIVE": {
+        "form": "amandum",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "NOMINATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "DATIVE|SINGULAR|NEUTER|POSITIVE": {
+        "form": "amandō",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "DATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "NOMINATIVE|SINGULAR|FEMININE|POSITIVE": {
+        "form": "amanda",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "NOMINATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "VOCATIVE|SINGULAR|NEUTER|POSITIVE": {
+        "form": "amandum",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "VOCATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "DATIVE|PLURAL|MASCULINE|FEMININE|NEUTER|POSITIVE": {
+        "form": "amandīs",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE",
+          "FEMININE",
+          "NEUTER"
+        ],
+        "grammaticalCase": "DATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "GENITIVE|PLURAL|NEUTER|POSITIVE": {
+        "form": "amandōrum",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "GENITIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "DATIVE|SINGULAR|MASCULINE|POSITIVE": {
+        "form": "amandō",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "DATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "ABLATIVE|SINGULAR|MASCULINE|POSITIVE": {
+        "form": "amandō",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "ABLATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "ACCUSATIVE|SINGULAR|FEMININE|POSITIVE": {
+        "form": "amandam",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "ACCUSATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "NOMINATIVE|SINGULAR|MASCULINE|POSITIVE": {
+        "form": "amandus",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "NOMINATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "ACCUSATIVE|PLURAL|NEUTER|POSITIVE": {
+        "form": "amanda",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "ACCUSATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "VOCATIVE|SINGULAR|FEMININE|POSITIVE": {
+        "form": "amanda",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "VOCATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "VOCATIVE|PLURAL|MASCULINE|POSITIVE": {
+        "form": "amandī",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "VOCATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "GENITIVE|PLURAL|MASCULINE|POSITIVE": {
+        "form": "amandōrum",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "GENITIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "GENITIVE|SINGULAR|NEUTER|POSITIVE": {
+        "form": "amandī",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "GENITIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "VOCATIVE|PLURAL|NEUTER|POSITIVE": {
+        "form": "amanda",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "VOCATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "VOCATIVE|SINGULAR|MASCULINE|POSITIVE": {
+        "form": "amande",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "VOCATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "NOMINATIVE|PLURAL|MASCULINE|POSITIVE": {
+        "form": "amandī",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "NOMINATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "ACCUSATIVE|SINGULAR|MASCULINE|POSITIVE": {
+        "form": "amandum",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "ACCUSATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "VOCATIVE|PLURAL|FEMININE|POSITIVE": {
+        "form": "amandae",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "VOCATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "DATIVE|SINGULAR|FEMININE|POSITIVE": {
+        "form": "amandae",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "DATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "ACCUSATIVE|PLURAL|MASCULINE|POSITIVE": {
+        "form": "amandōs",
+        "alternativeForm": null,
+        "genders": [
+          "MASCULINE"
+        ],
+        "grammaticalCase": "ACCUSATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      },
+      "ABLATIVE|SINGULAR|FEMININE|POSITIVE": {
+        "form": "amandā",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "ABLATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "ACCUSATIVE|SINGULAR|NEUTER|POSITIVE": {
+        "form": "amandum",
+        "alternativeForm": null,
+        "genders": [
+          "NEUTER"
+        ],
+        "grammaticalCase": "ACCUSATIVE",
+        "number": "SINGULAR",
+        "degree": "POSITIVE"
+      },
+      "NOMINATIVE|PLURAL|FEMININE|POSITIVE": {
+        "form": "amandae",
+        "alternativeForm": null,
+        "genders": [
+          "FEMININE"
+        ],
+        "grammaticalCase": "NOMINATIVE",
+        "number": "PLURAL",
+        "degree": "POSITIVE"
+      }
+    },
+    "participleKey": "PASSIVE|FUTURE"
+  }
+}
+}

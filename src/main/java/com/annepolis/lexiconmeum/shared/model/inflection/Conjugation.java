@@ -14,7 +14,7 @@ public class Conjugation implements Inflection {
     private final GrammaticalTense tense;
     private final GrammaticalPerson person;
     private final GrammaticalNumber number;
-    private final GrammaticalParticiple participle;
+    private final GrammaticalParticipleTense participleTense;
 
 
     public Conjugation(Builder builder){
@@ -23,7 +23,7 @@ public class Conjugation implements Inflection {
         this.tense = builder.getTense();
         this.person = builder.getPerson();
         this.number = builder.getNumber();
-        this.participle = builder.getParticiple();
+        this.participleTense = builder.getParticipleTense();
         this.form = builder.getForm();
         this.alternativeForm = builder.getAlternativeForm();
     }
@@ -46,7 +46,7 @@ public class Conjugation implements Inflection {
                 .setPerson(person)
                 .setNumber(number)
                 .setMood(mood)
-                .setParticiple(participle)
+                .setParticipleTense(participleTense)
                 .setAlternativeForm(alternativeForm);
     }
 
@@ -55,7 +55,7 @@ public class Conjugation implements Inflection {
     public GrammaticalPerson getPerson() { return person;}
     public GrammaticalNumber getNumber() { return number; }
     public GrammaticalMood getMood() { return mood; }
-    public GrammaticalParticiple getParticiple() {return participle; }
+    public GrammaticalParticipleTense getParticipleTense() {return participleTense; }
 
     public static class Builder implements InflectionBuilder {
 
@@ -64,7 +64,7 @@ public class Conjugation implements Inflection {
         private GrammaticalTense tense;
         private GrammaticalPerson person;
         private GrammaticalNumber number;
-        private GrammaticalParticiple participle;
+        private GrammaticalParticipleTense participle;
 
         private final String form;
         private String alternativeForm;
@@ -118,11 +118,11 @@ public class Conjugation implements Inflection {
             return this;
         }
 
-        public GrammaticalParticiple getParticiple() {
+        public GrammaticalParticipleTense getParticipleTense() {
             return participle;
         }
 
-        public Conjugation.Builder setParticiple(GrammaticalParticiple participle) {
+        public Conjugation.Builder setParticipleTense(GrammaticalParticipleTense participle) {
             this.participle = participle;
             return this;
         }

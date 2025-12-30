@@ -263,6 +263,10 @@ public class TestUtil {
     }
 
     public static List<JsonNode> getJsonRootNodes() throws IOException {
+        String testDataFilename = "testDataRaw.jsonl";
+        return getJsonRootNodes(testDataFilename);
+    }
+    public static List<JsonNode> getJsonRootNodes(String testDataFilename) throws IOException {
         InputStream inputStream = TestUtil.class.getClassLoader()
                 .getResourceAsStream("testDataRaw.jsonl");
 

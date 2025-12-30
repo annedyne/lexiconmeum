@@ -18,6 +18,8 @@ public final class InflectionKey {
             return buildDeclensionKey(d);
         } else if (inflection instanceof Agreement a ){
             return buildAgreementKey(a);
+        } else if (inflection instanceof Participle p ){
+            return buildParticipleInflectionKey(p);
         } else {
             throw new IllegalArgumentException("Unsupported inflection type: " + inflection.getClass());
         }
@@ -144,7 +146,9 @@ public final class InflectionKey {
     }
 
     /**
-     * Builds a key representing a participle set based on the specified grammatical voice and tense.
+     * Not strictly an 'Inflection Key'
+     * Builds a key representing a set of participle declensions ('ParticipleSet')
+     * for the specified grammatical voice and tense.
      *
      * @param voice the grammatical voice (e.g., ACTIVE, PASSIVE) to be included in the key
      * @param tense the grammatical tense (e.g., PRESENT, IMPERFECT) to be included in the key

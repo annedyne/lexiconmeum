@@ -4,13 +4,9 @@ import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.Sense;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
-import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.inflection.Declension;
-import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
 import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,13 +19,13 @@ import org.springframework.stereotype.Component;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.text.Normalizer;
-import java.util.*;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import static com.annepolis.lexiconmeum.ingest.wiktionary.ParserConstants.COMMON_FORM_BLACKLIST;
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.*;
-import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataKeyWord.FORM_OF;
 
 @Component
 class WiktionaryLexicalDataParser {
@@ -49,22 +45,13 @@ class WiktionaryLexicalDataParser {
         private LogMsg() {} // Prevent instantiation
     }
     
-    private static final Set<String> FORM_BLACKLIST = Set.of(
-            "no-table-tags",
-            "la-ndecl",
-            "conjugation-1",
-            "la-conj",
-            "la-adecl",
-            "two-termination",
-            "sigmatic"
-    );
-
     private final ObjectMapper mapper = new ObjectMapper();
     private ParseMode parseMode;
 
     private final LexicalTagResolver lexicalTagResolver;
     private final Map<PartOfSpeech, PartOfSpeechParser> partOfSpeechParsers;
     private final WiktionaryStagingService wiktionaryStagingService;
+    private final POSParticipleParser participleParser;
 
     public ParseMode getParseMode() {
         return parseMode;
@@ -76,10 +63,12 @@ class WiktionaryLexicalDataParser {
 
     WiktionaryLexicalDataParser(LexicalTagResolver lexicalTagResolver,
                                 Map<PartOfSpeech, PartOfSpeechParser> partOfSpeechParsers,
+                                POSParticipleParser participleParser,
                                 WiktionaryStagingService wiktionaryStagingService
     ) {
         this.lexicalTagResolver = lexicalTagResolver;
         this.partOfSpeechParsers = partOfSpeechParsers;
+        this.participleParser = participleParser;
         this.wiktionaryStagingService = wiktionaryStagingService;
     }
 
@@ -142,7 +131,7 @@ class WiktionaryLexicalDataParser {
         // Only build valid lemma entries
         if (!isValidLemmaEntry(root, partOfSpeech)) {
             // Participles get staged and added to associated parent Lexeme at the end
-            if (isParticipleEntry(root)) {
+            if (participleParser.isValidParticipleEntry(root)) {
                 handleParticipleEntry(root);
             }
             logger.trace(LogMsg.SKIPPING_NON_LEMMA, () -> posTag, () -> root.path(WORD.get()).asText());
@@ -327,7 +316,7 @@ class WiktionaryLexicalDataParser {
     private boolean isDeclensionForm(JsonNode formNode){
         String formValue = formNode.path(FORM.get()).asText();
 
-        if(FORM_BLACKLIST.contains(formValue)){
+        if(COMMON_FORM_BLACKLIST.contains(formValue)){
             return false;
         }
         if (!formNode.has(SOURCE.get())) {
@@ -345,108 +334,17 @@ class WiktionaryLexicalDataParser {
 
     // ---------------------------------- PARTICIPLE HANDLERS ---------------------------------- //
 
-    /**
-     * Check if this verb entry is actually a participle form entry
-     */
-    protected boolean isParticipleEntry(JsonNode root) {
-        // Must have head_templates
-       JsonNode headTemplates = root.path(HEAD_TEMPLATES.get());
-        if (!headTemplates.isArray() || headTemplates.isEmpty()) {
-            return false;
-        }
 
-        // Check template name
-        String templateName = headTemplates.get(0).path(NAME.get()).asText("");
-        return WiktionaryLexicalDataKeyWord.TEMPLATE_HEAD_PARTICPLE.get().equals(templateName);
-    }
     /**
      * Handle a participle entry by staging it for later attachment
      */
     private void handleParticipleEntry(JsonNode root) {
         try {
-            StagedParticipleData participleData = parseParticipleEntry(root);
+            StagedParticipleData participleData = participleParser.parseParticipleEntry(root);
             wiktionaryStagingService.stageParticiple(participleData);
 
         } catch (Exception e) {
             logger.error("Error parsing participle entry: {}", root.path(WORD.get()).asText(), e);
         }
-    }
-
-    /**
-     * Parse a participle entry and return staged data.
-     * This is called when processing a participle JSONL entry (not verb inflection data).
-     */
-    public StagedParticipleData parseParticipleEntry(JsonNode root) {
-        String participleLemma = root.path(WORD.get()).asText();
-
-        // If there is NO 'form_of' the tag, assuming participle is a GERUNDIVE,
-        // and the key for parent Lexeme lookup is GERUNDIVE form
-        String parentLemmaWithMacrons = participleLemma;
-        String parentLemma = participleLemma;
-        Conjugation.Builder conjBuilder = new Conjugation.Builder(parentLemmaWithMacrons);
-        List<String> tags = new ArrayList<>();
-        tags.add(GrammaticalVoice.PASSIVE.name().toLowerCase());
-        tags.add(GrammaticalTense.FUTURE.name().toLowerCase());
-
-        // Extract parent verb information from form_of if it exists,
-        // and overwrite parent lemma
-        // NB: Assuming the same tags for all senses for now
-        JsonNode formOfArray = root.path(SENSES.get()).get(0).path(FORM_OF.get());
-        if (formOfArray != null && !formOfArray.isEmpty()) {
-            parentLemmaWithMacrons = formOfArray.get(0).path(WORD.get()).asText();
-            parentLemma = removeMacrons(parentLemmaWithMacrons);
-
-            JsonNode senseNode = root.path(SENSES.get()).get(0);
-            tags = collectTags(senseNode);
-
-        }
-
-        lexicalTagResolver.applyAllToInflection(tags, conjBuilder, logger);
-                // Build participle case inflections.
-        Map<String, Agreement> inflections = parseParticipleInflections(root);
-
-        return new StagedParticipleData(
-                parentLemma,
-                parentLemmaWithMacrons,
-                conjBuilder.getVoice(),
-                conjBuilder.getTense(),
-                participleLemma,
-                inflections
-        );
-    }
-
-    String removeMacrons(String text) {
-        return Normalizer.normalize(text, Normalizer.Form.NFD)
-                .replaceAll("\\p{M}", "");
-    }
-    protected Map<String, Agreement> parseParticipleInflections(JsonNode root) {
-        Map<String, Agreement> inflections = new HashMap<>();
-        JsonNode formsArray = root.path(FORMS.get());
-
-        for (JsonNode formNode : formsArray) {
-            if (!isValidParticipleForm(formNode)) {
-                continue;
-            }
-
-            Agreement agreement = buildAgreement(formNode);
-
-            String key = InflectionKey.buildAgreementKey(agreement);
-            inflections.put(key, agreement);
-        }
-
-        return inflections;
-    }
-
-    boolean isValidParticipleForm(JsonNode formNode){
-        return formNode.path(SOURCE.get()).asText().equals(DECLENSION.get()) 
-                && !FORM_BLACKLIST.contains(formNode.path(FORM.get()).asText());
-    }
-
-    private List<String> collectTags(JsonNode tagParentNode) {
-        List<String> tags = new ArrayList<>();
-        for (JsonNode tag : tagParentNode.path(TAGS.get())) {
-            tags.add(tag.asText().toLowerCase());
-        }
-        return tags;
     }
 }
