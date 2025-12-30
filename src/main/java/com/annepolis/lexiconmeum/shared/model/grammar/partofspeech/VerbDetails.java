@@ -4,9 +4,10 @@ import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
 public final class VerbDetails implements PartOfSpeechDetails {
 
@@ -15,7 +16,7 @@ public final class VerbDetails implements PartOfSpeechDetails {
 
     public VerbDetails(Builder builder) {
         this.morphologicalSubtype = builder.morphologicalSubtype;
-        this.participleDeclensionSets = Map.copyOf(builder.participleDeclensionSets);
+        this.participleDeclensionSets = Collections.unmodifiableMap(new TreeMap<>(builder.participleDeclensionSets));
     }
 
     public MorphologicalSubtype getMorphologicalSubtype() {
@@ -33,13 +34,13 @@ public final class VerbDetails implements PartOfSpeechDetails {
 
     public VerbDetails.Builder toBuilder() {
         VerbDetails.Builder builder = new VerbDetails.Builder().setMorphologicalSubtype(morphologicalSubtype);
-        getParticiples().values().forEach(ps -> builder.addParticipleSet(ps));
+        getParticiples().values().forEach(builder::addParticipleSet);
         return builder;
     }
 
     public static class Builder {
         private MorphologicalSubtype morphologicalSubtype;
-        private final Map<String, ParticipleDeclensionSet> participleDeclensionSets = new HashMap<>();
+        private final Map<String, ParticipleDeclensionSet> participleDeclensionSets = new TreeMap<>();
         
         public Builder setMorphologicalSubtype(MorphologicalSubtype morphologicalSubtype) {
             this.morphologicalSubtype = morphologicalSubtype;

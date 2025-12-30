@@ -17,6 +17,9 @@ import java.util.*;
 // create a declension table for each tense
 @Component
 public class ParticipleTableMapper {
+    // Comparator orders individual tense groups by natural enum order
+    Comparator<ParticipleDeclensionSet> participleDTOComparator =
+            Comparator.comparing(ParticipleDeclensionSet::getParticipleTense,Comparator.nullsLast(Comparator.naturalOrder()));
 
     public List<ParticipleTableDTO> toInflectionTableDTO(Lexeme lexeme) {
         // From the list of participle inflections grouped by tense
@@ -39,8 +42,12 @@ public class ParticipleTableMapper {
     Map<GrammaticalGender, List<ParticipleTableDTO.ParticipleTenseDTO>> getTenseDTOsByGender(Map<String, ParticipleDeclensionSet> participleSetMap){
         Map<GrammaticalGender, List<ParticipleTableDTO.ParticipleTenseDTO>> byGender = new LinkedHashMap<>();
 
+        // Sort the participle sets by tense using the comparator before processing
+        List<ParticipleDeclensionSet> sortedSets = new ArrayList<>(participleSetMap.values());
+        sortedSets.sort(participleDTOComparator);
+
         // For each participle set (all inflections for all genders for a given tense )
-        for (ParticipleDeclensionSet participleSet : participleSetMap.values()) {
+        for (ParticipleDeclensionSet participleSet : sortedSets) {
 
             // Extract all inflections for the given set (all inflections for all genders for current tense)
             Map<String, Inflection> inflections = participleSet.getInflectionIndex();
@@ -57,6 +64,7 @@ public class ParticipleTableMapper {
                 byGender.computeIfAbsent(gender, k -> new ArrayList<>()).add(tenseDTO);
             }
         }
+        
         return byGender;
     }
 
