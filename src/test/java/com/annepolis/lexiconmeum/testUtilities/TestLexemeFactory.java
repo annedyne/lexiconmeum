@@ -1,8 +1,10 @@
-package com.annepolis.lexiconmeum.utils;
+package com.annepolis.lexiconmeum.testUtilities;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
-import com.annepolis.lexiconmeum.shared.model.grammar.*;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveDetails;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveTerminationType;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;

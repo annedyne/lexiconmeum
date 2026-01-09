@@ -10,12 +10,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.WORD;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ParticipleParserTest {
+public class POSParticipleParserTest {
 
    POSParticipleParser underTest;
 
@@ -55,7 +57,8 @@ public class ParticipleParserTest {
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Participle 'amans' not found"));
 
-        StagedParticipleData data = underTest.parseParticipleEntry(root);
+        StagedParticipleData data = underTest.parseParticipleEntry(root)
+                .orElseThrow(() -> new AssertionError("Failed to parse participle entry for 'amans'"));
 
         assertEquals("amans", data.getParticipleLemma());
         assertEquals("amo", data.getParentLemma());
@@ -70,7 +73,8 @@ public class ParticipleParserTest {
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Participle 'amandus' not found"));
 
-        StagedParticipleData data = underTest.parseParticipleEntry(root);
+        StagedParticipleData data = underTest.parseParticipleEntry(root)
+                .orElseThrow(() -> new AssertionError("Failed to parse participle entry for 'amandus'"));
 
         assertEquals("amandus", data.getParticipleLemma());
         assertEquals("amandus", data.getParentLemma());
@@ -102,8 +106,13 @@ public class ParticipleParserTest {
     }
 
     @Test
-    void removeMacronsNormalizesStringAsExpected(){
-        String normalized = underTest.removeMacrons("āēīōū");
-        assertEquals("aeiou", normalized);
+    void givenFutureAndNoActive_resolveParticipleTenseTags_addsFutureActiveAndActiveTags(){
+         List<String> tags = new ArrayList<>(Arrays.asList( "future",  "declension-1", "declension-2", "form-of", "participle"));
+         List<String> processed = underTest.resolveParticipleTenseTags(tags);
+         assertTrue(processed.contains("future_active"));   // sets tense
+         assertTrue(processed.contains("active"));          // sets voice
+
+
     }
+
 }
