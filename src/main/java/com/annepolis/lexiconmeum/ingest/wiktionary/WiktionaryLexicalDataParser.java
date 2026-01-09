@@ -106,12 +106,7 @@ class WiktionaryLexicalDataParser {
 
         // Run POS-specific validator if present
         PartOfSpeechParser validator = partOfSpeechParsers.get(pos);
-        if (validator != null && !validator.validate(root)) {
-            logger.debug(NON_LEMMA, "pos : {} ", pos::name );
-
-            return false;
-        }
-        return true;
+        return validator == null || validator.validate(root);
     }
 
     private Optional<Lexeme> buildLexeme(JsonNode root) {
@@ -340,8 +335,8 @@ class WiktionaryLexicalDataParser {
      */
     private void handleParticipleEntry(JsonNode root) {
         try {
-            StagedParticipleData participleData = participleParser.parseParticipleEntry(root);
-            wiktionaryStagingService.stageParticiple(participleData);
+            participleParser.parseParticipleEntry(root)
+                    .ifPresent(wiktionaryStagingService::stageParticiple);
 
         } catch (Exception e) {
             logger.error("Error parsing participle entry: {}", root.path(WORD.get()).asText(), e);
