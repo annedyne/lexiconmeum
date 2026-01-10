@@ -32,7 +32,7 @@ class WiktionaryLexicalDataParserTest {
     private WiktionaryStagingServiceStub stagingServiceStub;
 
     // IF YOU ADD A VALID LEMMA NODE TO THE testDataRaw.jsonl ADD IT HERE
-    static final String[] VALID_NON_VERB_LEMMA_LIST = { "amo", "poculum", "pulcher", "brevis", "brevis", "brevis","brevis",
+    static final String[] VALID_NON_VERB_LEMMA_LIST = { "amo", "poculum", "pulchrior", "pulcher", "brevis", "brevis", "brevis","brevis",
             "nox", "etsi", "ille", "ille" };
 
     static final String[] VALID_VERB_LEMMA_LIST = {"amo", "pulso", "sequor"};

@@ -1,8 +1,9 @@
 package com.annepolis.lexiconmeum.ingest.wiktionary;
 
-import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.stereotype.Component;
+
+import java.util.Set;
 
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.HEAD_TEMPLATES;
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.NAME;
@@ -10,19 +11,18 @@ import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJ
 @Component
 public class POSAdjectiveParser implements PartOfSpeechParser {
 
-    public static final String VALID_HEAD_TEMPLATE_NAME = "la-adj";
+    private static final Set<String> VALID_TEMPLATE_NAMES = Set.of("la-adj", "la-adj-comp", "la-adj-sup");
 
     @Override
     public boolean validate(JsonNode root) {
         // Only process full adjective structures, not separate form structures
         JsonNode headTemplates = root.path(HEAD_TEMPLATES.get());
-        String templateName = headTemplates.get(0).path(NAME.get()).asText("");
+        if (headTemplates.isMissingNode() || headTemplates.isEmpty()) {
+            return false;
+        }
 
-        return VALID_HEAD_TEMPLATE_NAME.equalsIgnoreCase(templateName);
-    }
+        String templateName = headTemplates.get(0).path(NAME.get()).asText("").toLowerCase();
 
-    @Override
-    public void addInflections(LexemeBuilder lexemeBuilder, JsonNode formsNode) {
-
+        return VALID_TEMPLATE_NAMES.contains(templateName);
     }
 }
