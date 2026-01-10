@@ -109,7 +109,7 @@ class WiktionaryLexicalDataParser {
         return validator == null || validator.validate(root);
     }
 
-    private Optional<Lexeme> buildLexeme(JsonNode root) {
+    Optional<Lexeme> buildLexeme(JsonNode root) {
         // Get primary keys
         String lemma = root.path(WORD.get()).asText();
         String posTag = root.path(PART_OF_SPEECH.get()).asText();

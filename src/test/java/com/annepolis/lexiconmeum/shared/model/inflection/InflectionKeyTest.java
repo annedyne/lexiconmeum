@@ -1,18 +1,20 @@
 package com.annepolis.lexiconmeum.shared.model.inflection;
 
-import com.annepolis.lexiconmeum.TestUtil;
+import com.annepolis.lexiconmeum.ingest.wiktionary.JsonTestDataManager;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.grammar.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class InflectionKeyTest {
 
     @Test
-    void buildsValidInflectionKeyFromConjugation(){
-        Lexeme lexeme = TestUtil.getNewTestVerbLexeme();
+    void buildsValidInflectionKeyFromConjugation() throws IOException {
+        Lexeme lexeme = JsonTestDataManager.INSTANCE.getParsedVerbLexeme("amo", "testDataVerb.jsonl");
         String key = lexeme.getInflections().stream()
                 .filter(Conjugation.class::isInstance)
                 .map(i -> (Conjugation) i)

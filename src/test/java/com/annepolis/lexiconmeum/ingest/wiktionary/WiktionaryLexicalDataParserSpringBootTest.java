@@ -1,9 +1,9 @@
 package com.annepolis.lexiconmeum.ingest.wiktionary;
 
-import com.annepolis.lexiconmeum.TestUtil;
 import com.annepolis.lexiconmeum.ingest.tagmapping.EsseFormProvider;
 import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
+import com.annepolis.lexiconmeum.shared.model.LexemeFixtureFactory;
 import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
 import com.annepolis.lexiconmeum.shared.model.inflection.Declension;
 import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
@@ -52,28 +52,8 @@ class WiktionaryLexicalDataParserSpringBootTest {
     static final String[] VALID_LEMMA_LIST = {"amo", "poculum", "pulcher", "brevis", "brevis", "brevis","brevis",
             "nox", "etsi", "ille", "ille" };
 
-    private List<Lexeme> verbLexemes;
     private List<Lexeme> nounLexemes;
     private List<Lexeme> adjectiveLexemes;
-
-    static final String STANDARD_VERB_LEMMA = "amo";
-
-    public List<Lexeme> getVerbLexemes() throws IOException {
-        if(verbLexemes == null) {
-            parseVerbLexemes();
-        }
-        return verbLexemes;
-    }
-
-    private void parseVerbLexemes() throws IOException {
-        Resource resource = resourceLoader.getResource("classpath:testDataVerb.jsonl");
-        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
-            verbLexemes = new ArrayList<>();
-            List<Lexeme> lexemes = new ArrayList<>();
-            parser.parseJsonl(reader, lexemes::add);
-
-        }
-    }
 
     public List<Lexeme> getNounLexemes() throws IOException {
         if(nounLexemes == null) {
@@ -205,7 +185,7 @@ class WiktionaryLexicalDataParserSpringBootTest {
     }
 
     static Stream<String> expectedPulcherForms() {
-        return TestUtil.expectedPulcherForms();
+        return LexemeFixtureFactory.expectedPulcherForms();
     }
 
     @Test
