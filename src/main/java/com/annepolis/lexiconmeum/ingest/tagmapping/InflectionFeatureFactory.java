@@ -181,6 +181,13 @@ public enum InflectionFeatureFactory {
         }
     }),
 
+    // wiktionary sets deponent perfect 'passive' participles as perfect 'active'
+    PARTICIPLE_PERFECT_ACTIVE("perfect_active", builder -> {
+        if(builder instanceof Conjugation.Builder conjBuilder){
+            conjBuilder.setParticipleTense(GrammaticalParticipleTense.PERFECT_ACTIVE);
+        }
+    }),
+
     PARTICIPLE_FUTURE_PASSIVE("future_passive", builder -> {
         if(builder instanceof Conjugation.Builder conjBuilder){
             conjBuilder.setParticipleTense(GrammaticalParticipleTense.FUTURE_PASSIVE);

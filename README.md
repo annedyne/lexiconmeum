@@ -76,7 +76,7 @@ git push origin v0.1.1
 # Replace 0.1.1 with the actual current version
 git checkout develop
 mvn versions:set -DnewVersion=0.1.2-SNAPSHOT
-git commit -am "Start 0.1.2-SNAPSHOT"
+git commit -am "Bump to 0.1.2-SNAPSHOT"
 git push origin develop
 ```
 

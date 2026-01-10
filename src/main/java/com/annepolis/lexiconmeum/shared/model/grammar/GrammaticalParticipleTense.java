@@ -1,8 +1,10 @@
 package com.annepolis.lexiconmeum.shared.model.grammar;
 
+@SuppressWarnings("java:S1192") // can't assume a change applies to all duplicate literals
 public enum GrammaticalParticipleTense {
     PARTICIPLE("Participle", "Participle"),
     PRESENT_ACTIVE("Present Active Participle", "Present Active Participle"),
+    PERFECT_ACTIVE("Perfect Passive Participle", "Perfect Active Participle"),
     PERFECT_PASSIVE("Perfect Passive Participle", "Perfect Passive Participle"),
     FUTURE_ACTIVE("Future Active Participle", "Future Active Participle"),
     FUTURE_PASSIVE("Gerundive", "Future Passive Participle");
@@ -41,7 +43,10 @@ public enum GrammaticalParticipleTense {
             return PERFECT_PASSIVE;
         } else if (voice == GrammaticalVoice.PASSIVE && tense == GrammaticalTense.FUTURE) {
             return FUTURE_PASSIVE;
-        } else {
+        }  else if (voice == GrammaticalVoice.ACTIVE && tense == GrammaticalTense.PERFECT) {
+            // For deponent perfect passive
+            return PERFECT_ACTIVE;
+        }else {
             throw new IllegalArgumentException(
                     "Invalid participle combination: " + voice + " " + tense
             );

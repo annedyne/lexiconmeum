@@ -4,6 +4,7 @@ import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
+import com.annepolis.lexiconmeum.shared.util.Utilities;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,8 @@ public class StagedLexemeCache {
     private final Map<String, List<Lexeme>> lemmaToLexemesLookup = new ConcurrentHashMap<>();
 
     private final Map<String, Lexeme> gerundiveFormToLexemeLookup = new ConcurrentHashMap<>();
+
+    private final String gerundiveKey = InflectionKey.buildParticipleSetKey(GrammaticalVoice.PASSIVE, GrammaticalTense.FUTURE);
 
     public void putLexeme(Lexeme lexeme){
         if(logger.isDebugEnabled()) {
@@ -60,10 +63,11 @@ public class StagedLexemeCache {
     }
 
     private void putGerundiveEntry(Lexeme lexeme){
-        String gerundiveKey = InflectionKey.buildParticipleSetKey(GrammaticalVoice.PASSIVE, GrammaticalTense.FUTURE);
+
         if(lexeme.getInflectionIndex().containsKey(gerundiveKey)) {
             String gerundiveForm = lexeme.getInflectionIndex().get(gerundiveKey).getForm();
-            gerundiveFormToLexemeLookup.put(gerundiveForm, lexeme);
+            // forms unlike 'lemmas' have macrons so normalize
+            gerundiveFormToLexemeLookup.put(normalizeDiacritics(gerundiveForm), lexeme);
         }
     }
 
@@ -95,6 +99,10 @@ public class StagedLexemeCache {
     void clearStaged(){
         lemmaToLexemesLookup.clear();
         gerundiveFormToLexemeLookup.clear();
+    }
+
+    protected static String normalizeDiacritics(String lemma){
+        return Utilities.normalizeDiacritics(lemma);
     }
 
 }

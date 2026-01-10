@@ -6,6 +6,7 @@ public enum WiktionaryLexicalDataJsonKey {
     CONJUGATION("conjugation"),
     DECLENSION("declension"),
     ETYMOLOGY_NUMBER("etymology_number"),
+    ETYMOLOGY_TEXT("etymology_text"),
     FORM("form"),
     FORMS("forms"),
     GLOSSES("glosses"),
