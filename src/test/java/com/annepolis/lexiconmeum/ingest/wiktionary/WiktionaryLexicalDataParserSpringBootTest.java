@@ -49,7 +49,7 @@ class WiktionaryLexicalDataParserSpringBootTest {
     private WiktionaryLexicalDataParser parser;
 
     // IF YOU ADD A VALID LEMMA NODE TO THE testDataRaw.jsonl ADD IT HERE
-    static final String[] VALID_LEMMA_LIST = {"amo", "poculum", "pulcher", "brevis", "brevis", "brevis","brevis",
+    static final String[] VALID_LEMMA_LIST = {"amo", "poculum", "pulcher", "pulchirior", "brevis", "brevis", "brevis","brevis",
             "nox", "etsi", "ille", "ille" };
 
     private List<Lexeme> nounLexemes;
