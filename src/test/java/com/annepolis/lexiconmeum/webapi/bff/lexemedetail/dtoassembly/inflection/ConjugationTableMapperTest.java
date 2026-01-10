@@ -1,11 +1,12 @@
 package com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection;
 
-import com.annepolis.lexiconmeum.TestUtil;
+import com.annepolis.lexiconmeum.ingest.wiktionary.JsonTestDataManager;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalMood;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -13,21 +14,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ConjugationTableMapperTest {
 
     @Test
-    void toConjugationTablesMoodsMappedInOrder(){
+    void toConjugationTablesMoodsMappedInOrder() throws IOException {
         ConjugationTableMapper mapper = new ConjugationTableMapper();
-        Lexeme lexeme = TestUtil.getNewTestVerbLexeme();
+        Lexeme lexeme = JsonTestDataManager.INSTANCE.getParsedVerbLexeme("amo", "testDataVerb.jsonl");
         List<ConjugationTableDTO> conjugationTableDTOS = mapper.toInflectionTableDTO(lexeme);
         assertEquals(GrammaticalMood.INDICATIVE.getHistoricalName(), conjugationTableDTOS.get(0).getMood());
         assertEquals(GrammaticalMood.SUBJUNCTIVE.getHistoricalName(), conjugationTableDTOS.get(1).getMood());
         assertEquals(GrammaticalMood.INFINITIVE.getHistoricalName(), conjugationTableDTOS.get(2).getMood());
-        assertEquals(GrammaticalMood.INDICATIVE.getHistoricalName(), conjugationTableDTOS.get(3).getMood());
-        assertEquals(GrammaticalVoice.PASSIVE.name(), conjugationTableDTOS.get(3).getVoice());
+        assertEquals(GrammaticalMood.IMPERATIVE.getHistoricalName(), conjugationTableDTOS.get(3).getMood());
+        assertEquals(GrammaticalVoice.PASSIVE.name(), conjugationTableDTOS.get(4).getVoice());
     }
 
     @Test
-    void forms_inNumberAndPerson_Ascending(){
+    void forms_inNumberAndPerson_Ascending() throws IOException {
         ConjugationTableMapper mapper = new ConjugationTableMapper();
-        Lexeme lexeme = TestUtil.getNewTestVerbLexeme();
+        Lexeme lexeme = JsonTestDataManager.INSTANCE.getParsedVerbLexeme("amo", "testDataVerb.jsonl");
 
         List<ConjugationTableDTO> tableDTOS = mapper.toInflectionTableDTO(lexeme);
         assertEquals("amō", tableDTOS.get(0).getTenses().get(0).getForms().get(0));
@@ -39,9 +40,9 @@ class ConjugationTableMapperTest {
     }
 
     @Test
-    void toConjugationTableMapsAllFormsInGivenLexemeTense(){
+    void toConjugationTableMapsAllFormsInGivenLexemeTense() throws IOException {
         ConjugationTableMapper mapper = new ConjugationTableMapper();
-        Lexeme lexeme = TestUtil.getNewTestVerbLexeme();
+        Lexeme lexeme = JsonTestDataManager.INSTANCE.getParsedVerbLexeme("amo", "testDataVerb.jsonl");
         List<ConjugationTableDTO> tableDTOS = mapper.toInflectionTableDTO(lexeme);
 
         ConjugationTableDTO activeIndicative = tableDTOS.stream()

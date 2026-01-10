@@ -10,22 +10,17 @@ import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.FORMS;
-import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.WORD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class VerbParserTest {
@@ -33,40 +28,16 @@ public class VerbParserTest {
     private static final EsseFormProvider ESSE_FORM_PROVIDER = new EsseFormProvider();
     private static LexemeBuilder sequorLexemeBuilder;
 
-    private List<JsonNode> getJsonRoot() throws IOException {
-        InputStream inputStream = getClass().getClassLoader()
-                .getResourceAsStream("testDataVerb.jsonl");
-
-        if (inputStream == null) {
-            throw new IOException("Resource not found: testDataVerb.jsonl");
-        }
-
-        List<JsonNode> nodes = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-               nodes.add(new ObjectMapper().readTree(line));
-            }
-        }
-        return nodes;
-    }
-
     @Test
     void validateConfirmsStandardVerbNodeAmoIsValidVerb() throws IOException {
-        JsonNode root = getJsonRoot().stream()
-                .filter(node -> node.path(WORD.get()).asText().equals("amo"))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Node 'amo' not found"));
-        POSVerbParser parser = new POSVerbParser(new LexicalTagResolver(),  new EsseFormProvider());
+        JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("amo", "testDataVerb.jsonl");
+        POSVerbParser parser = new POSVerbParser(new LexicalTagResolver(), new EsseFormProvider());
         Assertions.assertTrue(parser.validate(root));
     }
 
     @Test
     void validateConfirmsStandardParticipleNodeAmansIsNotValidVerb() throws IOException {
-        JsonNode root = getJsonRoot().stream()
-                .filter(node -> node.path(WORD.get()).asText().equals("amans"))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Node 'amans' not found"));
+        JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("amans", "testDataVerb.jsonl");
         POSVerbParser parser = new POSVerbParser(new LexicalTagResolver(),  new EsseFormProvider());
         Assertions.assertFalse(parser.validate(root));
     }
@@ -77,10 +48,7 @@ public class VerbParserTest {
     void generatesAllCompoundForms(ConjugationTestCase testCase ) throws IOException {
 
         if (sequorLexemeBuilder == null) {
-            JsonNode root = getJsonRoot().stream()
-                    .filter(node -> node.path(WORD.get()).asText().equals("sequor"))
-                    .findFirst()
-                    .orElseThrow(() -> new AssertionError("Lexeme 'sequor' not found"));
+            JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("sequor", "testDataVerb.jsonl");
 
             POSVerbParser parser = new POSVerbParser(new LexicalTagResolver(), new EsseFormProvider());
             sequorLexemeBuilder = new LexemeBuilder("testLemma", PartOfSpeech.VERB, "1");
@@ -95,7 +63,6 @@ public class VerbParserTest {
         Conjugation conjugation = (Conjugation) inflection;
         assertEquals(testCase.expectedForm, conjugation.getForm(),
                 "Form mismatch for " + testCase.mood + " " + testCase.tense + " " + testCase.number + " " + testCase.person);
-
     }
 
     static public Stream<ConjugationTestCase> expectedCompoundSequorTenseForms() {
@@ -126,9 +93,7 @@ public class VerbParserTest {
         return testCases.stream();
     }
 
-    static String generateForm ( String participle, 
-                                 String esseForm
-    ) {
+    static String generateForm ( String participle,  String esseForm ) {
         return participle + " " + esseForm;
     }
 
@@ -155,7 +120,4 @@ public class VerbParserTest {
             return mood + "|" + tense + "|" + number + "|" + person + " -> " + expectedForm;
         }
     }
-
-
-
 }
