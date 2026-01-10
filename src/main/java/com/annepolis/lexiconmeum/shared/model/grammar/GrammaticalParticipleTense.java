@@ -1,5 +1,6 @@
 package com.annepolis.lexiconmeum.shared.model.grammar;
 
+@SuppressWarnings("java:S1192") // can't assume a change applies to all duplicate literals
 public enum GrammaticalParticipleTense {
     PARTICIPLE("Participle", "Participle"),
     PRESENT_ACTIVE("Present Active Participle", "Present Active Participle"),
