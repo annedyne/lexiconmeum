@@ -23,10 +23,9 @@ public class SearchableVerbFormsExtractor implements SearchableFormsExtractor {
 
     @Override
     public Set<String> getSearchableForms(Lexeme lexeme) {
-        Set<String> forms = new LinkedHashSet<>();
 
         // Get regular conjugation forms using base extractor
-        forms.addAll(baseExtractor.getSearchableForms(lexeme));
+        Set<String> forms = new LinkedHashSet<>(baseExtractor.getSearchableForms(lexeme));
 
         // Add participle forms if present
         if (lexeme.getPartOfSpeechDetails() instanceof VerbDetails verbDetails) {

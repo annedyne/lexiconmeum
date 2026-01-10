@@ -43,7 +43,7 @@ public class StagedParticipleData {
 
     @Override
     public String toString() {
-        return String.format("StagedParticiple{parent='%s', voice=%s, tense=%s, baseForm='%s'}",
+        return String.format("StagedParticiple{parent='%s', voice=%s, tense=%s, participleTense=%s, lemma='%s'}",
                 parentLemma,
                 participleDeclensionSet.getVoice(),
                 participleDeclensionSet.getTense(),

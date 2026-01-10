@@ -64,12 +64,12 @@ import java.util.*;
                 subtypeSectionContributor
         ));
 
-        pipelines.get(PartOfSpeech.PREPOSITION).addAll(List.of(
+        pipelines.get(PartOfSpeech.PREPOSITION).add(
                 prepositionCaseSectionContributor
-        ));
-        pipelines.get(PartOfSpeech.POSTPOSITION).addAll(List.of(
+        );
+        pipelines.get(PartOfSpeech.POSTPOSITION).add(
                 prepositionCaseSectionContributor
-        ));
+        );
         return new LexemeDetailResponseAssembler(pipelines);
     }
 
