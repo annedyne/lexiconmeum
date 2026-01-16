@@ -19,7 +19,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.*;
-import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataKeyWord.TEMPLATE_HEAD_VERB;
 
 @Component
 public class POSVerbParser implements PartOfSpeechParser {
@@ -44,7 +43,7 @@ public class POSVerbParser implements PartOfSpeechParser {
             "PASSIVE|SUBJUNCTIVE|FUTURE_PERFECT"
     );
 
-    public static final Set<String> VALID_HEAD_TEMPLATE_NAMES = Set.of(TEMPLATE_HEAD_VERB.get());
+    public static final Set<String> VALID_HEAD_TEMPLATE_NAMES = Set.of(WiktionaryHeadTemplate.VERB.getName());
     private final LexicalTagResolver lexicalTagResolver;
     private final EsseFormProvider esseFormProvider;
 

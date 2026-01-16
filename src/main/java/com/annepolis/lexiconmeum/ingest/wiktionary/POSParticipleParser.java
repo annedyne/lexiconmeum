@@ -44,7 +44,7 @@ public class POSParticipleParser {
         // Check template name
         String templateName = headTemplates.get(0).path(NAME.get()).asText("");
 
-       return WiktionaryLexicalDataKeyWord.TEMPLATE_HEAD_PARTICPLE.get().equals(templateName);
+       return WiktionaryHeadTemplate.PARTICIPLE.getName().equals(templateName);
     }
 
     /**
