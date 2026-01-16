@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ContextConfiguration(classes = {
         WiktionaryLexicalDataParser.class,
         LexicalTagResolver.class,
-        PartOfSpeechParserConfig.class,
+        PartOfSpeechParserRegistryConfig.class,
         POSVerbParser.class,         // and these if they are @Component-less
         POSNounParser.class,
         POSAdjectiveParser.class,

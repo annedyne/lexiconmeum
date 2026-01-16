@@ -24,7 +24,8 @@ class WiktionaryLexicalDataLoader {
 
     public WiktionaryLexicalDataLoader(IngestLexemeUseCase ingestLexemeUseCase,
                                        WiktionaryLexicalDataParser parser,
-                                       LoadProperties loadProperties, DefaultWiktionaryStagingService wiktionaryStagingService
+                                       LoadProperties loadProperties,
+                                       DefaultWiktionaryStagingService wiktionaryStagingService
 
     ) {
         this.ingestLexemeUseCase = ingestLexemeUseCase;
