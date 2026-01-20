@@ -29,6 +29,10 @@ public enum PartOfSpeech {
         return inflectionType;
     }
 
+    public String getTag(){
+       return tag;
+    }
+
     public static Optional<PartOfSpeech> fromTag(String tag) {
         return Arrays.stream(values())
                 .filter(pos -> pos.tag.equalsIgnoreCase(tag))

@@ -29,7 +29,7 @@ public class POSParticipleParserTest {
         // Simple, readable, and uses the shared instance/cache
         JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("amans", "testDataVerb.jsonl");
 
-        boolean isParticiple = underTest.isValidParticipleEntry(root);
+        boolean isParticiple = underTest.validate(root);
         assertTrue(isParticiple);
     }
 
@@ -37,7 +37,7 @@ public class POSParticipleParserTest {
     void isParticipleEntryReturnsFalseGivenAVerbRoot() throws IOException {
         JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("amo", "testDataVerb.jsonl");
 
-        boolean isParticiple = underTest.isValidParticipleEntry(root);
+        boolean isParticiple = underTest.validate(root);
 
         assertFalse(isParticiple);
     }

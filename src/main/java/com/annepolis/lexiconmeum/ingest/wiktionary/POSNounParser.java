@@ -19,4 +19,9 @@ public class POSNounParser implements PartOfSpeechParser {
 
        return VALID_HEAD_TEMPLATE_NAME.equalsIgnoreCase(templateName);
     }
+
+    @Override
+    public boolean isActive() {
+        return false;
+    }
 }

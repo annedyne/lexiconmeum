@@ -11,7 +11,11 @@ import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJ
 @Component
 public class POSAdjectiveParser implements PartOfSpeechParser {
 
-    private static final Set<String> VALID_TEMPLATE_NAMES = Set.of("la-adj", "la-adj-comp", "la-adj-sup");
+    private static final Set<String> VALID_TEMPLATE_NAMES = Set.of(
+            WiktionaryHeadTemplate.ADJECTIVE_POSITIVE.getName(),
+            WiktionaryHeadTemplate.ADJECTIVE_COMPARATIVE.getName(),
+            WiktionaryHeadTemplate.ADJECTIVE_SUPERLATIVE.getName()
+    );
 
     @Override
     public boolean validate(JsonNode root) {
@@ -24,5 +28,10 @@ public class POSAdjectiveParser implements PartOfSpeechParser {
         String templateName = headTemplates.get(0).path(NAME.get()).asText("").toLowerCase();
 
         return VALID_TEMPLATE_NAMES.contains(templateName);
+    }
+
+    @Override
+    public boolean isActive() {
+        return false;
     }
 }

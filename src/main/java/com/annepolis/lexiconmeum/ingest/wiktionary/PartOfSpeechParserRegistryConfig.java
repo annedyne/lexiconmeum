@@ -1,6 +1,5 @@
 package com.annepolis.lexiconmeum.ingest.wiktionary;
 
-import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -11,15 +10,23 @@ import java.util.Map;
 public class PartOfSpeechParserRegistryConfig {
 
     @Bean
-    public Map<PartOfSpeech, PartOfSpeechParser> partOfSpeechParserRegistry(
+    public Map<POSParserKey, PartOfSpeechParser> partOfSpeechParserRegistry(
             POSVerbParser verbParser,
             POSNounParser nounParser,
-            POSAdjectiveParser adjectiveParser
+            POSAdjectiveParser adjectiveParser,
+            POSParticipleParser participleParser
     ) {
-        Map<PartOfSpeech, PartOfSpeechParser> map = new EnumMap<>(PartOfSpeech.class);
-        map.put(PartOfSpeech.VERB, verbParser);
-        map.put(PartOfSpeech.NOUN, nounParser);
-        map.put(PartOfSpeech.ADJECTIVE, adjectiveParser);
+        Map<POSParserKey, PartOfSpeechParser> map = new EnumMap<>(POSParserKey.class);
+        map.put(POSParserKey.VERB, verbParser);
+        map.put(POSParserKey.NOUN, nounParser);
+
+        map.put(POSParserKey.ADJECTIVE_POSITIVE, adjectiveParser);
+        map.put(POSParserKey.ADJECTIVE_COMPARATIVE, adjectiveParser);
+        map.put(POSParserKey.ADJECTIVE_SUPERLATIVE, adjectiveParser);
+
+        map.put(POSParserKey.DETERMINER, adjectiveParser);
+        map.put(POSParserKey.PRONOUN, adjectiveParser);
+        map.put(POSParserKey.PARTICIPLE, participleParser);
         return map;
     }
 }

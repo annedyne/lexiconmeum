@@ -21,7 +21,7 @@ import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJ
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataKeyWord.FORM_OF;
 
 @Component
-public class POSParticipleParser {
+public class POSParticipleParser implements PartOfSpeechParser {
 
     LexicalTagResolver lexicalTagResolver;
 
@@ -31,10 +31,17 @@ public class POSParticipleParser {
 
     static final Logger logger = LogManager.getLogger(POSParticipleParser.class);
 
-    /**
-     * Check if this verb entry is actually a participle form entry
-     */
-    protected boolean isValidParticipleEntry(JsonNode root) {
+    @Override
+    public boolean validate(JsonNode root) {
+        return isValidParticipleEntry(root);
+    }
+
+    @Override
+    public boolean isActive() {
+        return false;
+    }
+
+    public boolean isValidParticipleEntry(JsonNode root) {
         // Must have head_templates
         JsonNode headTemplates = root.path(HEAD_TEMPLATES.get());
         if (!headTemplates.isArray() || headTemplates.isEmpty()) {
@@ -44,7 +51,7 @@ public class POSParticipleParser {
         // Check template name
         String templateName = headTemplates.get(0).path(NAME.get()).asText("");
 
-       return WiktionaryHeadTemplate.PARTICIPLE.getName().equals(templateName);
+        return WiktionaryHeadTemplate.PARTICIPLE.getName().equals(templateName);
     }
 
     /**
@@ -219,4 +226,5 @@ public class POSParticipleParser {
         }
         return tags;
     }
+
 }

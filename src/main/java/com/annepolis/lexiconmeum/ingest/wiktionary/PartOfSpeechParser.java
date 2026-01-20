@@ -6,15 +6,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Optional;
 
+/**
+ * Class that includes specialized parsing for any
+ */
 public interface PartOfSpeechParser {
 
     boolean validate(JsonNode root);
 
+    boolean isActive();
+
     default Optional<Lexeme> parsePartOfSpeech(LexemeBuilder lexemeBuilder, JsonNode jsonNode){
        return Optional.empty();
-    }
-
-    default void addInflections(LexemeBuilder lexemeBuilder, JsonNode formsNode){
-        // do nothing by default
     }
 }

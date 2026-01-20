@@ -3,7 +3,6 @@ package com.annepolis.lexiconmeum.ingest.wiktionary;
 import com.annepolis.lexiconmeum.ingest.tagmapping.EsseFormProvider;
 import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.io.ClassPathResource;
@@ -21,10 +20,24 @@ public class JsonTestDataManager {
     private final ObjectMapper mapper = new ObjectMapper();
     private final Map<String, List<JsonNode>> cache = new HashMap<>();
     private final LexicalTagResolver tagResolver;
+    private final Map<POSParserKey, PartOfSpeechParser> parserRegistry = new EnumMap<>(POSParserKey.class);
 
     private JsonTestDataManager() {
         // Explicitly wire the dependencies as Spring would
         this.tagResolver = new LexicalTagResolver();
+        
+        // Initialize Registry
+        POSVerbParser verbParser = new POSVerbParser(tagResolver, new EsseFormProvider());
+        POSNounParser nounParser = new POSNounParser();
+        POSAdjectiveParser adjectiveParser = new POSAdjectiveParser();
+
+        parserRegistry.put(POSParserKey.VERB, verbParser);
+        parserRegistry.put(POSParserKey.NOUN, nounParser);
+        parserRegistry.put(POSParserKey.ADJECTIVE_POSITIVE, adjectiveParser);
+        parserRegistry.put(POSParserKey.ADJECTIVE_COMPARATIVE, adjectiveParser);
+        parserRegistry.put(POSParserKey.ADJECTIVE_SUPERLATIVE, adjectiveParser);
+        parserRegistry.put(POSParserKey.DETERMINER, adjectiveParser);
+        parserRegistry.put(POSParserKey.PRONOUN, adjectiveParser);
     }
 
     /**
@@ -33,18 +46,14 @@ public class JsonTestDataManager {
     public Lexeme getParsedNounLexeme(String word, String filename) throws IOException {
         JsonNode root = getRealNode(word, filename);
 
-        // Setup the parser with necessary dependencies
-        Map<PartOfSpeech, PartOfSpeechParser> parsers = new EnumMap<>(PartOfSpeech.class);
-        parsers.put(PartOfSpeech.NOUN, new POSNounParser());
-
-        WiktionaryLexicalDataParser parser = getLexicalDataParser(parsers, getStagingServiceStub());
+        WiktionaryLexicalDataParser parser = getLexicalDataParser(parserRegistry, getStagingServiceStub());
         parser.setParseMode(ParseMode.STRICT);
 
         return parser.buildLexeme(root)
                 .orElseThrow(() -> new IllegalStateException("Parser failed to produce a Lexeme for word: " + word));
     }
 
-    private WiktionaryLexicalDataParser getLexicalDataParser(Map<PartOfSpeech, PartOfSpeechParser> parsers, WiktionaryStagingService stagingStub) {
+    private WiktionaryLexicalDataParser getLexicalDataParser(Map<POSParserKey, PartOfSpeechParser> parsers, WiktionaryStagingService stagingStub) {
         return new WiktionaryLexicalDataParser(
                 tagResolver,
                 parsers,
@@ -67,12 +76,9 @@ public class JsonTestDataManager {
     public Lexeme getParsedVerbLexeme(String word, String filename) throws IOException {
         JsonNode root = getRealNode(word, filename);
 
-        Map<PartOfSpeech, PartOfSpeechParser> parsers = new EnumMap<>(PartOfSpeech.class);
-        parsers.put(PartOfSpeech.VERB, new POSVerbParser(tagResolver, new EsseFormProvider()));
-
         WiktionaryStagingService stagingStub = getStagingServiceStub();
 
-        WiktionaryLexicalDataParser parser = getLexicalDataParser(parsers, stagingStub);
+        WiktionaryLexicalDataParser parser = getLexicalDataParser(parserRegistry, stagingStub);
         parser.setParseMode(ParseMode.STRICT);
 
         return parser.buildLexeme(root)

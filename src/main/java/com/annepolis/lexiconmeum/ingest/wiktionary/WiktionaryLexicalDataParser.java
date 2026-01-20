@@ -49,7 +49,7 @@ class WiktionaryLexicalDataParser {
     private ParseMode parseMode;
 
     private final LexicalTagResolver lexicalTagResolver;
-    private final Map<PartOfSpeech, PartOfSpeechParser> partOfSpeechParsers;
+    private final Map<POSParserKey, PartOfSpeechParser> partOfSpeechParserRegistry;
     private final WiktionaryStagingService wiktionaryStagingService;
     private final POSParticipleParser participleParser;
 
@@ -62,12 +62,12 @@ class WiktionaryLexicalDataParser {
     }
 
     WiktionaryLexicalDataParser(LexicalTagResolver lexicalTagResolver,
-                                Map<PartOfSpeech, PartOfSpeechParser> partOfSpeechParsers,
+                                Map<POSParserKey, PartOfSpeechParser> partOfSpeechParserRegistry,
                                 POSParticipleParser participleParser,
                                 WiktionaryStagingService wiktionaryStagingService
     ) {
         this.lexicalTagResolver = lexicalTagResolver;
-        this.partOfSpeechParsers = partOfSpeechParsers;
+        this.partOfSpeechParserRegistry = partOfSpeechParserRegistry;
         this.participleParser = participleParser;
         this.wiktionaryStagingService = wiktionaryStagingService;
     }
@@ -97,7 +97,36 @@ class WiktionaryLexicalDataParser {
         return br.readLine();
     }
 
-    private boolean isValidLemmaEntry(JsonNode root, PartOfSpeech pos) {
+
+    private Optional<POSParserKey> resolveParserKey(JsonNode root, PartOfSpeech pos) {
+        String templateName = extractHeadTemplateNameFromRoot(root);
+        if (templateName.isEmpty()) {
+            return Optional.empty();
+        }
+        return POSParserKey.resolveWithPosTagAndHeadTemplateName(pos.getTag(), templateName);
+    }
+
+    public String extractHeadTemplateNameFromRoot(JsonNode root) {
+        JsonNode headTemplates = root.path(HEAD_TEMPLATES.get());
+        if (!headTemplates.isArray() || headTemplates.isEmpty()) {
+            return "";
+        }
+
+        JsonNode firstTemplate = headTemplates.get(0);
+        String name = firstTemplate.path(NAME.get()).asText("");
+
+        // If the template is generic "head", try to find a more specific identifier in args
+        if ("head".equalsIgnoreCase(name)) {
+            String arg2 = firstTemplate.path("args").path("2").asText("");
+            if (!arg2.isEmpty()) {
+                return arg2;
+            }
+        }
+
+        return name;
+    }
+
+    private boolean isValidLemmaEntry(JsonNode root, PartOfSpeechParser posParser) {
         JsonNode headTemplates = root.path(HEAD_TEMPLATES.get());
 
         if (!headTemplates.isArray() || headTemplates.isEmpty()) {
@@ -105,9 +134,9 @@ class WiktionaryLexicalDataParser {
         }
 
         // Run POS-specific validator if present
-        PartOfSpeechParser validator = partOfSpeechParsers.get(pos);
-        return validator == null || validator.validate(root);
+        return posParser == null || posParser.validate(root);
     }
+
 
     Optional<Lexeme> buildLexeme(JsonNode root) {
         // Get primary keys
@@ -123,13 +152,36 @@ class WiktionaryLexicalDataParser {
         }
         PartOfSpeech partOfSpeech = optionalPartOfSpeech.get();
 
+        // Unified resolution: if we have a key, it's a potential lemma
+        Optional<POSParserKey> optionalParserKey = resolveParserKey(root, partOfSpeech);
+        // Delegate to specialized parser if available
+        if(optionalParserKey.isEmpty()) {
+            logger.trace("Skipping unknown parser / head-template combo: {} : {}", posTag, lemma);
+            return Optional.empty();
+        }
+
+        POSParserKey parserKey = optionalParserKey.get();
+
+        PartOfSpeechParser specializedParser = partOfSpeechParserRegistry.get(parserKey);
+        if(specializedParser == null){
+            logger.trace("No parser matching this parser / head-template combo {} : {} c", posTag, lemma);
+            return Optional.empty();
+        }
         // Only build valid lemma entries
-        if (!isValidLemmaEntry(root, partOfSpeech)) {
+        if ( parserKey == POSParserKey.PARTICIPLE) {
             // Participles get staged and added to associated parent Lexeme at the end
-            if (participleParser.isValidParticipleEntry(root)) {
+            if (specializedParser.validate(root)) {
                 handleParticipleEntry(root);
             }
+
             logger.trace(LogMsg.SKIPPING_NON_LEMMA, () -> posTag, () -> root.path(WORD.get()).asText());
+            // participles are staged so return empty
+            return Optional.empty();
+        }
+
+        if( isValidLemmaEntry(root, specializedParser)) {
+            logger.trace(LogMsg.SKIPPING_NON_LEMMA, () -> posTag, () -> root.path(WORD.get()).asText());
+            // participles are staged so return empty
             return Optional.empty();
         }
 
@@ -138,7 +190,7 @@ class WiktionaryLexicalDataParser {
 
         // Add sense nodes
         addSenses(root.path(SENSES.get()), builder);
-        PartOfSpeechParser partOfSpeechParser = partOfSpeechParsers.get(partOfSpeech);
+
 
         // Parse inflected forms and other POS-specific info
         return switch (partOfSpeech) {
@@ -146,12 +198,14 @@ class WiktionaryLexicalDataParser {
             case ADVERB, PREPOSITION, POSTPOSITION -> buildLexemeWithOutForms(builder);
             case CONJUNCTION -> buildLexemeWithForms(builder, root, this::findAndAddCanonicalForm);
             case NOUN -> buildLexemeWithForms(builder, root, this::addDeclensionForms);
-            case VERB -> partOfSpeechParser.parsePartOfSpeech(builder, root);            default -> {
+            case VERB -> specializedParser.parsePartOfSpeech(builder, root);            default -> {
                 logger.trace(LogMsg.UNSUPPORTED_POS, partOfSpeech);
                 yield Optional.empty();
             }
         };
     }
+
+
 
     // Build sense nodes and add to builder
     private void addSenses(JsonNode sensesNode, LexemeBuilder lexemeBuilder) {

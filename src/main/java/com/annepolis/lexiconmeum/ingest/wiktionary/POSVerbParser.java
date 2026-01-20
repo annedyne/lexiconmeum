@@ -54,12 +54,20 @@ public class POSVerbParser implements PartOfSpeechParser {
 
     @Override
     public boolean validate(JsonNode root) {
-
-         // Only process full verb structures, not separate form structures
         JsonNode headTemplates = root.path(HEAD_TEMPLATES.get());
+
+        if (!headTemplates.isArray() || headTemplates.isEmpty()) {
+            return false;
+        }
+
         String templateName = headTemplates.get(0).path(NAME.get()).asText("");
 
         return VALID_HEAD_TEMPLATE_NAMES.contains(templateName);
+    }
+
+    @Override
+    public boolean isActive() {
+        return true;
     }
 
     // Filter out form nodes in the blacklist
@@ -83,7 +91,6 @@ public class POSVerbParser implements PartOfSpeechParser {
         }
     }
 
-    @Override
     public void addInflections(LexemeBuilder lexemeBuilder, JsonNode formsNode) {
         for (JsonNode formNode : formsNode) {
             try {
