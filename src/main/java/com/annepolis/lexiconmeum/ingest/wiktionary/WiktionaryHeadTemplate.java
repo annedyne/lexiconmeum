@@ -1,5 +1,10 @@
 package com.annepolis.lexiconmeum.ingest.wiktionary;
 
+/**
+ * A Wiktionary head template includes
+ * the lua script function and parameters
+ * for a given word.
+ */
 public enum WiktionaryHeadTemplate {
     ADJECTIVE_POSITIVE("la-adj"),
     ADJECTIVE_COMPARATIVE("la-adj-comp"),

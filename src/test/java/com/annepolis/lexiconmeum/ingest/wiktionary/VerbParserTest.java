@@ -11,7 +11,6 @@ import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -27,20 +26,6 @@ public class VerbParserTest {
 
     private static final EsseFormProvider ESSE_FORM_PROVIDER = new EsseFormProvider();
     private static LexemeBuilder sequorLexemeBuilder;
-
-    @Test
-    void validateConfirmsStandardVerbNodeAmoIsValidVerb() throws IOException {
-        JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("amo", "testDataVerb.jsonl");
-        POSVerbParser parser = new POSVerbParser(new LexicalTagResolver(), new EsseFormProvider());
-        Assertions.assertTrue(parser.validate(root));
-    }
-
-    @Test
-    void validateConfirmsStandardParticipleNodeAmansIsNotValidVerb() throws IOException {
-        JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("amans", "testDataVerb.jsonl");
-        POSVerbParser parser = new POSVerbParser(new LexicalTagResolver(),  new EsseFormProvider());
-        Assertions.assertFalse(parser.validate(root));
-    }
 
 
     @ParameterizedTest
@@ -65,7 +50,7 @@ public class VerbParserTest {
                 "Form mismatch for " + testCase.mood + " " + testCase.tense + " " + testCase.number + " " + testCase.person);
     }
 
-    static public Stream<ConjugationTestCase> expectedCompoundSequorTenseForms() {
+    public static Stream<ConjugationTestCase> expectedCompoundSequorTenseForms() {
         List<ConjugationTestCase> testCases = new ArrayList<>();
 
         for (GrammaticalMood mood  : GrammaticalMood.values()) {

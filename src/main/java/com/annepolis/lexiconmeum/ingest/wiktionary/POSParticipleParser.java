@@ -31,29 +31,6 @@ public class POSParticipleParser implements PartOfSpeechParser {
 
     static final Logger logger = LogManager.getLogger(POSParticipleParser.class);
 
-    @Override
-    public boolean validate(JsonNode root) {
-        return isValidParticipleEntry(root);
-    }
-
-    @Override
-    public boolean isActive() {
-        return false;
-    }
-
-    public boolean isValidParticipleEntry(JsonNode root) {
-        // Must have head_templates
-        JsonNode headTemplates = root.path(HEAD_TEMPLATES.get());
-        if (!headTemplates.isArray() || headTemplates.isEmpty()) {
-            return false;
-        }
-
-        // Check template name
-        String templateName = headTemplates.get(0).path(NAME.get()).asText("");
-
-        return WiktionaryHeadTemplate.PARTICIPLE.getName().equals(templateName);
-    }
-
     /**
      * Parse a participle entry and return staged data.
      * This is called when processing a participle JSONL entry (not verb inflection data).

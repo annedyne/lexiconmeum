@@ -51,6 +51,7 @@ class WiktionaryLexicalDataParserTest {
         POSNounParser nounParser = new POSNounParser();
         POSAdjectiveParser adjectiveParser = new POSAdjectiveParser();
         POSParticipleParser participleParser = new POSParticipleParser(lexicalTagResolver);
+        POSNonInflectedFormParser posNonInflectedFormParser = new POSNonInflectedFormParser();
 
         partOfSpeechParsers.put(POSParserKey.VERB, verbParser);
         partOfSpeechParsers.put(POSParserKey.NOUN, nounParser);
@@ -62,6 +63,13 @@ class WiktionaryLexicalDataParserTest {
         partOfSpeechParsers.put(POSParserKey.DETERMINER, adjectiveParser);
         partOfSpeechParsers.put(POSParserKey.PRONOUN, adjectiveParser);
         partOfSpeechParsers.put(POSParserKey.PARTICIPLE, participleParser);
+        partOfSpeechParsers.put(POSParserKey.ADVERB, posNonInflectedFormParser);
+        partOfSpeechParsers.put(POSParserKey.CONJUNCTION, posNonInflectedFormParser);
+        partOfSpeechParsers.put(POSParserKey.PREPOSITION, posNonInflectedFormParser);
+        partOfSpeechParsers.put(POSParserKey.POSTPOSITION, posNonInflectedFormParser);
+
+
+
 
 
 

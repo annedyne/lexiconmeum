@@ -11,10 +11,6 @@ import java.util.Optional;
  */
 public interface PartOfSpeechParser {
 
-    boolean validate(JsonNode root);
-
-    boolean isActive();
-
     default Optional<Lexeme> parsePartOfSpeech(LexemeBuilder lexemeBuilder, JsonNode jsonNode){
        return Optional.empty();
     }

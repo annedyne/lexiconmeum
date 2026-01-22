@@ -37,12 +37,20 @@ public enum POSParserKey {
         return isLemma;
     }
 
-    public static Optional<POSParserKey> resolveWithPosTagAndHeadTemplateName(String posTag, String headTemplateName) {
+    /**
+     * Attempts to find a {@link POSParserKey} corresponding to the given head template name.
+     * Matches are determined by either the {@code HeadTemplateName} or the {@code partOfSpeech} name
+     * in a case-insensitive manner.
+     *
+     * @param headTemplateName the name of the head template to search for; cannot be null or empty
+     * @return an {@code Optional} containing the matched {@code POSParserKey} if found,
+     *         or an empty {@code Optional} if no match is found
+     */
+    public static Optional<POSParserKey> fromHeadTemplateName(String headTemplateName) {
         return Arrays.stream(values())
                 .filter(POSParserKey ->
-                        POSParserKey.partOfSpeech.getTag().equalsIgnoreCase(posTag)
-                            && (headTemplateName.equalsIgnoreCase(POSParserKey.HeadTemplateName)
-                        || headTemplateName.equalsIgnoreCase(POSParserKey.partOfSpeech.name()))
+                        headTemplateName.equalsIgnoreCase(POSParserKey.HeadTemplateName)
+                        || headTemplateName.equalsIgnoreCase(POSParserKey.partOfSpeech.name())
                 )
                 .findFirst();
     }

@@ -13,7 +13,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class POSParticipleParserTest {
 
@@ -23,24 +24,6 @@ public class POSParticipleParserTest {
    void setUp() {
        underTest = new POSParticipleParser(new LexicalTagResolver());
    }
-
-    @Test
-    void isParticipleEntryReturnsTrueGivenParticipleRoot() throws IOException {
-        // Simple, readable, and uses the shared instance/cache
-        JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("amans", "testDataVerb.jsonl");
-
-        boolean isParticiple = underTest.validate(root);
-        assertTrue(isParticiple);
-    }
-
-    @Test
-    void isParticipleEntryReturnsFalseGivenAVerbRoot() throws IOException {
-        JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("amo", "testDataVerb.jsonl");
-
-        boolean isParticiple = underTest.validate(root);
-
-        assertFalse(isParticiple);
-    }
 
     @Test
     void parseParticipleEntryGeneratesExpectedStagedParticipleDataGivenPresentActiveParticiple() throws IOException {

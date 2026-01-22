@@ -98,12 +98,12 @@ class WiktionaryLexicalDataParser {
     }
 
 
-    private Optional<POSParserKey> resolveParserKey(JsonNode root, PartOfSpeech pos) {
+    private Optional<POSParserKey> deriveParserKeyFromRoot(JsonNode root) {
         String templateName = extractHeadTemplateNameFromRoot(root);
         if (templateName.isEmpty()) {
             return Optional.empty();
         }
-        return POSParserKey.resolveWithPosTagAndHeadTemplateName(pos.getTag(), templateName);
+        return POSParserKey.fromHeadTemplateName(templateName);
     }
 
     public String extractHeadTemplateNameFromRoot(JsonNode root) {
@@ -126,18 +126,6 @@ class WiktionaryLexicalDataParser {
         return name;
     }
 
-    private boolean isValidLemmaEntry(JsonNode root, PartOfSpeechParser posParser) {
-        JsonNode headTemplates = root.path(HEAD_TEMPLATES.get());
-
-        if (!headTemplates.isArray() || headTemplates.isEmpty()) {
-            return false;
-        }
-
-        // Run POS-specific validator if present
-        return posParser == null || posParser.validate(root);
-    }
-
-
     Optional<Lexeme> buildLexeme(JsonNode root) {
         // Get primary keys
         String lemma = root.path(WORD.get()).asText();
@@ -153,7 +141,7 @@ class WiktionaryLexicalDataParser {
         PartOfSpeech partOfSpeech = optionalPartOfSpeech.get();
 
         // Unified resolution: if we have a key, it's a potential lemma
-        Optional<POSParserKey> optionalParserKey = resolveParserKey(root, partOfSpeech);
+        Optional<POSParserKey> optionalParserKey = deriveParserKeyFromRoot(root);
         // Delegate to specialized parser if available
         if(optionalParserKey.isEmpty()) {
             logger.trace("Skipping unknown parser / head-template combo: {} : {}", posTag, lemma);
@@ -170,20 +158,13 @@ class WiktionaryLexicalDataParser {
         // Only build valid lemma entries
         if ( parserKey == POSParserKey.PARTICIPLE) {
             // Participles get staged and added to associated parent Lexeme at the end
-            if (specializedParser.validate(root)) {
-                handleParticipleEntry(root);
-            }
+            handleParticipleEntry(root);
 
             logger.trace(LogMsg.SKIPPING_NON_LEMMA, () -> posTag, () -> root.path(WORD.get()).asText());
             // participles are staged so return empty
             return Optional.empty();
         }
 
-        if( isValidLemmaEntry(root, specializedParser)) {
-            logger.trace(LogMsg.SKIPPING_NON_LEMMA, () -> posTag, () -> root.path(WORD.get()).asText());
-            // participles are staged so return empty
-            return Optional.empty();
-        }
 
         // Initialize builder with necessary unique identifiers
         LexemeBuilder builder = new LexemeBuilder(lemma, partOfSpeech, etymologyNumber);

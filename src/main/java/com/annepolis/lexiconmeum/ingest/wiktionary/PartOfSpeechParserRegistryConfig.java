@@ -14,9 +14,12 @@ public class PartOfSpeechParserRegistryConfig {
             POSVerbParser verbParser,
             POSNounParser nounParser,
             POSAdjectiveParser adjectiveParser,
-            POSParticipleParser participleParser
+            POSParticipleParser participleParser,
+            POSNonInflectedFormParser nonInflectedFormParser
     ) {
         Map<POSParserKey, PartOfSpeechParser> map = new EnumMap<>(POSParserKey.class);
+        map.put(POSParserKey.ADVERB, nonInflectedFormParser);
+        map.put(POSParserKey.CONJUNCTION, nonInflectedFormParser);
         map.put(POSParserKey.VERB, verbParser);
         map.put(POSParserKey.NOUN, nounParser);
 
@@ -25,6 +28,8 @@ public class PartOfSpeechParserRegistryConfig {
         map.put(POSParserKey.ADJECTIVE_SUPERLATIVE, adjectiveParser);
 
         map.put(POSParserKey.DETERMINER, adjectiveParser);
+        map.put(POSParserKey.PREPOSITION, nonInflectedFormParser);
+        map.put(POSParserKey.POSTPOSITION, nonInflectedFormParser);
         map.put(POSParserKey.PRONOUN, adjectiveParser);
         map.put(POSParserKey.PARTICIPLE, participleParser);
         return map;

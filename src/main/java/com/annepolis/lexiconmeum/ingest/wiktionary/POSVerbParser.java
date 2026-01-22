@@ -43,31 +43,12 @@ public class POSVerbParser implements PartOfSpeechParser {
             "PASSIVE|SUBJUNCTIVE|FUTURE_PERFECT"
     );
 
-    public static final Set<String> VALID_HEAD_TEMPLATE_NAMES = Set.of(WiktionaryHeadTemplate.VERB.getName());
     private final LexicalTagResolver lexicalTagResolver;
     private final EsseFormProvider esseFormProvider;
 
     public POSVerbParser(LexicalTagResolver lexicalTagResolver, EsseFormProvider esseFormProvider){
         this.lexicalTagResolver = lexicalTagResolver;
         this.esseFormProvider = esseFormProvider;
-    }
-
-    @Override
-    public boolean validate(JsonNode root) {
-        JsonNode headTemplates = root.path(HEAD_TEMPLATES.get());
-
-        if (!headTemplates.isArray() || headTemplates.isEmpty()) {
-            return false;
-        }
-
-        String templateName = headTemplates.get(0).path(NAME.get()).asText("");
-
-        return VALID_HEAD_TEMPLATE_NAMES.contains(templateName);
-    }
-
-    @Override
-    public boolean isActive() {
-        return true;
     }
 
     // Filter out form nodes in the blacklist
