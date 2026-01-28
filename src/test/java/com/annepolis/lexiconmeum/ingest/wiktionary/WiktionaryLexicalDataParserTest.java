@@ -38,6 +38,9 @@ class WiktionaryLexicalDataParserTest {
     private List<Lexeme> verbLexemes;
 
     static final String STANDARD_VERB_LEMMA = "amo";
+    private static final LexicalTagResolver LEXICAL_TAG_RESOLVER = new LexicalTagResolver();
+    private static final ParserSupport PARSER_SUPPORT = new ParserSupport(LEXICAL_TAG_RESOLVER, ParseMode.STRICT);
+
 
     @BeforeEach
     void setUp() {
@@ -47,9 +50,9 @@ class WiktionaryLexicalDataParserTest {
         EsseFormProvider esseFormProvider = new EsseFormProvider();
 
         Map<POSParserKey, PartOfSpeechParser> partOfSpeechParsers = new EnumMap<>(POSParserKey.class);
-        POSVerbParser verbParser = new POSVerbParser(lexicalTagResolver, esseFormProvider);
-        POSNounParser nounParser = new POSNounParser();
-        POSAdjectiveParser adjectiveParser = new POSAdjectiveParser();
+        POSVerbParser verbParser = new POSVerbParser(esseFormProvider, PARSER_SUPPORT);
+        POSNounParser nounParser = new POSNounParser(PARSER_SUPPORT);
+        POSAdjectiveParser adjectiveParser = new POSAdjectiveParser(PARSER_SUPPORT);
         POSParticipleParser participleParser = new POSParticipleParser(lexicalTagResolver);
         POSNonInflectedFormParser posNonInflectedFormParser = new POSNonInflectedFormParser();
 
@@ -68,11 +71,6 @@ class WiktionaryLexicalDataParserTest {
         partOfSpeechParsers.put(POSParserKey.PREPOSITION, posNonInflectedFormParser);
         partOfSpeechParsers.put(POSParserKey.POSTPOSITION, posNonInflectedFormParser);
 
-
-
-
-
-
         // Create test stub for staging service
         stagingServiceStub = new WiktionaryStagingServiceStub();
 
@@ -81,9 +79,9 @@ class WiktionaryLexicalDataParserTest {
                 lexicalTagResolver,
                 partOfSpeechParsers,
                 participleParser,
-                stagingServiceStub
+                stagingServiceStub,
+                PARSER_SUPPORT
         );
-        parser.setParseMode(ParseMode.STRICT);
     }
 
     static class WiktionaryStagingServiceStub implements WiktionaryStagingService {

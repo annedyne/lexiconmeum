@@ -9,6 +9,7 @@ public class SafeBuilder<T> {
     private final Supplier<T> builder;
     private final String label;
 
+
     SafeBuilder(String label, Supplier<T> builder) {
         this.label = label;
         this.builder = builder;

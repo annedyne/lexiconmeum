@@ -1,17 +1,15 @@
 package com.annepolis.lexiconmeum.ingest.wiktionary;
 
-import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.fasterxml.jackson.databind.JsonNode;
-
-import java.util.Optional;
 
 /**
  * Class that includes specialized parsing for any
  */
 public interface PartOfSpeechParser {
 
-    default Optional<Lexeme> parsePartOfSpeech(LexemeBuilder lexemeBuilder, JsonNode jsonNode){
-       return Optional.empty();
+    default ParsedResultProcessor parsePartOfSpeech(JsonNode root){
+        return ParsedResultProcessor.EMPTY;
     }
+
+    boolean isActive();
 }

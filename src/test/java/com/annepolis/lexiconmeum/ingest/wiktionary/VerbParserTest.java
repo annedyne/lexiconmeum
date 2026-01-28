@@ -25,8 +25,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class VerbParserTest {
 
     private static final EsseFormProvider ESSE_FORM_PROVIDER = new EsseFormProvider();
+    private static final LexicalTagResolver LEXICAL_TAG_RESOLVER = new LexicalTagResolver();
+    private static final ParserSupport PARSER_SUPPORT = new ParserSupport(LEXICAL_TAG_RESOLVER, ParseMode.STRICT);
     private static LexemeBuilder sequorLexemeBuilder;
-
 
     @ParameterizedTest
     @MethodSource("expectedCompoundSequorTenseForms")
@@ -35,7 +36,7 @@ public class VerbParserTest {
         if (sequorLexemeBuilder == null) {
             JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("sequor", "testDataVerb.jsonl");
 
-            POSVerbParser parser = new POSVerbParser(new LexicalTagResolver(), new EsseFormProvider());
+            POSVerbParser parser = new POSVerbParser(new EsseFormProvider(), PARSER_SUPPORT);
             sequorLexemeBuilder = new LexemeBuilder("testLemma", PartOfSpeech.VERB, "1");
             parser.addInflections(sequorLexemeBuilder, root.path(FORMS.get()) );
         }

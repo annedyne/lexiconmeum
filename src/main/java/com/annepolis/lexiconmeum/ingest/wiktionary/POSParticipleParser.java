@@ -204,4 +204,8 @@ public class POSParticipleParser implements PartOfSpeechParser {
         return tags;
     }
 
+    @Override
+    public boolean isActive() {
+        return false;
+    }
 }

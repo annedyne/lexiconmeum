@@ -4,9 +4,6 @@ import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.Sense;
-import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
-import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
-import com.annepolis.lexiconmeum.shared.model.inflection.Declension;
 import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,7 +21,6 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import static com.annepolis.lexiconmeum.ingest.wiktionary.ParserConstants.COMMON_FORM_BLACKLIST;
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.*;
 
 @Component
@@ -32,44 +28,39 @@ class WiktionaryLexicalDataParser {
 
     static final Logger logger = LogManager.getLogger(WiktionaryLexicalDataParser.class);
     private static final Marker NON_LEMMA = MarkerManager.getMarker("NON_LEMMA");
+    private static final Marker PARSER_DELEGATION_ISSUE = MarkerManager.getMarker("PARSER_DELEGATION_ISSUE");
 
     static class LogMsg {
         private static final String SKIPPING_NON_LEMMA = "Skipping non-lemma entry for: {} {}";
         static final String SKIPPING_INVALID_FORM = "Skipping invalid form: {}";
-        private static final String UNEXPECTED_INFLECTION_SOURCE = "Found an unexpected inflection source {} in form: {}";
+        static final String UNEXPECTED_INFLECTION_SOURCE = "Found an unexpected inflection source {} in form: {}";
         private static final String UNSUPPORTED_POS = "Unsupported partOfSpeech: {}";
         static final String FAILED_TO_BUILD = "Failed to build lexeme: {}";
         private static final String CANONICAL_NOT_FOUND = "Canonical Form Not Found: {}";
         private static final String JSONL_FORMAT_ERROR = "Check that JSONL is correctly formatted and not 'prettified'";
+        private static final String MISSING_NODES = "{} not found";
 
         private LogMsg() {} // Prevent instantiation
     }
     
     private final ObjectMapper mapper = new ObjectMapper();
-    private ParseMode parseMode;
-
     private final LexicalTagResolver lexicalTagResolver;
     private final Map<POSParserKey, PartOfSpeechParser> partOfSpeechParserRegistry;
     private final WiktionaryStagingService wiktionaryStagingService;
     private final POSParticipleParser participleParser;
+    private final ParserSupport parserSupport;
 
-    public ParseMode getParseMode() {
-        return parseMode;
-    }
-
-    public void setParseMode(ParseMode parseMode) {
-        this.parseMode = parseMode;
-    }
 
     WiktionaryLexicalDataParser(LexicalTagResolver lexicalTagResolver,
                                 Map<POSParserKey, PartOfSpeechParser> partOfSpeechParserRegistry,
                                 POSParticipleParser participleParser,
-                                WiktionaryStagingService wiktionaryStagingService
+                                WiktionaryStagingService wiktionaryStagingService, ParserSupport parserSupport
     ) {
         this.lexicalTagResolver = lexicalTagResolver;
         this.partOfSpeechParserRegistry = partOfSpeechParserRegistry;
         this.participleParser = participleParser;
         this.wiktionaryStagingService = wiktionaryStagingService;
+        this.parserSupport = parserSupport;
     }
 
     public void parseJsonl(Reader reader, Consumer<Lexeme> lexemeConsumer) throws IOException {
@@ -78,15 +69,9 @@ class WiktionaryLexicalDataParser {
         while ((line = readJsonLine(br)) != null) {
             try {
                 JsonNode root = mapper.readTree(line);
-                buildLexeme(root).ifPresent(lexeme -> {
-                    // Stage verbs, directly consume others
-                    if (lexeme.getPartOfSpeech() == PartOfSpeech.VERB) {
-                        wiktionaryStagingService.stageLexeme(lexeme);
-                    } else {
-                        lexemeConsumer.accept(lexeme);
-                    }
-                });
-            } catch(JsonEOFException eofException) {
+                processJson(root, lexemeConsumer);
+
+            }  catch(JsonEOFException eofException) {
                 logger.error(LogMsg.JSONL_FORMAT_ERROR, eofException);
                 throw eofException;
             }
@@ -97,96 +82,93 @@ class WiktionaryLexicalDataParser {
         return br.readLine();
     }
 
-
-    private Optional<POSParserKey> deriveParserKeyFromRoot(JsonNode root) {
-        String templateName = extractHeadTemplateNameFromRoot(root);
-        if (templateName.isEmpty()) {
-            return Optional.empty();
+    void processJson(JsonNode root, Consumer<Lexeme> lexemeConsumer){
+        // Unified resolution: if we have a key, it's a potential lemma
+        Optional<POSParserKey> optionalParserKey = deriveParserKeyFromRoot(root);
+        // Delegate to specialized parser if available
+        if(optionalParserKey.isPresent()) {
+            POSParserKey parserKey = optionalParserKey.get();
+            PartOfSpeechParser specializedParser = partOfSpeechParserRegistry.get(parserKey);
+            if (specializedParser.isActive()) {
+                parseLexicalDataEntry(specializedParser, root).process(lexemeConsumer, wiktionaryStagingService);
+            } else buildLexeme(root, parserKey).ifPresent(lexemeConsumer);
+        } else {
+            logger.trace("Skipping unknown head-template");
         }
-        return POSParserKey.fromHeadTemplateName(templateName);
     }
 
-    public String extractHeadTemplateNameFromRoot(JsonNode root) {
+    ParsedResultProcessor parseLexicalDataEntry(PartOfSpeechParser partOfSpeechParser, JsonNode root){
+
+        return partOfSpeechParser.parsePartOfSpeech(root);
+    }
+
+
+    private Optional<POSParserKey> deriveParserKeyFromRoot(JsonNode root) {
+        return extractHeadTemplateNameFromRoot(root).flatMap(POSParserKey::fromHeadTemplateName);
+    }
+
+    public Optional<String> extractHeadTemplateNameFromRoot(JsonNode root) {
         JsonNode headTemplates = root.path(HEAD_TEMPLATES.get());
         if (!headTemplates.isArray() || headTemplates.isEmpty()) {
-            return "";
+            logger.trace(PARSER_DELEGATION_ISSUE, LogMsg.MISSING_NODES, HEAD_TEMPLATES.name());
+            return Optional.empty();
         }
 
         JsonNode firstTemplate = headTemplates.get(0);
         String name = firstTemplate.path(NAME.get()).asText("");
 
-        // If the template is generic "head", try to find a more specific identifier in args
-        if ("head".equalsIgnoreCase(name)) {
-            String arg2 = firstTemplate.path("args").path("2").asText("");
-            if (!arg2.isEmpty()) {
-                return arg2;
+        if(firstTemplate.path(NAME.get()).asText("").isEmpty()){
+            logger.trace(PARSER_DELEGATION_ISSUE, LogMsg.MISSING_NODES, HEAD_TEMPLATES.name() + NAME.name());
+            return Optional.empty();
+        } else if ("head".equalsIgnoreCase(name)) {
+            String arg2 = firstTemplate.path("args").path("2").asText();
+            if (arg2.isEmpty()) {
+                logger.trace(PARSER_DELEGATION_ISSUE, LogMsg.MISSING_NODES, HEAD_TEMPLATES.name() + ARGS.name() );
+                return Optional.empty();
+            } else {
+               return Optional.of(arg2);
             }
         }
 
-        return name;
+        return Optional.of(name);
     }
 
-    Optional<Lexeme> buildLexeme(JsonNode root) {
-        // Get primary keys
-        String lemma = root.path(WORD.get()).asText();
-        String posTag = root.path(PART_OF_SPEECH.get()).asText();
-        String etymologyNumber = normalizeEtymologyNumber(root.path(ETYMOLOGY_NUMBER.get()).asText());
 
-        // Validate POS against White-list
-        Optional<PartOfSpeech> optionalPartOfSpeech = PartOfSpeech.resolveWithWarning(posTag, logger);
-        if (optionalPartOfSpeech.isEmpty()) {
-            logger.trace("Skipping unknown part of speech: {}", posTag);
-            return Optional.empty();
-        }
-        PartOfSpeech partOfSpeech = optionalPartOfSpeech.get();
+    Optional<Lexeme> buildLexeme(JsonNode root, POSParserKey posParserKey) {
 
-        // Unified resolution: if we have a key, it's a potential lemma
-        Optional<POSParserKey> optionalParserKey = deriveParserKeyFromRoot(root);
-        // Delegate to specialized parser if available
-        if(optionalParserKey.isEmpty()) {
-            logger.trace("Skipping unknown parser / head-template combo: {} : {}", posTag, lemma);
-            return Optional.empty();
-        }
-
-        POSParserKey parserKey = optionalParserKey.get();
-
-        PartOfSpeechParser specializedParser = partOfSpeechParserRegistry.get(parserKey);
-        if(specializedParser == null){
-            logger.trace("No parser matching this parser / head-template combo {} : {} c", posTag, lemma);
-            return Optional.empty();
-        }
         // Only build valid lemma entries
-        if ( parserKey == POSParserKey.PARTICIPLE) {
+        if (posParserKey == POSParserKey.PARTICIPLE) {
             // Participles get staged and added to associated parent Lexeme at the end
             handleParticipleEntry(root);
 
-            logger.trace(LogMsg.SKIPPING_NON_LEMMA, () -> posTag, () -> root.path(WORD.get()).asText());
+            logger.trace(LogMsg.SKIPPING_NON_LEMMA, POSParserKey.PARTICIPLE::name, () -> root.path(WORD.get()).asText());
             // participles are staged so return empty
             return Optional.empty();
         }
 
 
         // Initialize builder with necessary unique identifiers
-        LexemeBuilder builder = new LexemeBuilder(lemma, partOfSpeech, etymologyNumber);
+        Optional<POSPrimaryKeyData> optionalPrimaryKeyData = parserSupport.extractPrimaryKeyData(root, logger);
+        if(optionalPrimaryKeyData.isEmpty()){
+            return Optional.empty();
+        }
+        POSPrimaryKeyData primaryKeyData = optionalPrimaryKeyData.get();
+        LexemeBuilder builder = new LexemeBuilder(primaryKeyData.lemma(), primaryKeyData.partOfSpeech(), primaryKeyData.etymologyNumber());
 
         // Add sense nodes
         addSenses(root.path(SENSES.get()), builder);
 
 
         // Parse inflected forms and other POS-specific info
-        return switch (partOfSpeech) {
-            case ADJECTIVE, DETERMINER, PRONOUN -> buildLexemeWithForms(builder, root, this::addAdjectiveForms);
+        return switch (primaryKeyData.partOfSpeech()) {
             case ADVERB, PREPOSITION, POSTPOSITION -> buildLexemeWithOutForms(builder);
             case CONJUNCTION -> buildLexemeWithForms(builder, root, this::findAndAddCanonicalForm);
-            case NOUN -> buildLexemeWithForms(builder, root, this::addDeclensionForms);
-            case VERB -> specializedParser.parsePartOfSpeech(builder, root);            default -> {
-                logger.trace(LogMsg.UNSUPPORTED_POS, partOfSpeech);
+            default -> {
+                logger.trace(LogMsg.UNSUPPORTED_POS, primaryKeyData.partOfSpeech());
                 yield Optional.empty();
             }
         };
     }
-
-
 
     // Build sense nodes and add to builder
     private void addSenses(JsonNode sensesNode, LexemeBuilder lexemeBuilder) {
@@ -232,6 +214,8 @@ class WiktionaryLexicalDataParser {
         }
     }
 
+
+
     // Build inflected forms
     private Optional<Lexeme> buildLexemeWithForms(
             LexemeBuilder builder,
@@ -262,108 +246,6 @@ class WiktionaryLexicalDataParser {
             }
         }
     }
-
-    // Add canonical form to the builder
-    private void addCanonicalForm(JsonNode formNode, LexemeBuilder lexemeBuilder) {
-        try {
-            for (JsonNode tag : formNode.path(TAGS.get())) {
-                if(CANONICAL.name().equalsIgnoreCase(tag.asText())){
-                    lexemeBuilder.addCanonicalForm(formNode.path(FORM.get()).asText());
-                    break;
-                }
-            }
-        } catch (IllegalArgumentException | IllegalStateException ex) {
-           logger.trace(LogMsg.SKIPPING_INVALID_FORM, ex.getMessage());
-        }
-    }
-
-    // ---------------------------------- POS SPECIFIC FORM HANDLERS ---------------------------------- //
-
-    // ---------------------------------- ADJECTIVE HANDLERS ---------------------------------- //
-
-    private void addAdjectiveForms(JsonNode formsNode, LexemeBuilder lexemeBuilder) {
-            for (JsonNode formNode : formsNode) {
-                if(isDeclensionForm(formNode)) {
-                    try {
-                        lexemeBuilder.addInflection(buildAgreement(formNode));
-                    } catch (IllegalArgumentException | IllegalStateException ex) {
-                       logger.trace(LogMsg.SKIPPING_INVALID_FORM, ex.getMessage());
-                    }
-                } else {
-                    addCanonicalForm(formNode, lexemeBuilder);
-                }
-
-            }
-    }
-
-    // Build adjective inflected form
-    Agreement buildAgreement(JsonNode formNode) {
-        Agreement.Builder builder = new Agreement.Builder(formNode.path(FORM.get()).asText());
-
-        for (JsonNode tag : formNode.path(TAGS.get())) {
-            lexicalTagResolver.applyToInflection(builder, tag.asText(), logger);
-        }
-
-        return builder.build();
-    }
-
-    // ---------------------------------- NOUN HANDLERS ---------------------------------- //
-
-    // Find and set canonical form and gender of nouns
-    void setNounCanonicalFormAndGender(JsonNode formNode, LexemeBuilder lexemeBuilder){
-        JsonNode tags = formNode.path(TAGS.get());
-        for (int i = 0; i < tags.size(); i++) {
-            //if first tag is CANONICAL then next is gender
-            if (CANONICAL.name().equalsIgnoreCase(tags.get(i).asText()) && i + 1 < tags.size()) {
-                lexemeBuilder.addCanonicalForm(formNode.path(FORM.get()).asText());
-                lexicalTagResolver.applyToLexeme(tags.get(i + 1).asText(), lexemeBuilder, logger);
-            }
-        }
-    }
-
-    private void addDeclensionForms(JsonNode formsNode, LexemeBuilder lexemeBuilder) {
-        for (JsonNode formNode : formsNode) {
-            if (isDeclensionForm(formNode)) {
-                buildDeclension(formNode, getParseMode()).ifPresent(lexemeBuilder::addInflection);
-            } else {
-                //this sets genders for nouns with gender-specific inflections (Ex: 1st & 2nd, not 3rd)
-                setNounCanonicalFormAndGender(formNode, lexemeBuilder);
-            }
-        }
-    }
-
-    Optional<Declension> buildDeclension(JsonNode formNode, ParseMode mode) {
-        Declension.Builder builder = new Declension.Builder(formNode.path(FORM.get()).asText());
-
-        for (JsonNode tag : formNode.path(TAGS.get())) {
-            lexicalTagResolver.applyToInflection( builder, tag.asText(), logger);
-        }
-
-        return new SafeBuilder<>(DECLENSION.get(), builder::build).build(logger, mode);
-    }
-
-    // Filter out form nodes in black-list
-    private boolean isDeclensionForm(JsonNode formNode){
-        String formValue = formNode.path(FORM.get()).asText();
-
-        if(COMMON_FORM_BLACKLIST.contains(formValue)){
-            return false;
-        }
-        if (!formNode.has(SOURCE.get())) {
-            return false;
-        }
-        String source = formNode.path(SOURCE.get()).asText();
-
-        // wrong inflection table header or pos in wiktionary data
-       if( !DECLENSION.get().equalsIgnoreCase(source) &&
-               !INFLECTION.get().equalsIgnoreCase(source)){
-          logger.trace(LogMsg.UNEXPECTED_INFLECTION_SOURCE, source, formValue);
-       }
-        return true;
-    }
-
-    // ---------------------------------- PARTICIPLE HANDLERS ---------------------------------- //
-
 
     /**
      * Handle a participle entry by staging it for later attachment

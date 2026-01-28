@@ -31,7 +31,6 @@ class WiktionaryLexicalDataLoader {
         this.ingestLexemeUseCase = ingestLexemeUseCase;
         this.parser = parser;
         this.wiktionaryStagingService = wiktionaryStagingService;
-        this.parser.setParseMode(loadProperties.getParseMode());
         this.lexicalData = loadProperties.getDataFile();
     }
 
