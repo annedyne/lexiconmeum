@@ -22,12 +22,12 @@ public class JsonTestDataManager {
     private final Map<String, List<JsonNode>> cache = new HashMap<>();
     private final Map<POSParserKey, PartOfSpeechParser> parserRegistry = new EnumMap<>(POSParserKey.class);
     private final LexicalTagResolver lexicalTagResolver = new LexicalTagResolver();
-    private final ParserSupport parserSupport = new ParserSupport(lexicalTagResolver, ParseMode.STRICT);
 
-     private JsonTestDataManager() {
+    private JsonTestDataManager() {
         // Explicitly wire the dependencies as Spring would
          EsseFormProvider esseFormProvider = new EsseFormProvider();
-         POSVerbParser verbParser = new POSVerbParser(esseFormProvider,parserSupport);
+        ParserSupport parserSupport = new ParserSupport(lexicalTagResolver, ParseMode.STRICT);
+        POSVerbParser verbParser = new POSVerbParser(esseFormProvider, parserSupport);
          POSNounParser nounParser = new POSNounParser(parserSupport);
          POSAdjectiveParser adjectiveParser = new POSAdjectiveParser(parserSupport);
 
@@ -59,11 +59,8 @@ public class JsonTestDataManager {
 
     private WiktionaryLexicalDataParser getLexicalDataParser(Map<POSParserKey, PartOfSpeechParser> parsers, WiktionaryStagingService stagingStub) {
         return new WiktionaryLexicalDataParser(
-                lexicalTagResolver,
                 parsers,
-                new POSParticipleParser(lexicalTagResolver),
-                stagingStub,
-                parserSupport
+                stagingStub
         );
     }
 

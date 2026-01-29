@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.FORMS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class VerbParserTest {
+class VerbParserTest {
 
     private static final EsseFormProvider ESSE_FORM_PROVIDER = new EsseFormProvider();
     private static final LexicalTagResolver LEXICAL_TAG_RESOLVER = new LexicalTagResolver();

@@ -2,6 +2,7 @@ package com.annepolis.lexiconmeum.ingest.wiktionary;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,12 +13,13 @@ import java.util.Optional;
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.SENSES;
 
 @Component
-public class POSNonInflectedFormParser implements PartOfSpeechParser {
+public class POSConjunctionParser implements PartOfSpeechParser{
 
     private static final Logger logger = LogManager.getLogger(POSConjunctionParser.class);
+
     ParserSupport parserSupport;
 
-    public POSNonInflectedFormParser(ParserSupport parserSupport) {
+    public POSConjunctionParser(ParserSupport parserSupport) {
         this.parserSupport = parserSupport;
     }
 
@@ -43,12 +45,10 @@ public class POSNonInflectedFormParser implements PartOfSpeechParser {
         parserSupport.extractCanonicalForms(root, lexemeBuilder);
         parserSupport.addSenses(root.path(SENSES.get()), lexemeBuilder, logger);
 
-        try {
-            return Optional.of(lexemeBuilder.build());
-        } catch (Exception ex) {
-            logger.warn(ParserSupport.LogMsg.FAILED_TO_BUILD, ex.getMessage());
-            return Optional.empty();
-        }
+        return new SafeBuilder<>(PartOfSpeech.CONJUNCTION.name(),
+                lexemeBuilder::build).build(logger,
+                parserSupport.getParseMode()
+        );
     }
 
 }

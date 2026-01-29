@@ -16,13 +16,15 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class POSParticipleParserTest {
+class POSParticipleParserTest {
 
-   POSParticipleParser underTest;
+    POSParticipleParser underTest;
+    private static final LexicalTagResolver LEXICAL_TAG_RESOLVER = new LexicalTagResolver();
+    private static final ParserSupport PARSER_SUPPORT = new ParserSupport(LEXICAL_TAG_RESOLVER, ParseMode.STRICT);
 
    @BeforeEach
    void setUp() {
-       underTest = new POSParticipleParser(new LexicalTagResolver());
+       underTest = new POSParticipleParser(PARSER_SUPPORT);
    }
 
     @Test

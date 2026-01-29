@@ -11,6 +11,7 @@ import org.springframework.lang.NonNull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.UnaryOperator;
 
 /**
@@ -61,7 +62,7 @@ public class ParticipleDeclensionSet {
 
         private final GrammaticalVoice voice;
         private final GrammaticalTense tense;
-        private final GrammaticalParticipleTense participleTense;
+        private GrammaticalParticipleTense participleTense;
         private final String tenseLemma;
         private final Map<String, Inflection> inflectionIndex = new HashMap<>();
 
@@ -73,11 +74,24 @@ public class ParticipleDeclensionSet {
             this.voice = voice;
             this.tense = tense;
             this.tenseLemma = tenseLemma;
-            this.participleTense = GrammaticalParticipleTense.fromVoiceAndTense(voice, tense);
         }
 
         public ParticipleDeclensionSet build() {
+            this.participleTense = GrammaticalParticipleTense.fromVoiceAndTense(voice, tense);
             return new ParticipleDeclensionSet(this);
+        }
+
+        public Optional<ParticipleDeclensionSet> buildOptional() {
+            // Tolerant: for parsing/untrusted data paths
+            Optional<GrammaticalParticipleTense> pt =
+                    GrammaticalParticipleTense.tryFromVoiceAndTense(voice, tense);
+
+            if (pt.isEmpty()) {
+                return Optional.empty();
+            }
+
+            this.participleTense = pt.get();
+            return Optional.of(new ParticipleDeclensionSet(this));
         }
 
         public ParticipleDeclensionSet.Builder addInflections(List<Participle> inflections) {

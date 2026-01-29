@@ -12,8 +12,6 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.*;
-import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataParser.normalizeEtymologyNumber;
-
 /**
  * Helper lass for common POSParser-specific parsing tasks
  */
@@ -22,6 +20,11 @@ public class ParserSupport {
 
     private final LexicalTagResolver lexicalTagResolver;
     private final ParseMode parseMode;
+    static class LogMsg {
+
+        static final String FAILED_TO_BUILD = "Failed to build lexeme: {}";
+        private LogMsg() {} // Prevent instantiation
+    }
 
     public ParserSupport(LexicalTagResolver lexicalTagResolver, ParseMode parseMode) {
         this.lexicalTagResolver = lexicalTagResolver;
@@ -39,7 +42,6 @@ public class ParserSupport {
                primaryKeyData.partOfSpeech(),
                primaryKeyData.etymologyNumber()
        ));
-
     }
 
     public Optional<POSPrimaryKeyData> extractPrimaryKeyData(JsonNode root, Logger logger){
@@ -58,6 +60,11 @@ public class ParserSupport {
         return Optional.of(new POSPrimaryKeyData(lemma, partOfSpeech, etymologyNumber));
     }
 
+    // Default to etymologyNumber of 1 to ensure identifier consistency
+    public static String normalizeEtymologyNumber(String ety) {
+        return ety == null || ety.isBlank() ? "1" : ety;
+    }
+
     public String getHeadTemplateName(JsonNode root) {
         JsonNode headTemplates = root.path(HEAD_TEMPLATES.get());
         return headTemplates.get(0).path(NAME.get()).asText("");
@@ -69,6 +76,25 @@ public class ParserSupport {
                 && !ParserConstants.COMMON_FORM_BLACKLIST.contains(formNode.path(FORM.get()).asText());
     }
 
+
+    /**
+     * Standardized way to extract canonical forms from the common 'forms' array
+     */
+    public void extractCanonicalForms(JsonNode root, LexemeBuilder builder) {
+        JsonNode formsNode = root.path(FORMS.get());
+        if (!formsNode.isArray()) return;
+
+        for (JsonNode formNode : formsNode) {
+            JsonNode tags = formNode.path(TAGS.get());
+            if (tags.isArray()) {
+                for (JsonNode tag : tags) {
+                    if (CANONICAL.name().equalsIgnoreCase(tag.asText())) {
+                        builder.addCanonicalForm(formNode.path(FORM.get()).asText());
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * Checks a single node for canonical tags and adds to builder.
@@ -120,6 +146,9 @@ public class ParserSupport {
         lexicalTagResolver.applyToInflection(builder, inflectionTag, logger);
     }
 
+    public void applyAllToInflection(Iterable<String> tags, InflectionBuilder builder, Logger logger){
+        lexicalTagResolver.applyAllToInflection(tags, builder, logger);
+    }
 
     public void applyToLexeme(String tag, LexemeBuilder builder, Logger logger) {
         lexicalTagResolver.applyToLexeme(tag, builder, logger);

@@ -45,42 +45,38 @@ class WiktionaryLexicalDataParserTest {
     @BeforeEach
     void setUp() {
         // Create real dependencies
-        LexicalTagResolver lexicalTagResolver = new LexicalTagResolver();
-
         EsseFormProvider esseFormProvider = new EsseFormProvider();
 
-        Map<POSParserKey, PartOfSpeechParser> partOfSpeechParsers = new EnumMap<>(POSParserKey.class);
+        POSConjunctionParser conjunctionParser = new POSConjunctionParser(PARSER_SUPPORT);
         POSVerbParser verbParser = new POSVerbParser(esseFormProvider, PARSER_SUPPORT);
         POSNounParser nounParser = new POSNounParser(PARSER_SUPPORT);
         POSAdjectiveParser adjectiveParser = new POSAdjectiveParser(PARSER_SUPPORT);
-        POSParticipleParser participleParser = new POSParticipleParser(lexicalTagResolver);
-        POSNonInflectedFormParser posNonInflectedFormParser = new POSNonInflectedFormParser();
+        POSParticipleParser participleParser = new POSParticipleParser(PARSER_SUPPORT);
+        POSNonInflectedFormParser nonInflectedFormParser = new POSNonInflectedFormParser(PARSER_SUPPORT);
 
-        partOfSpeechParsers.put(POSParserKey.VERB, verbParser);
-        partOfSpeechParsers.put(POSParserKey.NOUN, nounParser);
+        Map<POSParserKey, PartOfSpeechParser> posParsers = new EnumMap<>(POSParserKey.class);
+        posParsers.put(POSParserKey.DETERMINER, adjectiveParser);
+        posParsers.put(POSParserKey.PRONOUN, adjectiveParser);
+        posParsers.put(POSParserKey.ADJECTIVE_POSITIVE, adjectiveParser);
+        posParsers.put(POSParserKey.ADJECTIVE_COMPARATIVE, adjectiveParser);
+        posParsers.put(POSParserKey.ADJECTIVE_SUPERLATIVE, adjectiveParser);
 
-        partOfSpeechParsers.put(POSParserKey.ADJECTIVE_POSITIVE, adjectiveParser);
-        partOfSpeechParsers.put(POSParserKey.ADJECTIVE_COMPARATIVE, adjectiveParser);
-        partOfSpeechParsers.put(POSParserKey.ADJECTIVE_SUPERLATIVE, adjectiveParser);
+        posParsers.put(POSParserKey.CONJUNCTION, conjunctionParser);
+        posParsers.put(POSParserKey.VERB, verbParser);
+        posParsers.put(POSParserKey.NOUN, nounParser);
+        posParsers.put(POSParserKey.PARTICIPLE, participleParser);
 
-        partOfSpeechParsers.put(POSParserKey.DETERMINER, adjectiveParser);
-        partOfSpeechParsers.put(POSParserKey.PRONOUN, adjectiveParser);
-        partOfSpeechParsers.put(POSParserKey.PARTICIPLE, participleParser);
-        partOfSpeechParsers.put(POSParserKey.ADVERB, posNonInflectedFormParser);
-        partOfSpeechParsers.put(POSParserKey.CONJUNCTION, posNonInflectedFormParser);
-        partOfSpeechParsers.put(POSParserKey.PREPOSITION, posNonInflectedFormParser);
-        partOfSpeechParsers.put(POSParserKey.POSTPOSITION, posNonInflectedFormParser);
+        posParsers.put(POSParserKey.ADVERB, nonInflectedFormParser);
+        posParsers.put(POSParserKey.PREPOSITION, nonInflectedFormParser);
+        posParsers.put(POSParserKey.POSTPOSITION, nonInflectedFormParser);
 
         // Create test stub for staging service
         stagingServiceStub = new WiktionaryStagingServiceStub();
 
         // Create parser with stub
         parser = new WiktionaryLexicalDataParser(
-                lexicalTagResolver,
-                partOfSpeechParsers,
-                participleParser,
-                stagingServiceStub,
-                PARSER_SUPPORT
+                posParsers,
+                stagingServiceStub
         );
     }
 
