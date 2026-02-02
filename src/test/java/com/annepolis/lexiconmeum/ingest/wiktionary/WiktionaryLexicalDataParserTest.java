@@ -4,7 +4,6 @@ import com.annepolis.lexiconmeum.ingest.tagmapping.EsseFormProvider;
 import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
-import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
@@ -39,32 +38,46 @@ class WiktionaryLexicalDataParserTest {
     private List<Lexeme> verbLexemes;
 
     static final String STANDARD_VERB_LEMMA = "amo";
+    private static final LexicalTagResolver LEXICAL_TAG_RESOLVER = new LexicalTagResolver();
+    private static final ParserSupport PARSER_SUPPORT = new ParserSupport(LEXICAL_TAG_RESOLVER, ParseMode.STRICT);
+
 
     @BeforeEach
     void setUp() {
         // Create real dependencies
-        LexicalTagResolver lexicalTagResolver = new LexicalTagResolver();
-
         EsseFormProvider esseFormProvider = new EsseFormProvider();
 
-        Map<PartOfSpeech, PartOfSpeechParser> partOfSpeechParsers = new EnumMap<>(PartOfSpeech.class);
-        partOfSpeechParsers.put(PartOfSpeech.VERB, new POSVerbParser(lexicalTagResolver, esseFormProvider));
-        partOfSpeechParsers.put(PartOfSpeech.NOUN, new POSNounParser());
-        partOfSpeechParsers.put(PartOfSpeech.ADJECTIVE, new POSAdjectiveParser());
+        POSConjunctionParser conjunctionParser = new POSConjunctionParser(PARSER_SUPPORT);
+        POSVerbParser verbParser = new POSVerbParser(esseFormProvider, PARSER_SUPPORT);
+        POSNounParser nounParser = new POSNounParser(PARSER_SUPPORT);
+        POSAdjectiveParser adjectiveParser = new POSAdjectiveParser(PARSER_SUPPORT);
+        POSParticipleParser participleParser = new POSParticipleParser(PARSER_SUPPORT);
+        POSNonInflectedFormParser nonInflectedFormParser = new POSNonInflectedFormParser(PARSER_SUPPORT);
 
-        POSParticipleParser participleParser = new POSParticipleParser(new LexicalTagResolver());
+        Map<POSParserKey, PartOfSpeechParser> posParsers = new EnumMap<>(POSParserKey.class);
+        posParsers.put(POSParserKey.DETERMINER, adjectiveParser);
+        posParsers.put(POSParserKey.PRONOUN, adjectiveParser);
+        posParsers.put(POSParserKey.ADJECTIVE_POSITIVE, adjectiveParser);
+        posParsers.put(POSParserKey.ADJECTIVE_COMPARATIVE, adjectiveParser);
+        posParsers.put(POSParserKey.ADJECTIVE_SUPERLATIVE, adjectiveParser);
+
+        posParsers.put(POSParserKey.CONJUNCTION, conjunctionParser);
+        posParsers.put(POSParserKey.VERB, verbParser);
+        posParsers.put(POSParserKey.NOUN, nounParser);
+        posParsers.put(POSParserKey.PARTICIPLE, participleParser);
+
+        posParsers.put(POSParserKey.ADVERB, nonInflectedFormParser);
+        posParsers.put(POSParserKey.PREPOSITION, nonInflectedFormParser);
+        posParsers.put(POSParserKey.POSTPOSITION, nonInflectedFormParser);
 
         // Create test stub for staging service
         stagingServiceStub = new WiktionaryStagingServiceStub();
 
         // Create parser with stub
         parser = new WiktionaryLexicalDataParser(
-                lexicalTagResolver,
-                partOfSpeechParsers,
-                participleParser,
+                posParsers,
                 stagingServiceStub
         );
-        parser.setParseMode(ParseMode.STRICT);
     }
 
     static class WiktionaryStagingServiceStub implements WiktionaryStagingService {
@@ -138,6 +151,7 @@ class WiktionaryLexicalDataParserTest {
             assertEquals(VALID_NON_VERB_LEMMA_LIST.length + VALID_VERB_LEMMA_LIST.length, totalCount);
         }
     }
+
 
     @Test
     void verbsAreStagedParticiplesAreConsumed() throws Exception {

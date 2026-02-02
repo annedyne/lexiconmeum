@@ -1,10 +1,10 @@
 package com.annepolis.lexiconmeum.ingest.wiktionary;
 
 import com.annepolis.lexiconmeum.ingest.tagmapping.EsseFormProvider;
-import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.grammar.*;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -19,7 +19,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.*;
-import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataKeyWord.TEMPLATE_HEAD_VERB;
 
 @Component
 public class POSVerbParser implements PartOfSpeechParser {
@@ -44,51 +43,46 @@ public class POSVerbParser implements PartOfSpeechParser {
             "PASSIVE|SUBJUNCTIVE|FUTURE_PERFECT"
     );
 
-    public static final Set<String> VALID_HEAD_TEMPLATE_NAMES = Set.of(TEMPLATE_HEAD_VERB.get());
-    private final LexicalTagResolver lexicalTagResolver;
     private final EsseFormProvider esseFormProvider;
+    private final ParserSupport parserSupport;
 
-    public POSVerbParser(LexicalTagResolver lexicalTagResolver, EsseFormProvider esseFormProvider){
-        this.lexicalTagResolver = lexicalTagResolver;
+    public POSVerbParser(EsseFormProvider esseFormProvider, ParserSupport parserSupport){
         this.esseFormProvider = esseFormProvider;
+        this.parserSupport = parserSupport;
     }
 
     @Override
-    public boolean validate(JsonNode root) {
+    public ParsedResultProcessor parsePartOfSpeech(JsonNode root) {
 
-         // Only process full verb structures, not separate form structures
-        JsonNode headTemplates = root.path(HEAD_TEMPLATES.get());
-        String templateName = headTemplates.get(0).path(NAME.get()).asText("");
-
-        return VALID_HEAD_TEMPLATE_NAMES.contains(templateName);
+        // Build the lexeme and return it wrapped in the appropriate processor, or EMPTY if no result
+        return parserSupport.initLexemeBuilderFromRoot(root, logger)
+                .flatMap(lexemeBuilder -> buildLexeme(lexemeBuilder, root))
+                .map(lexeme -> (ParsedResultProcessor) (
+                        lexemeConsumer,
+                        stagingService) -> stagingService.stageLexeme(lexeme)
+                )
+                .orElse(ParsedResultProcessor.EMPTY);
     }
 
-    // Filter out form nodes in the blacklist
-    private boolean isConjugationForm(JsonNode formNode){
-        String formValue = formNode.path(FORM.get()).asText();
+    private Optional<Lexeme> buildLexeme(LexemeBuilder lexemeBuilder, JsonNode root){
+        parserSupport.addSenses(root.path(SENSES.get()), lexemeBuilder, logger);
 
-        return CONJUGATION.get().equalsIgnoreCase(formNode.path(SOURCE.get()).asText())
-                && !ParserConstants.COMMON_FORM_BLACKLIST.contains(formValue);
-    }
-
-    @Override
-    public Optional<Lexeme> parsePartOfSpeech(LexemeBuilder lexemeBuilder, JsonNode root){
         JsonNode formsNode = root.path(FORMS.get());
         addInflections( lexemeBuilder, formsNode);
-        try {
-            // Return the built lexeme instead of staging it directly
-            return Optional.of(lexemeBuilder.build());
-        } catch (Exception ex) {
-            logger.warn(WiktionaryLexicalDataParser.LogMsg.FAILED_TO_BUILD, ex.getMessage());
-            return Optional.empty();
-        }
+
+        return new SafeBuilder<>(PartOfSpeech.VERB.name(), lexemeBuilder::build).build(logger, parserSupport.getParseMode());
+
     }
 
     @Override
+    public boolean isActive() {
+        return true;
+    }
+
     public void addInflections(LexemeBuilder lexemeBuilder, JsonNode formsNode) {
         for (JsonNode formNode : formsNode) {
             try {
-                if (isConjugationForm(formNode)) {
+                if (parserSupport.isValidFormNode(formNode, PartOfSpeech.VERB.getInflectionType())) {
                    
                     String formValue = formNode.path(FORM.get()).asText();
                     List<String> tags = collectTags(formNode);
@@ -98,7 +92,7 @@ public class POSVerbParser implements PartOfSpeechParser {
                 } else {
                     // Canonical just tags a form already in the form array.
                     // so no need to add it again as an inflection
-                    addCanonicalForm(lexemeBuilder, formNode);
+                    parserSupport.addCanonicalForm( formNode, lexemeBuilder);
                 }
             } catch (IllegalArgumentException | IllegalStateException ex) {
                 logger.trace(WiktionaryLexicalDataParser.LogMsg.SKIPPING_INVALID_FORM, ex.getMessage());
@@ -156,17 +150,6 @@ public class POSVerbParser implements PartOfSpeechParser {
     }
 
 
-    // If this form contains a 'canonical' tag, add it to Lexeme canonical forms 
-    private void addCanonicalForm(LexemeBuilder lexemeBuilder, JsonNode formNode) throws IllegalArgumentException{
-        for (JsonNode tag : formNode.path(TAGS.get())) {
-            if(CANONICAL.name().equalsIgnoreCase(tag.asText())){
-                lexemeBuilder.addCanonicalForm(formNode.path(FORM.get()).asText());
-                break;
-            }
-        }
-    }
-
-
     Optional<Conjugation> buildConjugation(String formValue, List<String> tags){
         if (hasBlacklistedTag(tags)) {
             return Optional.empty();
@@ -177,7 +160,7 @@ public class POSVerbParser implements PartOfSpeechParser {
         coalesceCompoundFutureTenseTags(tags);
 
         for (String tag : tags){
-            lexicalTagResolver.applyToInflection(builder, tag, logger);
+            parserSupport.applyToInflection(builder, tag, logger);
         }
 
         return Optional.of(builder.build());

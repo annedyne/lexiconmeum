@@ -3,7 +3,6 @@ package com.annepolis.lexiconmeum.ingest.wiktionary;
 import com.annepolis.lexiconmeum.ingest.tagmapping.EsseFormProvider;
 import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.io.ClassPathResource;
@@ -12,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class JsonTestDataManager {
@@ -20,11 +20,24 @@ public class JsonTestDataManager {
 
     private final ObjectMapper mapper = new ObjectMapper();
     private final Map<String, List<JsonNode>> cache = new HashMap<>();
-    private final LexicalTagResolver tagResolver;
+    private final Map<POSParserKey, PartOfSpeechParser> parserRegistry = new EnumMap<>(POSParserKey.class);
+    private final LexicalTagResolver lexicalTagResolver = new LexicalTagResolver();
 
     private JsonTestDataManager() {
         // Explicitly wire the dependencies as Spring would
-        this.tagResolver = new LexicalTagResolver();
+         EsseFormProvider esseFormProvider = new EsseFormProvider();
+        ParserSupport parserSupport = new ParserSupport(lexicalTagResolver, ParseMode.STRICT);
+        POSVerbParser verbParser = new POSVerbParser(esseFormProvider, parserSupport);
+         POSNounParser nounParser = new POSNounParser(parserSupport);
+         POSAdjectiveParser adjectiveParser = new POSAdjectiveParser(parserSupport);
+
+         parserRegistry.put(POSParserKey.VERB, verbParser);
+         parserRegistry.put(POSParserKey.NOUN, nounParser);
+         parserRegistry.put(POSParserKey.ADJECTIVE_POSITIVE, adjectiveParser);
+         parserRegistry.put(POSParserKey.ADJECTIVE_COMPARATIVE, adjectiveParser);
+         parserRegistry.put(POSParserKey.ADJECTIVE_SUPERLATIVE, adjectiveParser);
+         parserRegistry.put(POSParserKey.DETERMINER, adjectiveParser);
+         parserRegistry.put(POSParserKey.PRONOUN, adjectiveParser);
     }
 
     /**
@@ -33,32 +46,49 @@ public class JsonTestDataManager {
     public Lexeme getParsedNounLexeme(String word, String filename) throws IOException {
         JsonNode root = getRealNode(word, filename);
 
-        // Setup the parser with necessary dependencies
-        Map<PartOfSpeech, PartOfSpeechParser> parsers = new EnumMap<>(PartOfSpeech.class);
-        parsers.put(PartOfSpeech.NOUN, new POSNounParser());
+        WiktionaryStagingServiceStub stagingStub = getStagingServiceStub();
 
-        WiktionaryLexicalDataParser parser = getLexicalDataParser(parsers, getStagingServiceStub());
-        parser.setParseMode(ParseMode.STRICT);
+        WiktionaryLexicalDataParser parser = getLexicalDataParser(parserRegistry, stagingStub);
+        AtomicReference<Lexeme> captured = new AtomicReference<>();
+        Consumer<Lexeme> consumer = captured::set;
 
-        return parser.buildLexeme(root)
-                .orElseThrow(() -> new IllegalStateException("Parser failed to produce a Lexeme for word: " + word));
+        parser.processJson(root, consumer);
+
+        return captured.get();
     }
 
-    private WiktionaryLexicalDataParser getLexicalDataParser(Map<PartOfSpeech, PartOfSpeechParser> parsers, WiktionaryStagingService stagingStub) {
+    private WiktionaryLexicalDataParser getLexicalDataParser(Map<POSParserKey, PartOfSpeechParser> parsers, WiktionaryStagingService stagingStub) {
         return new WiktionaryLexicalDataParser(
-                tagResolver,
                 parsers,
-                new POSParticipleParser(tagResolver),
                 stagingStub
         );
     }
 
-    private WiktionaryStagingService getStagingServiceStub() {
-        return new WiktionaryStagingService() {
-            @Override public void stageLexeme(Lexeme lexeme) {}
-            @Override public void stageParticiple(StagedParticipleData participleData) {}
-            @Override public ParticipleResolutionService.FinalizationReport finalizeIngestion(Consumer<Lexeme> lexemeConsumer) { return null; }
-        };
+    private WiktionaryStagingServiceStub getStagingServiceStub() {
+
+        return new WiktionaryStagingServiceStub();
+    }
+
+    // Capture staged lexemes so tests can retrieve what processors staged.
+    class WiktionaryStagingServiceStub implements WiktionaryStagingService {
+        private final List<Lexeme> stagedLexemes = new ArrayList<>();
+
+        @Override
+        public void stageLexeme(Lexeme lexeme) {
+            stagedLexemes.add(lexeme);
+        }
+
+        public Optional<Lexeme> getLastStagedLexeme() {
+            return stagedLexemes.isEmpty()
+                    ? Optional.empty()
+                    : Optional.of(stagedLexemes.get(stagedLexemes.size() - 1));
+        }
+
+        @Override
+        public void stageParticiple(StagedParticipleData participleData) {}
+
+        @Override
+        public ParticipleResolutionService.FinalizationReport finalizeIngestion(Consumer<Lexeme> lexemeConsumer) { return null;}
     }
 
     /**
@@ -67,16 +97,15 @@ public class JsonTestDataManager {
     public Lexeme getParsedVerbLexeme(String word, String filename) throws IOException {
         JsonNode root = getRealNode(word, filename);
 
-        Map<PartOfSpeech, PartOfSpeechParser> parsers = new EnumMap<>(PartOfSpeech.class);
-        parsers.put(PartOfSpeech.VERB, new POSVerbParser(tagResolver, new EsseFormProvider()));
+        WiktionaryStagingServiceStub stagingStub = getStagingServiceStub();
 
-        WiktionaryStagingService stagingStub = getStagingServiceStub();
+        WiktionaryLexicalDataParser parser = getLexicalDataParser(parserRegistry, stagingStub);
 
-        WiktionaryLexicalDataParser parser = getLexicalDataParser(parsers, stagingStub);
-        parser.setParseMode(ParseMode.STRICT);
+        Consumer<Lexeme> consumer = lexeme -> {};
+        parser.processJson(root, consumer);
 
-        return parser.buildLexeme(root)
-                .orElseThrow(() -> new IllegalStateException("Parser failed to produce a Lexeme for verb: " + word));
+        return stagingStub.getLastStagedLexeme()
+                .orElseThrow(() -> new IllegalStateException("Parser failed to stage a Lexeme for verb: " + word));
     }
 
     /**

@@ -11,7 +11,6 @@ import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -23,25 +22,12 @@ import java.util.stream.Stream;
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.FORMS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class VerbParserTest {
+class VerbParserTest {
 
     private static final EsseFormProvider ESSE_FORM_PROVIDER = new EsseFormProvider();
+    private static final LexicalTagResolver LEXICAL_TAG_RESOLVER = new LexicalTagResolver();
+    private static final ParserSupport PARSER_SUPPORT = new ParserSupport(LEXICAL_TAG_RESOLVER, ParseMode.STRICT);
     private static LexemeBuilder sequorLexemeBuilder;
-
-    @Test
-    void validateConfirmsStandardVerbNodeAmoIsValidVerb() throws IOException {
-        JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("amo", "testDataVerb.jsonl");
-        POSVerbParser parser = new POSVerbParser(new LexicalTagResolver(), new EsseFormProvider());
-        Assertions.assertTrue(parser.validate(root));
-    }
-
-    @Test
-    void validateConfirmsStandardParticipleNodeAmansIsNotValidVerb() throws IOException {
-        JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("amans", "testDataVerb.jsonl");
-        POSVerbParser parser = new POSVerbParser(new LexicalTagResolver(),  new EsseFormProvider());
-        Assertions.assertFalse(parser.validate(root));
-    }
-
 
     @ParameterizedTest
     @MethodSource("expectedCompoundSequorTenseForms")
@@ -50,7 +36,7 @@ public class VerbParserTest {
         if (sequorLexemeBuilder == null) {
             JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("sequor", "testDataVerb.jsonl");
 
-            POSVerbParser parser = new POSVerbParser(new LexicalTagResolver(), new EsseFormProvider());
+            POSVerbParser parser = new POSVerbParser(new EsseFormProvider(), PARSER_SUPPORT);
             sequorLexemeBuilder = new LexemeBuilder("testLemma", PartOfSpeech.VERB, "1");
             parser.addInflections(sequorLexemeBuilder, root.path(FORMS.get()) );
         }
@@ -65,7 +51,7 @@ public class VerbParserTest {
                 "Form mismatch for " + testCase.mood + " " + testCase.tense + " " + testCase.number + " " + testCase.person);
     }
 
-    static public Stream<ConjugationTestCase> expectedCompoundSequorTenseForms() {
+    public static Stream<ConjugationTestCase> expectedCompoundSequorTenseForms() {
         List<ConjugationTestCase> testCases = new ArrayList<>();
 
         for (GrammaticalMood mood  : GrammaticalMood.values()) {

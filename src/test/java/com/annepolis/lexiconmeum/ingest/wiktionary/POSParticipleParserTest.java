@@ -13,34 +13,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class POSParticipleParserTest {
+class POSParticipleParserTest {
 
-   POSParticipleParser underTest;
+    POSParticipleParser underTest;
+    private static final LexicalTagResolver LEXICAL_TAG_RESOLVER = new LexicalTagResolver();
+    private static final ParserSupport PARSER_SUPPORT = new ParserSupport(LEXICAL_TAG_RESOLVER, ParseMode.STRICT);
 
    @BeforeEach
    void setUp() {
-       underTest = new POSParticipleParser(new LexicalTagResolver());
+       underTest = new POSParticipleParser(PARSER_SUPPORT);
    }
-
-    @Test
-    void isParticipleEntryReturnsTrueGivenParticipleRoot() throws IOException {
-        // Simple, readable, and uses the shared instance/cache
-        JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("amans", "testDataVerb.jsonl");
-
-        boolean isParticiple = underTest.isValidParticipleEntry(root);
-        assertTrue(isParticiple);
-    }
-
-    @Test
-    void isParticipleEntryReturnsFalseGivenAVerbRoot() throws IOException {
-        JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("amo", "testDataVerb.jsonl");
-
-        boolean isParticiple = underTest.isValidParticipleEntry(root);
-
-        assertFalse(isParticiple);
-    }
 
     @Test
     void parseParticipleEntryGeneratesExpectedStagedParticipleDataGivenPresentActiveParticiple() throws IOException {

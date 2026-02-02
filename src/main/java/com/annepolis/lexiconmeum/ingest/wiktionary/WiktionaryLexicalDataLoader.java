@@ -24,13 +24,13 @@ class WiktionaryLexicalDataLoader {
 
     public WiktionaryLexicalDataLoader(IngestLexemeUseCase ingestLexemeUseCase,
                                        WiktionaryLexicalDataParser parser,
-                                       LoadProperties loadProperties, DefaultWiktionaryStagingService wiktionaryStagingService
+                                       LoadProperties loadProperties,
+                                       DefaultWiktionaryStagingService wiktionaryStagingService
 
     ) {
         this.ingestLexemeUseCase = ingestLexemeUseCase;
         this.parser = parser;
         this.wiktionaryStagingService = wiktionaryStagingService;
-        this.parser.setParseMode(loadProperties.getParseMode());
         this.lexicalData = loadProperties.getDataFile();
     }
 

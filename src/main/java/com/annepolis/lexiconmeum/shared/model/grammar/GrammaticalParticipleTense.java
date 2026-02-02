@@ -1,5 +1,7 @@
 package com.annepolis.lexiconmeum.shared.model.grammar;
 
+import java.util.Optional;
+
 @SuppressWarnings("java:S1192") // can't assume a change applies to all duplicate literals
 public enum GrammaticalParticipleTense {
     PARTICIPLE("Participle", "Participle"),
@@ -26,6 +28,16 @@ public enum GrammaticalParticipleTense {
         return alternativeName;
     }
 
+    public static Optional<GrammaticalParticipleTense> tryFromVoiceAndTense(
+            GrammaticalVoice voice,
+            GrammaticalTense tense
+    ) {
+        try {
+            return Optional.of(fromVoiceAndTense(voice, tense));
+        } catch (IllegalArgumentException ex) {
+            return Optional.empty();
+        }
+    }
     /**
      * Derives the participle tense from the given voice and tense combination.
      *

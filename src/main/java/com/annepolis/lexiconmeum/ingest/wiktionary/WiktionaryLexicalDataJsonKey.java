@@ -2,6 +2,7 @@ package com.annepolis.lexiconmeum.ingest.wiktionary;
 
 public enum WiktionaryLexicalDataJsonKey {
 
+    ARGS("args"),
     CANONICAL("canonical"),
     CONJUGATION("conjugation"),
     DECLENSION("declension"),

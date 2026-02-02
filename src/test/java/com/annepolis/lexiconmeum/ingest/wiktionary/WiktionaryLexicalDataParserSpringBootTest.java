@@ -1,7 +1,5 @@
 package com.annepolis.lexiconmeum.ingest.wiktionary;
 
-import com.annepolis.lexiconmeum.ingest.tagmapping.EsseFormProvider;
-import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeFixtureFactory;
 import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
@@ -14,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,19 +25,7 @@ import static com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass.THI
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@ContextConfiguration(classes = {
-        WiktionaryLexicalDataParser.class,
-        LexicalTagResolver.class,
-        PartOfSpeechParserConfig.class,
-        POSVerbParser.class,         // and these if they are @Component-less
-        POSNounParser.class,
-        POSAdjectiveParser.class,
-        POSParticipleParser.class,
-        EsseFormProvider.class,
-        DefaultWiktionaryStagingService.class,
-        StagedLexemeCache.class,
-        ParticipleResolutionService.class
-})
+@TestPropertySource(properties = "app.load.parse-mode=STRICT")
 class WiktionaryLexicalDataParserSpringBootTest {
 
     @Autowired
@@ -85,18 +71,14 @@ class WiktionaryLexicalDataParserSpringBootTest {
         Resource resource = resourceLoader.getResource("classpath:testDataAdjective.jsonl");
         try (Reader reader = new InputStreamReader(resource.getInputStream())) {
             adjectiveLexemes = new ArrayList<>();
-            parser.parseJsonl(reader, lexeme -> {
-                if (lexeme.getInflections().get(0) instanceof Agreement) {
-                    adjectiveLexemes.add(lexeme);
-                }
-            });
-
+            parser.parseJsonl(reader, adjectiveLexemes::add);
         }
     }
 
     private List<String> getValidLemmaList(){
         return Arrays.asList(VALID_LEMMA_LIST);
     }
+
 
     @Test
     void resourceExists() {
@@ -166,22 +148,24 @@ class WiktionaryLexicalDataParserSpringBootTest {
     @ParameterizedTest
     @MethodSource("expectedPulcherForms")
     void threeTerminationAdjectiveInflectionsLoaded(String expectedForm) throws Exception {
-        Optional<Lexeme> pulcher = getAdjectiveLexemes().stream()
-                .filter(l -> l.getLemma().equals("pulcher"))
-                .findFirst();
-        assertTrue(pulcher.isPresent(), "Pulcher lexeme not found");
 
-        boolean found = pulcher.get().getInflections().stream()
-                .anyMatch(i -> i.getForm().equals(expectedForm)
-                        || expectedForm.equals("pulcherrimē")); //no superlative adverb in data
+            Optional<Lexeme> pulcher = getAdjectiveLexemes().stream()
+                    .filter(l -> l.getLemma().equals("pulcher"))
+                    .findFirst();
+            assertTrue(pulcher.isPresent(), "Pulcher lexeme not found");
 
-        pulcher.get().getInflections()
-                .forEach(i -> {
-                    if (i instanceof Agreement ag) {
-                        assert ag.getNumber() != null : "GrammaticalNumber is null in Agreement: " + ag;
-                    }
-                });
-        assertTrue(found, "Expected form not found: " + expectedForm);
+            boolean found = pulcher.get().getInflections().stream()
+                    .anyMatch(i -> i.getForm().equals(expectedForm)
+                            || expectedForm.equals("pulcherrimē")); //no superlative adverb in data
+
+            pulcher.get().getInflections()
+                    .forEach(i -> {
+                        if (i instanceof Agreement ag) {
+                            assert ag.getNumber() != null : "GrammaticalNumber is null in Agreement: " + ag;
+                        }
+                    });
+            assertTrue(found, "Expected form not found: " + expectedForm);
+
     }
 
     static Stream<String> expectedPulcherForms() {
@@ -190,18 +174,19 @@ class WiktionaryLexicalDataParserSpringBootTest {
 
     @Test
     void thirdInflectionAssignedSetOnTwoTerminationAdjectiveInflection() throws IOException {
-        Optional<Lexeme> brevis = getAdjectiveLexemes().stream()
-                .filter(l -> l.getLemma().equals("brevis"))
-                .findFirst();
-        assertTrue(brevis.isPresent(), "Brevis lexeme not found");
-        assertEquals(Set.of(THIRD), brevis.get().getInflectionClasses());
 
-        brevis.get().getInflections().stream()
-                .forEach(i -> {
-                    if (i instanceof Agreement ag) {
-                        assert ag.getNumber() != null : "GrammaticalNumber is null in Agreement: " + ag;
-                    }
-                });
+            Optional<Lexeme> brevis = getAdjectiveLexemes().stream()
+                    .filter(l -> l.getLemma().equals("brevis"))
+                    .findFirst();
+            assertTrue(brevis.isPresent(), "Brevis lexeme not found");
+            assertEquals(Set.of(THIRD), brevis.get().getInflectionClasses());
+
+            brevis.get().getInflections().stream()
+                    .forEach(i -> {
+                        if (i instanceof Agreement ag) {
+                            assert ag.getNumber() != null : "GrammaticalNumber is null in Agreement: " + ag;
+                        }
+                    });
     }
 
     @Test
