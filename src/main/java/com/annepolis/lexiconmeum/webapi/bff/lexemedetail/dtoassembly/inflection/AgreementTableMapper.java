@@ -1,7 +1,9 @@
 package com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import com.annepolis.lexiconmeum.shared.model.grammar.*;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveDetails;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveTerminationType;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeechDetails;
@@ -22,7 +24,7 @@ public class AgreementTableMapper implements InflectionTableMapper {
             boolean twoTermination;
             PartOfSpeechDetails details = lexeme.getPartOfSpeechDetails();
             if (details instanceof AdjectiveDetails adj) {
-                twoTermination = adj.terminationType() == AdjectiveTerminationType.TWO_TERMINATION;
+                twoTermination = adj.getTerminationType() == AdjectiveTerminationType.TWO_TERMINATION;
             } else {
                 twoTermination = false;
             }

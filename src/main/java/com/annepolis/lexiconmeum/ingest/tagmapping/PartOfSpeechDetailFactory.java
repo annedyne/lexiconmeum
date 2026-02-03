@@ -31,13 +31,25 @@ public enum PartOfSpeechDetailFactory {
     }),
 
     TWO_TERMINATION(Set.of("two-termination"), builder ->  {
-        AdjectiveDetails adjectiveDetails = new AdjectiveDetails(AdjectiveTerminationType.TWO_TERMINATION);
-        builder.setPartOfSpeechDetails(adjectiveDetails);
+        if( builder.getPartOfSpeechDetails() instanceof AdjectiveDetails details) {
+            details = details.toBuilder().setAdjectiveTerminationType(AdjectiveTerminationType.TWO_TERMINATION).build();
+            builder.setPartOfSpeechDetails(details);
+        } else if(builder.getPartOfSpeechDetails() == null){
+            AdjectiveDetails.Builder adBuilder = new AdjectiveDetails.Builder();
+            adBuilder.setAdjectiveTerminationType(AdjectiveTerminationType.TWO_TERMINATION);
+            builder.setPartOfSpeechDetails(adBuilder.build());
+        }
     }),
 
     THREE_TERMINATION(Set.of("three-termination"), builder ->  {
-        AdjectiveDetails adjectiveDetails = new AdjectiveDetails(AdjectiveTerminationType.THREE_TERMINATION);
-        builder.setPartOfSpeechDetails(adjectiveDetails);
+        if( builder.getPartOfSpeechDetails() instanceof AdjectiveDetails details) {
+            details = details.toBuilder().setAdjectiveTerminationType(AdjectiveTerminationType.THREE_TERMINATION).build();
+            builder.setPartOfSpeechDetails(details);
+        } else if(builder.getPartOfSpeechDetails() == null){
+            AdjectiveDetails.Builder adBuilder = new AdjectiveDetails.Builder();
+            adBuilder.setAdjectiveTerminationType(AdjectiveTerminationType.THREE_TERMINATION);
+            builder.setPartOfSpeechDetails(adBuilder.build());
+        }
     }),
 
     DEMONSTRATIVE(Set.of("demonstrative"), builder ->  {
@@ -99,7 +111,7 @@ public enum PartOfSpeechDetailFactory {
 
     DEPONENT(Set.of("deponent"), builder ->  {
        if( builder.getPartOfSpeechDetails() instanceof VerbDetails details) {
-           details.toBuilder().setMorphologicalSubtype(MorphologicalSubtype.DEPONENT);
+           details = details.toBuilder().setMorphologicalSubtype(MorphologicalSubtype.DEPONENT).build();
            builder.setPartOfSpeechDetails(details);
        } else if(builder.getPartOfSpeechDetails() == null){
            VerbDetails.Builder vdBuilder = new VerbDetails.Builder();
