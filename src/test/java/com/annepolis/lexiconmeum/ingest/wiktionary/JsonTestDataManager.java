@@ -3,6 +3,7 @@ package com.annepolis.lexiconmeum.ingest.wiktionary;
 import com.annepolis.lexiconmeum.ingest.tagmapping.EsseFormProvider;
 import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.io.ClassPathResource;
@@ -21,15 +22,15 @@ public class JsonTestDataManager {
     private final ObjectMapper mapper = new ObjectMapper();
     private final Map<String, List<JsonNode>> cache = new HashMap<>();
     private final Map<POSParserKey, PartOfSpeechParser> parserRegistry = new EnumMap<>(POSParserKey.class);
-    private final LexicalTagResolver lexicalTagResolver = new LexicalTagResolver();
 
     private JsonTestDataManager() {
         // Explicitly wire the dependencies as Spring would
-         EsseFormProvider esseFormProvider = new EsseFormProvider();
+        EsseFormProvider esseFormProvider = new EsseFormProvider();
+        LexicalTagResolver lexicalTagResolver = new LexicalTagResolver();
         ParserSupport parserSupport = new ParserSupport(lexicalTagResolver, ParseMode.STRICT);
         POSVerbParser verbParser = new POSVerbParser(esseFormProvider, parserSupport);
-         POSNounParser nounParser = new POSNounParser(parserSupport);
-         POSAdjectiveParser adjectiveParser = new POSAdjectiveParser(parserSupport);
+        POSNounParser nounParser = new POSNounParser(parserSupport);
+        POSAdjectiveParser adjectiveParser = new POSAdjectiveParser(parserSupport);
 
          parserRegistry.put(POSParserKey.VERB, verbParser);
          parserRegistry.put(POSParserKey.NOUN, nounParser);
@@ -41,10 +42,17 @@ public class JsonTestDataManager {
     }
 
     /**
-     * Replaces the synthetic getNewTestNounLexeme by parsing a real JSON entry via the actual parser.
+     * Loads the file for the given filename, finds the given noun JSON data,
+     * parses the JSON data with the application's parser,
+     * and returns it as a noun Lexeme object.
+     *
+     * @param word the word to be parsed and matched in the JSON file
+     * @param filename the name of the file containing JSON data for parsing
+     * @return a Lexeme object representing the parsed noun lexeme, or null if the lexeme could not be captured
+     * @throws IOException if an error occurs when reading from the JSON file
      */
     public Lexeme getParsedNounLexeme(String word, String filename) throws IOException {
-        JsonNode root = getRealNode(word, filename);
+        JsonNode root = getRealNode(word, PartOfSpeech.NOUN, filename);
 
         WiktionaryStagingServiceStub stagingStub = getStagingServiceStub();
 
@@ -65,17 +73,21 @@ public class JsonTestDataManager {
     }
 
     private WiktionaryStagingServiceStub getStagingServiceStub() {
-
         return new WiktionaryStagingServiceStub();
     }
 
     // Capture staged lexemes so tests can retrieve what processors staged.
-    class WiktionaryStagingServiceStub implements WiktionaryStagingService {
+    static class WiktionaryStagingServiceStub implements WiktionaryStagingService {
         private final List<Lexeme> stagedLexemes = new ArrayList<>();
 
         @Override
         public void stageLexeme(Lexeme lexeme) {
             stagedLexemes.add(lexeme);
+        }
+
+        @Override
+        public void stageLinkableData(LinkableData linkableData) {
+
         }
 
         public Optional<Lexeme> getLastStagedLexeme() {
@@ -85,17 +97,21 @@ public class JsonTestDataManager {
         }
 
         @Override
-        public void stageParticiple(StagedParticipleData participleData) {}
-
-        @Override
-        public ParticipleResolutionService.FinalizationReport finalizeIngestion(Consumer<Lexeme> lexemeConsumer) { return null;}
+        public DataLinkingService.FinalizationReport finalizeIngestion(Consumer<Lexeme> lexemeConsumer) { return null;}
     }
 
     /**
-     * Replaces the synthetic getNewTestVerbLexeme by parsing a real JSON entry via the actual parser.
+     * Loads the file for the given filename, finds the given noun JSON data,
+     * parses the JSON data with the application's parser,
+     * and returns it as a verb Lexeme object.
+     *
+     * @param word the word to be parsed and matched in the JSON file
+     * @param filename the name of the file containing JSON data for parsing
+     * @return a Lexeme object representing the parsed verb lexeme, or null if the lexeme could not be captured
+     * @throws IOException if an error occurs when reading from the JSON file
      */
     public Lexeme getParsedVerbLexeme(String word, String filename) throws IOException {
-        JsonNode root = getRealNode(word, filename);
+        JsonNode root = getRealNode(word, PartOfSpeech.VERB ,filename);
 
         WiktionaryStagingServiceStub stagingStub = getStagingServiceStub();
 
@@ -109,17 +125,26 @@ public class JsonTestDataManager {
     }
 
     /**
-     * Finds a specific node by its "word" property across one or more files.
+     * Finds a specific node by its "word" and Part of Speech (pos) property across one or more files.
      */
-    public JsonNode getRealNode(String word, String... filenames) throws IOException {
-        for (String file : filenames) {
-            List<JsonNode> nodes = loadFile(file);
-            Optional<JsonNode> match = nodes.stream()
-                .filter(n -> n.path("word").asText().equalsIgnoreCase(word))
+    public JsonNode  getRealNode(String word, PartOfSpeech pos, String filename, String... additionalFilenames) throws IOException {
+        // Process the required filename
+        List<JsonNode> nodes = loadFile(filename);
+        Optional<JsonNode> match = nodes.stream()
+                .filter(n -> n.path("word").asText().equalsIgnoreCase(word) && n.path("pos").asText().equals(pos.getTag() ))
                 .findFirst();
+        if (match.isPresent()) return match.get();
+
+        // process any additional filenames
+        for (String file : additionalFilenames) {
+            nodes = loadFile(file);
+            match = nodes.stream()
+                    .filter(n -> n.path("word").asText().equalsIgnoreCase(word) && n.path("pos").asText().equals(pos.getTag()) )
+                    .findFirst();
             if (match.isPresent()) return match.get();
         }
         throw new IllegalArgumentException("Word '" + word + "' not found in provided test files.");
+
     }
 
     private List<JsonNode> loadFile(String filename) throws IOException {
@@ -136,6 +161,4 @@ public class JsonTestDataManager {
         cache.put(filename, nodes);
         return nodes;
     }
-
-
 }

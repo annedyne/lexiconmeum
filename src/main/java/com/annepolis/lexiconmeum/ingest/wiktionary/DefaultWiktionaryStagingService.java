@@ -17,12 +17,12 @@ public class DefaultWiktionaryStagingService implements WiktionaryStagingService
 
     private static final Logger logger = LogManager.getLogger(DefaultWiktionaryStagingService.class);
 
-    private final ParticipleResolutionService participleResolutionService;
+    private final DataLinkingService dataLinkingService;
     private final StagedLexemeCache stagedLexemeCache;
 
-    public DefaultWiktionaryStagingService(ParticipleResolutionService participleResolutionService,
+    public DefaultWiktionaryStagingService(DataLinkingService dataLinkingService,
                                            StagedLexemeCache stagedLexemeCache) {
-        this.participleResolutionService = participleResolutionService;
+        this.dataLinkingService = dataLinkingService;
         this.stagedLexemeCache = stagedLexemeCache;
     }
 
@@ -38,8 +38,8 @@ public class DefaultWiktionaryStagingService implements WiktionaryStagingService
      * Stage participle data for later resolution
      */
     @Override
-    public void stageParticiple(StagedParticipleData participleData) {
-        participleResolutionService.stageParticiple(participleData);
+    public void stageLinkableData(LinkableData dataToLink) {
+        dataLinkingService.stageDataToLink(dataToLink);
     }
 
     private void clearStaged(){
@@ -51,18 +51,18 @@ public class DefaultWiktionaryStagingService implements WiktionaryStagingService
      * Performs finalization tasks like attaching staged participles.
      */
     @Override
-    public ParticipleResolutionService.FinalizationReport finalizeIngestion(Consumer<Lexeme> lexemeConsumer) {
+    public DataLinkingService.FinalizationReport finalizeIngestion(Consumer<Lexeme> lexemeConsumer) {
         logger.info("Starting ingestion finalization...");
 
-        int stagedCount = participleResolutionService.getStagedCount();
+        int stagedCount = dataLinkingService.getStagedCount();
         logger.info("Found {} staged participles to process", stagedCount);
 
-        ParticipleResolutionService.FinalizationReport report =
-                participleResolutionService.finalizeParticiples(lexemeConsumer, stagedLexemeCache);
+        DataLinkingService.FinalizationReport report =
+                dataLinkingService.finalizeParticiples(lexemeConsumer, stagedLexemeCache);
 
         if (report.hasUnresolved()) {
             logger.warn("Finalization completed with {} unresolved participles",
-                    report.participlesUnresolved());
+                    report.linkablesUnresolved());
 
             // Log details
             report.unresolvedDetails().forEach((verb, participles) -> logger.warn("  Verb '{}': {} unresolved - {}",

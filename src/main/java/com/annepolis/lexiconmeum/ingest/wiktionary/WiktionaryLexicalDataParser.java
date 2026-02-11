@@ -74,15 +74,15 @@ class WiktionaryLexicalDataParser {
         if(optionalParserKey.isPresent()) {
             POSParserKey parserKey = optionalParserKey.get();
             PartOfSpeechParser specializedParser = partOfSpeechParserRegistry.get(parserKey);
-            parseLexicalDataEntry(specializedParser, root).process(lexemeConsumer, wiktionaryStagingService);
+            parseLexicalDataEntry(specializedParser, root, parserKey).process(lexemeConsumer, wiktionaryStagingService);
         } else {
             logger.trace("Skipping unknown head-template");
         }
     }
 
-    ParsedResultProcessor parseLexicalDataEntry(PartOfSpeechParser partOfSpeechParser, JsonNode root){
+    ParsedResultProcessor parseLexicalDataEntry(PartOfSpeechParser partOfSpeechParser, JsonNode root, POSParserKey parserKey){
 
-        return partOfSpeechParser.parsePartOfSpeech(root);
+        return partOfSpeechParser.parsePartOfSpeech(root,parserKey );
     }
 
     private Optional<POSParserKey> deriveParserKeyFromRoot(JsonNode root) {

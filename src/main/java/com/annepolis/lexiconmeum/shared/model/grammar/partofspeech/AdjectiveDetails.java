@@ -48,8 +48,6 @@ public final class AdjectiveDetails implements PartOfSpeechDetails {
             return new AdjectiveDetails(this);
         }
     }
-
-
 }
 
 

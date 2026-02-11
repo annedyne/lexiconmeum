@@ -34,7 +34,7 @@ class VerbParserTest {
     void generatesAllCompoundForms(ConjugationTestCase testCase ) throws IOException {
 
         if (sequorLexemeBuilder == null) {
-            JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("sequor", "testDataVerb.jsonl");
+            JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("sequor", PartOfSpeech.VERB,"testDataVerb.jsonl");
 
             POSVerbParser parser = new POSVerbParser(new EsseFormProvider(), PARSER_SUPPORT);
             sequorLexemeBuilder = new LexemeBuilder("testLemma", PartOfSpeech.VERB, "1");

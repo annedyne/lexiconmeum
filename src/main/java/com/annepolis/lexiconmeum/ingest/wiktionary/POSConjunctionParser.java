@@ -13,7 +13,7 @@ import java.util.Optional;
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.SENSES;
 
 @Component
-public class POSConjunctionParser implements PartOfSpeechParser{
+public class POSConjunctionParser implements PartOfSpeechParser {
 
     private static final Logger logger = LogManager.getLogger(POSConjunctionParser.class);
 
@@ -24,12 +24,7 @@ public class POSConjunctionParser implements PartOfSpeechParser{
     }
 
     @Override
-    public boolean isActive() {
-        return true;
-    }
-
-    @Override
-    public ParsedResultProcessor parsePartOfSpeech(JsonNode root) {
+    public ParsedResultProcessor parsePartOfSpeech(JsonNode root, POSParserKey parserKey) {
         // Build the lexeme and return it wrapped in the appropriate processor, or EMPTY if no result
         return parserSupport.initLexemeBuilderFromRoot(root, logger)
                 .flatMap(lexemeBuilder -> buildLexeme(lexemeBuilder, root))

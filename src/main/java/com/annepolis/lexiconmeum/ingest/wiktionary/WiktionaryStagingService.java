@@ -7,7 +7,7 @@ import java.util.function.Consumer;
 public interface WiktionaryStagingService {
     void stageLexeme(Lexeme lexeme);
 
-    void stageParticiple(StagedParticipleData participleData);
+    void stageLinkableData(LinkableData linkableData);
 
-    ParticipleResolutionService.FinalizationReport finalizeIngestion(Consumer<Lexeme> lexemeConsumer);
+    DataLinkingService.FinalizationReport finalizeIngestion(Consumer<Lexeme> lexemeConsumer);
 }

@@ -7,9 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 public interface PartOfSpeechParser {
 
-    default ParsedResultProcessor parsePartOfSpeech(JsonNode root){
+    default ParsedResultProcessor parsePartOfSpeech(JsonNode root, POSParserKey parserKey){
         return ParsedResultProcessor.EMPTY;
     }
-
-    boolean isActive();
 }

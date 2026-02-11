@@ -5,10 +5,13 @@ import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.Sense;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionBuilder;
+import com.annepolis.lexiconmeum.shared.util.Utilities;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.*;
@@ -65,17 +68,10 @@ public class ParserSupport {
         return ety == null || ety.isBlank() ? "1" : ety;
     }
 
-    public String getHeadTemplateName(JsonNode root) {
-        JsonNode headTemplates = root.path(HEAD_TEMPLATES.get());
-        return headTemplates.get(0).path(NAME.get()).asText("");
-    }
-
-
     public boolean isValidFormNode(JsonNode formNode, String inflectionType) {
         return formNode.path(SOURCE.get()).asText().equals(inflectionType)
                 && !ParserConstants.COMMON_FORM_BLACKLIST.contains(formNode.path(FORM.get()).asText());
     }
-
 
     /**
      * Standardized way to extract canonical forms from the common 'forms' array
@@ -152,5 +148,17 @@ public class ParserSupport {
 
     public void applyToLexeme(String tag, LexemeBuilder builder, Logger logger) {
         lexicalTagResolver.applyToLexeme(tag, builder, logger);
+    }
+
+    List<String> collectTags(JsonNode tagParentNode) {
+        List<String> tags = new ArrayList<>();
+        for (JsonNode tag : tagParentNode.path(TAGS.get())) {
+            tags.add(tag.asText().toLowerCase());
+        }
+        return tags;
+    }
+
+    String normalizeDiacritics(String lemmaWithMacrons){
+        return Utilities.normalizeDiacritics(lemmaWithMacrons);
     }
 }

@@ -1,35 +1,31 @@
 package com.annepolis.lexiconmeum.shared.model.grammar.partofspeech;
 
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalDegree;
+import com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass;
 import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
 
 import java.util.Map;
+import java.util.Set;
 
 public class AdjectiveDegreeAgreementSet {
 
-    private String degreeLemma;
-    private GrammaticalDegree grammaticalDegree;
+    final private String degreeLemma;
+    final private GrammaticalDegree grammaticalDegree;
+    final private Set<InflectionClass> inflectionClasses;
     private Map<String, Inflection> inflectionIndex;
 
-    public AdjectiveDegreeAgreementSet(String degreeLemma, GrammaticalDegree grammaticalDegree){
+    public AdjectiveDegreeAgreementSet(String degreeLemma, GrammaticalDegree grammaticalDegree, Set<InflectionClass> inflectionClasses){
         this.degreeLemma = degreeLemma;
         this.grammaticalDegree = grammaticalDegree;
+        this.inflectionClasses = inflectionClasses;
     }
 
     public String getDegreeLemma() {
         return degreeLemma;
     }
 
-    public void setDegreeLemma(String degreeLemma) {
-        this.degreeLemma = degreeLemma;
-    }
-
     public GrammaticalDegree getGrammaticalDegree() {
         return grammaticalDegree;
-    }
-
-    public void setGrammaticalDegree(GrammaticalDegree grammaticalDegree) {
-        this.grammaticalDegree = grammaticalDegree;
     }
 
     public Map<String, Inflection> getInflectionIndex() {
@@ -39,4 +35,5 @@ public class AdjectiveDegreeAgreementSet {
     public void setInflectionIndex(Map<String, Inflection> inflectionIndex) {
         this.inflectionIndex = inflectionIndex;
     }
+
 }
