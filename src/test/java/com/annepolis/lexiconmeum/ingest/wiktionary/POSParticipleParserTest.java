@@ -3,6 +3,7 @@ package com.annepolis.lexiconmeum.ingest.wiktionary;
 import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.Participle;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +30,7 @@ class POSParticipleParserTest {
 
     @Test
     void parseParticipleEntryGeneratesExpectedStagedParticipleDataGivenPresentActiveParticiple() throws IOException {
-        JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("amans", "testDataVerb.jsonl");
+        JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("amans", PartOfSpeech.VERB ,"testDataVerb.jsonl");
 
         StagedParticipleData data = underTest.parseParticipleEntry(root)
                 .orElseThrow(() -> new AssertionError("Failed to parse participle entry for 'amans'"));
@@ -42,7 +43,7 @@ class POSParticipleParserTest {
 
     @Test
     void parseParticipleEntryGeneratesExpectedStagedParticipleDataGivenFuturePassiveParticiple() throws IOException {
-        JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("amandus", "testDataRaw.jsonl");
+        JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("amandus", PartOfSpeech.VERB,"testDataRaw.jsonl");
 
         StagedParticipleData data = underTest.parseParticipleEntry(root)
                 .orElseThrow(() -> new AssertionError("Failed to parse participle entry for 'amandus'"));
@@ -55,7 +56,7 @@ class POSParticipleParserTest {
 
     @Test
     void parseParticipleInflectionsGeneratesExpectedInflections() throws IOException {
-        JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("amans", "testDataVerb.jsonl");
+        JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("amans", PartOfSpeech.VERB, "testDataVerb.jsonl");
 
         List<Participle> inflections = underTest.parseParticipleInflections(root);
 

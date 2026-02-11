@@ -45,7 +45,7 @@ class WiktionaryLexicalDataLoader {
         logger.info("PHASE 2: Finalizing participles and distributing complete lexemes");
         
         // Finalize participles and distribute everything once
-        ParticipleResolutionService.FinalizationReport report = wiktionaryStagingService.finalizeIngestion(ingestLexemeUseCase::ingest);
+        DataLinkingService.FinalizationReport report = wiktionaryStagingService.finalizeIngestion(ingestLexemeUseCase::ingest);
 
         logger.info("Load complete: {}", report.getSummary());
 

@@ -43,10 +43,10 @@ class AutocompleteServiceSpringTest {
     }
 
     @Test
-    void getWordsStartingWithNoDupes(){
+    void getWordsStartingWithReturnsOnlyLemmaFormsOrSingleInflectedMatch(){
 
         List<SuggestionResponse> result = underTest.getWordsStartingWith("brevis", 10);
-        assertEquals(4, result.size());
+        assertEquals(3, result.size());
 
         result = underTest.getWordsStartingWith("amarem", 10);
         assertEquals(4, result.size());

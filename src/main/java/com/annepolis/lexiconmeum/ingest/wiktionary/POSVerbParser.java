@@ -52,7 +52,7 @@ public class POSVerbParser implements PartOfSpeechParser {
     }
 
     @Override
-    public ParsedResultProcessor parsePartOfSpeech(JsonNode root) {
+    public ParsedResultProcessor parsePartOfSpeech(JsonNode root, POSParserKey parserKey) {
 
         // Build the lexeme and return it wrapped in the appropriate processor, or EMPTY if no result
         return parserSupport.initLexemeBuilderFromRoot(root, logger)
@@ -72,11 +72,6 @@ public class POSVerbParser implements PartOfSpeechParser {
 
         return new SafeBuilder<>(PartOfSpeech.VERB.name(), lexemeBuilder::build).build(logger, parserSupport.getParseMode());
 
-    }
-
-    @Override
-    public boolean isActive() {
-        return true;
     }
 
     public void addInflections(LexemeBuilder lexemeBuilder, JsonNode formsNode) {

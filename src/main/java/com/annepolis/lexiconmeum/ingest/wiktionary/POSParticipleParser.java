@@ -31,17 +31,12 @@ public class POSParticipleParser implements PartOfSpeechParser {
     static final Logger logger = LogManager.getLogger(POSParticipleParser.class);
 
     @Override
-    public boolean isActive() {
-        return true;
-    }
-
-    @Override
-    public ParsedResultProcessor parsePartOfSpeech(JsonNode root) {
+    public ParsedResultProcessor parsePartOfSpeech(JsonNode root, POSParserKey parserKey) {
 
         // Build the participle and return it wrapped in the appropriate processor, or EMPTY if no result
         return parseParticipleEntry(root).map( participleData -> (ParsedResultProcessor) (
                 lexemeConsumer,
-                stagingService) -> stagingService.stageParticiple(participleData)
+                stagingService) -> stagingService.stageLinkableData(participleData)
         )
         .orElse(ParsedResultProcessor.EMPTY);
     }
@@ -79,7 +74,7 @@ public class POSParticipleParser implements PartOfSpeechParser {
 
         Conjugation.Builder conjBuilder = new Conjugation.Builder(parentLemmaWithMacrons);
 
-        List<String> senseTags = collectTags(senseNode);
+        List<String> senseTags = parserSupport.collectTags(senseNode);
         senseTags = resolveParticipleTenseTags(senseTags);
 
         // resolve any conjugation attributes of participle (tense and voice)
@@ -208,13 +203,5 @@ public class POSParticipleParser implements PartOfSpeechParser {
     boolean isValidParticipleForm(JsonNode formNode){
         return formNode.path(SOURCE.get()).asText().equals(DECLENSION.get())
                 && !ParserConstants.COMMON_FORM_BLACKLIST.contains(formNode.path(FORM.get()).asText());
-    }
-
-    private List<String> collectTags(JsonNode tagParentNode) {
-        List<String> tags = new ArrayList<>();
-        for (JsonNode tag : tagParentNode.path(TAGS.get())) {
-            tags.add(tag.asText().toLowerCase());
-        }
-        return tags;
     }
 }

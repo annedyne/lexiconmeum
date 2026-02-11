@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ParticipleResolutionServiceTest {
+class DataLinkingServiceTest {
     public Lexeme cachedLexeme;
 
 
@@ -22,7 +22,7 @@ class ParticipleResolutionServiceTest {
         // was not being refreshed after a participle was added
 
         // Instantiate Class under test.
-        ParticipleResolutionService underTest = new ParticipleResolutionService();
+        DataLinkingService underTest = new DataLinkingService();
 
         // Set up parent Lexeme lemmas.
         String parentLemma = "amo";
@@ -71,10 +71,10 @@ class ParticipleResolutionServiceTest {
                 ).build());
 
         // Stage the two test participles.
-        underTest.stageParticiple(perfectPassive);
-        underTest.stageParticiple(presentActive);
-        underTest.stageParticiple(futureActive);
-        underTest.stageParticiple(gerundive);
+        underTest.stageDataToLink(perfectPassive);
+        underTest.stageDataToLink(presentActive);
+        underTest.stageDataToLink(futureActive);
+        underTest.stageDataToLink(gerundive);
 
         // Call finalize which contains the functionality under test
         underTest.finalizeParticiples(this::setCachedLexeme, stagedLexemeCache);

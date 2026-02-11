@@ -30,7 +30,9 @@ public final class LexemeFixtureFactory {
 
     public static Lexeme generateSyntheticAdjectiveLexeme(AdjectiveTerminationType terminationType, List<Agreement> agreements) {
 
-        AdjectiveDetails details = new AdjectiveDetails( terminationType);
+        AdjectiveDetails.Builder builder = new AdjectiveDetails.Builder();
+
+        AdjectiveDetails details = builder.setAdjectiveTerminationType(terminationType).build();
 
         LexemeBuilder lexemeBuilder = new LexemeBuilder("test-adj", PartOfSpeech.ADJECTIVE, "1" );
         lexemeBuilder.setPartOfSpeechDetails(details);
