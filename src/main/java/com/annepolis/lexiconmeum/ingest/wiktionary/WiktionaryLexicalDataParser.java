@@ -23,12 +23,9 @@ import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJ
 class WiktionaryLexicalDataParser {
 
     static final Logger logger = LogManager.getLogger(WiktionaryLexicalDataParser.class);
-    private static final Marker NON_LEMMA = MarkerManager.getMarker("NON_LEMMA");
     private static final Marker PARSER_DELEGATION_ISSUE = MarkerManager.getMarker("PARSER_DELEGATION_ISSUE");
 
     static class LogMsg {
-        static final String SKIPPING_INVALID_FORM = "Skipping invalid form: {}";
-        static final String UNEXPECTED_INFLECTION_SOURCE = "Found an unexpected inflection source {} in form: {}";
         private static final String JSONL_FORMAT_ERROR = "Check that JSONL is correctly formatted and not 'prettified'";
         private static final String MISSING_NODES = "{} not found";
 

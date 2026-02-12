@@ -91,9 +91,13 @@ public class POSAdjectiveParser implements PartOfSpeechParser {
         }
     }
 
+
     // Filter out form nodes in black-list
     private boolean isDeclensionForm(JsonNode formNode){
-        if(!parserSupport.isValidFormNode(formNode, PartOfSpeech.ADJECTIVE.getInflectionType())) {
+        if(!parserSupport.isValidForm(formNode)) {
+            return false;
+        }
+        if (!formNode.has(SOURCE.get())) {
             return false;
         }
         String source = formNode.path(SOURCE.get()).asText();
@@ -102,7 +106,7 @@ public class POSAdjectiveParser implements PartOfSpeechParser {
         String formValue = formNode.path(FORM.get()).asText();
 
         if (!DECLENSION.get().equalsIgnoreCase(source) && !INFLECTION.get().equalsIgnoreCase(source)){
-            logger.trace(WiktionaryLexicalDataParser.LogMsg.UNEXPECTED_INFLECTION_SOURCE, source, formValue);
+            logger.trace(ParserSupport.LogMsg.UNEXPECTED_INFLECTION_SOURCE, source, formValue);
         }
         return true;
     }

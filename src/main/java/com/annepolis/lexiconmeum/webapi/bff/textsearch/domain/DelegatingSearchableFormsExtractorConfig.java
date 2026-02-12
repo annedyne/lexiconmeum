@@ -15,12 +15,13 @@ public class DelegatingSearchableFormsExtractorConfig {
     public DelegatingSearchableFormsExtractor defaultSearchableFormsExtractor(
             SearchableInflectedFormsExtractor inflectedFormsProvider,
             SearchableUninflectedFormsExtractor uninflectedFormsProvider,
-            SearchableVerbFormsExtractor verbFormsProvider
+            SearchableVerbFormsExtractor verbFormsProvider,
+            SearchableAdjectiveFormsExtractor adjectiveFormProvider
 
     ){
         Map<PartOfSpeech, SearchableFormsExtractor> formsExtractors = new EnumMap<>(PartOfSpeech.class);
 
-        formsExtractors.put(PartOfSpeech.ADJECTIVE, inflectedFormsProvider);
+        formsExtractors.put(PartOfSpeech.ADJECTIVE, adjectiveFormProvider);
         formsExtractors.put(PartOfSpeech.ADVERB, uninflectedFormsProvider);
         formsExtractors.put(PartOfSpeech.CONJUNCTION, uninflectedFormsProvider);
         formsExtractors.put(PartOfSpeech.DETERMINER, inflectedFormsProvider);
