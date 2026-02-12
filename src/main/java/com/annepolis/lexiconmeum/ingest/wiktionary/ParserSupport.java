@@ -26,6 +26,8 @@ public class ParserSupport {
     static class LogMsg {
 
         static final String FAILED_TO_BUILD = "Failed to build lexeme: {}";
+        static final String SKIPPING_INVALID_FORM = "Skipping invalid form: {}";
+        static final String UNEXPECTED_INFLECTION_SOURCE = "Found an unexpected inflection source {} in form: {}";
         private LogMsg() {} // Prevent instantiation
     }
 
@@ -71,6 +73,10 @@ public class ParserSupport {
     public boolean isValidFormNode(JsonNode formNode, String inflectionType) {
         return formNode.path(SOURCE.get()).asText().equals(inflectionType)
                 && !ParserConstants.COMMON_FORM_BLACKLIST.contains(formNode.path(FORM.get()).asText());
+    }
+
+    public boolean isValidForm(JsonNode formNode){
+       return !ParserConstants.COMMON_FORM_BLACKLIST.contains(formNode.path(FORM.get()).asText());
     }
 
     /**

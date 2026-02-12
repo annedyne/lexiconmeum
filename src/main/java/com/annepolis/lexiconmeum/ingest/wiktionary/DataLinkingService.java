@@ -1,4 +1,3 @@
-
 package com.annepolis.lexiconmeum.ingest.wiktionary;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
@@ -42,6 +41,9 @@ public class DataLinkingService {
                 Collections.synchronizedList(new ArrayList<>())
         ).add(dataToLink);
 
+        // Sometimes the parent-lemma of a non-lemma (linkable) will not be a 'Lexeme' lemma
+        // but the canonical form of another non-lemma - which in turn will point to a Lexeme lemma
+        // so storing not just parentLemmas of linkables, but also their lemmas -> parentLemma mapping
         linkableDataLemmaToParentLemma.computeIfAbsent(dataToLink.getLemma(), k ->
                 Collections.synchronizedList(new ArrayList<>())
         ).add(dataToLink.getLinkingLemma());
@@ -63,16 +65,18 @@ public class DataLinkingService {
         AtomicInteger linkablesUnresolved = new AtomicInteger(0);
         Map<String, List<String>> unresolvedDetails = new ConcurrentHashMap<>();
 
-        // Process each lexeme parent associated with linkables staged in the parsing phase
+        // Process each lexeme parent associated with linkables staged in the parsing phase.
         stagedDataToLink.forEach((parentLemma, linkables) -> {
             logger.debug("Processing {} linkable(s) for lexeme '{}'", linkables.size(), parentLemma);
 
             List<Lexeme> parentLexemes = new ArrayList<>();
             if(!stagedLexemeCache.containsKey(parentLemma)){
-                // Check for mapping of non-lemma linkable parents to linkable lemmas to lexeme lemmas
+                // If no direct mapping to a Lexeme exists, check for a mapping to another non-lexeme
+                // and get their parent-lemmas.
                 List<String> parentLemmas = linkableDataLemmaToParentLemma.computeIfAbsent(parentLemma, k -> new CopyOnWriteArrayList<>());
+
+                // Pick up all Lexemes matching the above parentLemmas.
                 for(String lexemeLemma : parentLemmas){
-                    // attempt to retrieve staged lexeme lexemes matching lexeme lemma from lexeme lemma->linkable index
                     parentLexemes.addAll(stagedLexemeCache.getLexemesByLemma(lexemeLemma)) ;
                 }
             } else {
@@ -81,46 +85,45 @@ public class DataLinkingService {
 
             }
 
+            // If no matching parentLexemes exist, update the 'unresolved' stats and skip.
             if (parentLexemes.isEmpty()) {
-                logger.warn("No parent lexeme found for {} staged linkable(s) of '{}'",
-                        linkables.size(), parentLemma);
-                linkablesUnresolved.addAndGet(linkables.size());
-                unresolvedDetails.put(parentLemma, linkables.stream()
-                        .map(LinkableData::getLemma)
-                        .toList());
+                linkables.forEach(linkable ->
+                        markUnresolved(parentLemma, linkable, linkablesUnresolved, unresolvedDetails)
+                );
                 return;
             }
 
-            // Attach non-lemma forms to matching lexeme(s)
-            for (LinkableData dataToLink : linkables) {
-                Lexeme matchingParentLexeme = findMatchingVerb(parentLexemes, dataToLink);
+                // Attach non-lemma forms to matching lexeme(s)
+                for (LinkableData dataToLink : linkables) {
+                    // Refresh parent lexemes from any changes effected in the previous iteration
+                    List<Lexeme> currentParentLexemes = stagedLexemeCache.getLexemesByLemma(parentLemma);
+                    
+                    if (currentParentLexemes.isEmpty()) {
+                        markUnresolved(parentLemma, dataToLink, linkablesUnresolved, unresolvedDetails);
+                        continue;
+                    }
+                    
+                    Lexeme matchingParentLexeme = findMatchingVerb(currentParentLexemes, dataToLink);
 
-                if (matchingParentLexeme != null) {
-                    Lexeme updatedVerb = dataToLink.link(matchingParentLexeme);
+                    if (matchingParentLexeme != null) {
+                        Lexeme updatedVerb = dataToLink.link(matchingParentLexeme);
 
-                    // Update the staged cache with the new version
-                    stagedLexemeCache.replaceLexeme(matchingParentLexeme, updatedVerb);
+                        // Update the staged cache with the new version
+                        stagedLexemeCache.replaceLexeme(matchingParentLexeme, updatedVerb);
 
-                    // Use callback instead of direct sink access
-                    reingestCallback.accept(updatedVerb);
+                        // Use callback instead of direct sink access
+                        reingestCallback.accept(updatedVerb);
 
-                    linkablesAttached.incrementAndGet();
+                        linkablesAttached.incrementAndGet();
 
-                    // refresh so the next iteration picks up any updates
-                    parentLexemes = stagedLexemeCache.getLexemesByLemma(parentLemma);
-                    logger.trace("Attached linkable '{}' ({}) to lexeme '{}'",
-                            dataToLink.getLemma(),
-                            dataToLink.getDataKey(),
-                            matchingParentLexeme.getLemma());
-                } else {
-                    logger.warn("Could not match linkable '{}' to any lexeme with lemma '{}'",dataToLink.getLemma(), parentLemma);
-
-                    linkablesUnresolved.incrementAndGet();
-                    unresolvedDetails.computeIfAbsent(
-                            parentLemma, k -> Collections.synchronizedList(new ArrayList<>()))
-                            .add(dataToLink.getLemma());
+                        logger.trace("Attached linkable '{}' ({}) to lexeme '{}'",
+                                dataToLink.getLemma(),
+                                dataToLink.getDataKey(),
+                                matchingParentLexeme.getLemma());
+                    } else {
+                        markUnresolved(parentLemma, dataToLink, linkablesUnresolved, unresolvedDetails);
+                    }
                 }
-            }
             lexemesUpdated.incrementAndGet();
         });
 
@@ -136,14 +139,6 @@ public class DataLinkingService {
         return report;
     }
 
-    public int getStagedCount() {
-        return stagedDataToLink.values().stream().mapToInt(List::size).sum();
-    }
-
-    public void clearStaged() {
-        stagedDataToLink.clear();
-    }
-
     private Lexeme findMatchingVerb(List<Lexeme> candidateLexemes, LinkableData dataToLink) {
         if (candidateLexemes.size() == 1) {
             return candidateLexemes.get(0);
@@ -155,6 +150,23 @@ public class DataLinkingService {
                 .filter(v -> v.getCanonicalForm().equals(targetCanonical))
                 .findFirst()
                 .orElse(candidateLexemes.get(0)); // Fallback to first if no exact match
+    }
+
+    private static void markUnresolved(String parentLemma, LinkableData dataToLink, AtomicInteger linkablesUnresolved, Map<String, List<String>> unresolvedDetails) {
+        logger.warn("Could not match linkable '{}' to any lexeme with lemma '{}'",dataToLink.getLemma(), parentLemma);
+
+        linkablesUnresolved.incrementAndGet();
+        unresolvedDetails.computeIfAbsent(
+                        parentLemma, k -> Collections.synchronizedList(new ArrayList<>()))
+                .add(dataToLink.getLemma());
+    }
+
+    public int getStagedCount() {
+        return stagedDataToLink.values().stream().mapToInt(List::size).sum();
+    }
+
+    public void clearStaged() {
+        stagedDataToLink.clear();
     }
 
     public record FinalizationReport(int lexemesUpdated, int linkablesAttached, int linkablesUnresolved,

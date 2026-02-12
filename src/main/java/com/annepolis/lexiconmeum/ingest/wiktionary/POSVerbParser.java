@@ -90,7 +90,7 @@ public class POSVerbParser implements PartOfSpeechParser {
                     parserSupport.addCanonicalForm( formNode, lexemeBuilder);
                 }
             } catch (IllegalArgumentException | IllegalStateException ex) {
-                logger.trace(WiktionaryLexicalDataParser.LogMsg.SKIPPING_INVALID_FORM, ex.getMessage());
+                logger.trace(ParserSupport.LogMsg.SKIPPING_INVALID_FORM, ex.getMessage());
             }
         }
     }
