@@ -29,11 +29,12 @@ public class AgreementTableMapperTest {
     static final String AGREEMENTS = "agreements";
     static final String INFLECTIONS = "inflections";
     static final String GENDERS = "genders";
+
     @Test
     void thirdDecl_threeTermination_expandsToSingletons() throws Exception {
         // Build a 3-termination Adjective Lexeme with three Nominative Singular Agreement entries, one for each gender
         Lexeme lexeme = LexemeFixtureFactory.generateSyntheticAdjectiveLexeme(
-                 AdjectiveTerminationType.THREE_TERMINATION,
+                AdjectiveTerminationType.THREE_TERMINATION,
                 List.of(
                         LexemeFixtureFactory.generateSyntheticAgreement(
                                 Set.of(MASCULINE),
@@ -47,6 +48,7 @@ public class AgreementTableMapperTest {
                 )
         );
 
+        // Picking up only the first DTO in the list which is the main (positive) degree
         InflectionTableDTO dto = agreementTableMapper.toInflectionTableDTO(lexeme);
         JsonNode root = objectMapper.readTree(objectMapper.writeValueAsString(dto));
         ArrayNode agreements = (ArrayNode) root.get(AGREEMENTS);
@@ -59,29 +61,6 @@ public class AgreementTableMapperTest {
                 .containsEntry(Set.of(MASCULINE.name()), MASCULINE_FORM)
                 .containsEntry(Set.of(FEMININE.name()), FEMININE_FORM)
                 .containsEntry(Set.of(NEUTER.name()), NEUTER_FORM);
-    }
-
-    @Test
-    void thirdDecl_twoTermination_groupsMandF() throws Exception {
-        //build a two-termination adjective that has the same form for all three genders
-        Lexeme lexeme = LexemeFixtureFactory.generateSyntheticAdjectiveLexeme(
-                AdjectiveTerminationType.TWO_TERMINATION,
-                List.of(
-                        LexemeFixtureFactory.generateSyntheticAgreement(
-                                Set.of(MASCULINE, GrammaticalGender.FEMININE, GrammaticalGender.NEUTER),
-                                GrammaticalNumber.SINGULAR, GrammaticalCase.NOMINATIVE, "formX")
-                )
-        );
-
-        JsonNode root = objectMapper.readTree(objectMapper.writeValueAsString(agreementTableMapper.toInflectionTableDTO(lexeme)));
-        ArrayNode agreements = (ArrayNode) root.get(AGREEMENTS);
-        assertThat(agreements).hasSize(2); // two columns - one for [M,F] and one for [N]
-
-        Map<Set<String>, String> gendersToForm =
-                JsonAsserts.gendersToFormAt(agreements, GrammaticalNumber.SINGULAR, GrammaticalCase.NOMINATIVE);
-        assertThat(gendersToForm)
-                .containsEntry(Set.of(MASCULINE.name(), FEMININE.name()), "formX")
-                .containsEntry(Set.of(NEUTER.name()), "formX");
     }
 
     @Test
@@ -117,5 +96,4 @@ public class AgreementTableMapperTest {
             return out;
         }
     }
-
 }

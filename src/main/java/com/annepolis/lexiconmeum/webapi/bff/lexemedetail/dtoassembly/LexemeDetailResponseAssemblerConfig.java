@@ -77,14 +77,15 @@ import java.util.*;
     Map<PartOfSpeech, InflectionTableMapper> inflectionMappers(
             ConjugationGroupMapper conjugationTableMapper,
             DeclensionTableMapper lexemeDeclensionMapper,
-            AgreementTableMapper lexemeAgreementMapper
+            DegreeGroupMapper degreeGroupMapper,
+            AgreementTableMapper agreementTableMapper
     ) {
         Map<PartOfSpeech, InflectionTableMapper> mappers = new EnumMap<>(PartOfSpeech.class);
         mappers.put(PartOfSpeech.VERB, conjugationTableMapper);
         mappers.put(PartOfSpeech.NOUN, lexemeDeclensionMapper);
-        mappers.put(PartOfSpeech.ADJECTIVE, lexemeAgreementMapper);
-        mappers.put(PartOfSpeech.DETERMINER, lexemeAgreementMapper);
-        mappers.put(PartOfSpeech.PRONOUN, lexemeAgreementMapper);
+        mappers.put(PartOfSpeech.ADJECTIVE, degreeGroupMapper);
+        mappers.put(PartOfSpeech.DETERMINER, agreementTableMapper);
+        mappers.put(PartOfSpeech.PRONOUN, agreementTableMapper);
         return mappers;
     }
 

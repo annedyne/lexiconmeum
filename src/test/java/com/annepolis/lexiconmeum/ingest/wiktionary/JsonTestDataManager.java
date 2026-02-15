@@ -113,6 +113,10 @@ public class JsonTestDataManager {
     public Lexeme getParsedVerbLexeme(String word, String filename) throws IOException {
         JsonNode root = getRealNode(word, PartOfSpeech.VERB ,filename);
 
+        return getStagedLexeme(word, root);
+    }
+
+    private Lexeme getStagedLexeme(String word, JsonNode root) {
         WiktionaryStagingServiceStub stagingStub = getStagingServiceStub();
 
         WiktionaryLexicalDataParser parser = getLexicalDataParser(parserRegistry, stagingStub);
@@ -121,7 +125,7 @@ public class JsonTestDataManager {
         parser.processJson(root, consumer);
 
         return stagingStub.getLastStagedLexeme()
-                .orElseThrow(() -> new IllegalStateException("Parser failed to stage a Lexeme for verb: " + word));
+                .orElseThrow(() -> new IllegalStateException("Parser failed to stage a Lexeme for: " + word));
     }
 
     /**

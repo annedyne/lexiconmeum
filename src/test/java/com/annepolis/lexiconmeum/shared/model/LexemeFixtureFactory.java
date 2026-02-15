@@ -1,18 +1,13 @@
 package com.annepolis.lexiconmeum.shared.model;
 
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalDegree;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
+import com.annepolis.lexiconmeum.shared.model.grammar.*;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveDegreeAgreementSet;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveDetails;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveTerminationType;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 public final class LexemeFixtureFactory {
@@ -28,13 +23,47 @@ public final class LexemeFixtureFactory {
         return builder.build();
     }
 
-    public static Lexeme generateSyntheticAdjectiveLexeme(AdjectiveTerminationType terminationType, List<Agreement> agreements) {
+    public static Lexeme generateSyntheticAdjectiveLexeme(AdjectiveTerminationType terminationType, List<Agreement> agreements ) {
+        return generateSyntheticAdjectiveLexeme(terminationType, agreements, false);
+    }
+
+    public static Lexeme generateSyntheticAdjectiveLexemeWithNoComparative(AdjectiveTerminationType terminationType, List<Agreement> agreements ) {
+        return generateSyntheticAdjectiveLexeme(terminationType, agreements, true);
+    }
+
+
+    private static Lexeme generateSyntheticAdjectiveLexeme(AdjectiveTerminationType terminationType, List<Agreement> agreements, boolean skipComparative) {
 
         AdjectiveDetails.Builder builder = new AdjectiveDetails.Builder();
+        builder.setAdjectiveTerminationType(terminationType);
 
-        AdjectiveDetails details = builder.setAdjectiveTerminationType(terminationType).build();
+        if (!skipComparative) {
+            // Create synthetic comparative degree agreement set
+            AdjectiveDegreeAgreementSet comparativeSet = new AdjectiveDegreeAgreementSet(
+                    "test-adj-comparative",
+                    GrammaticalDegree.COMPARATIVE,
+                    terminationType == AdjectiveTerminationType.TWO_TERMINATION
+                            ? Set.of(InflectionClass.THIRD)
+                            : Set.of(InflectionClass.FIRST, InflectionClass.SECOND)
+            );
+            comparativeSet.setInflectionIndex(new HashMap<>());
+            builder.addDegreeInflectionSet(comparativeSet);
+        }
 
-        LexemeBuilder lexemeBuilder = new LexemeBuilder("test-adj", PartOfSpeech.ADJECTIVE, "1" );
+        // Create synthetic superlative degree agreement set
+        AdjectiveDegreeAgreementSet superlativeSet = new AdjectiveDegreeAgreementSet(
+                "test-adj-superlative",
+                GrammaticalDegree.SUPERLATIVE,
+                terminationType == AdjectiveTerminationType.TWO_TERMINATION
+                        ? Set.of(InflectionClass.THIRD)
+                        : Set.of(InflectionClass.FIRST, InflectionClass.SECOND)
+        );
+        superlativeSet.setInflectionIndex(new HashMap<>());
+        builder.addDegreeInflectionSet(superlativeSet);
+
+        AdjectiveDetails details = builder.build();
+
+        LexemeBuilder lexemeBuilder = new LexemeBuilder("test-adj", PartOfSpeech.ADJECTIVE, "1");
         lexemeBuilder.setPartOfSpeechDetails(details);
 
         for (Agreement a : agreements) {
@@ -50,7 +79,7 @@ public final class LexemeFixtureFactory {
             for (GrammaticalGender gender : GrammaticalGender.values()) {
                 for (GrammaticalNumber number : GrammaticalNumber.values()) {
                     for (GrammaticalCase grammaticalCase : GrammaticalCase.values()) {
-                        String form = generateForm( gender, number, grammaticalCase);
+                        String form = generateForm(gender, number, grammaticalCase);
                         forms.add(form);
                     }
                 }
