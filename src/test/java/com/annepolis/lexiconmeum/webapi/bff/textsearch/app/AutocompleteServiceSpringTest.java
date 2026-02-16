@@ -1,5 +1,6 @@
 package com.annepolis.lexiconmeum.webapi.bff.textsearch.app;
 
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestConstructor;
@@ -80,6 +81,25 @@ class AutocompleteServiceSpringTest {
         result = underTest.getWordsStartingWith("amamus", 10);
         assertEquals(1, result.size());
 
+    }
+
+    @Test
+    void determinerLoadedIntoSearch(){
+
+        List<SuggestionResponse> result = underTest.getWordsStartingWith("ille", 10);
+
+        assertEquals(1, result.size());
+        assertEquals(PartOfSpeech.DETERMINER, result.get(0).getPartOfSpeech());
+    }
+
+    @Test
+    void pronounLoadedIntoSearch(){
+
+        List<SuggestionResponse> result = underTest.getWordsStartingWith("quis", 10);
+        result.stream()
+                .filter(r -> r.getPartOfSpeech().equals(PartOfSpeech.PRONOUN))
+                .findAny()
+                .orElseThrow(() -> new AssertionError("'Autocomplete Suggestion for 'quis' PRONOUN not found"));
     }
 
 }

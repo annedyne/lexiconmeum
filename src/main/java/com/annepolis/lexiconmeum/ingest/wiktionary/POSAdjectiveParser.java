@@ -3,7 +3,6 @@ package com.annepolis.lexiconmeum.ingest.wiktionary;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalDegree;
-import com.annepolis.lexiconmeum.shared.model.grammar.InflectionClass;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveDegreeAgreementSet;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.*;
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataKeyWord.FORM_OF;
@@ -31,9 +29,10 @@ public class POSAdjectiveParser implements PartOfSpeechParser {
     @Override
     public ParsedResultProcessor parsePartOfSpeech(JsonNode root, POSParserKey parserKey) {
 
-       return switch (parserKey) {
+        return switch (parserKey) {
             case ADJECTIVE_POSITIVE -> stageLexeme(root);
             case ADJECTIVE_COMPARATIVE, ADJECTIVE_SUPERLATIVE -> stageAdjective(root);
+            case DETERMINER, PRONOUN -> processImmediately(root);
             default -> processImmediately(root);
         };
     }
@@ -66,8 +65,6 @@ public class POSAdjectiveParser implements PartOfSpeechParser {
                 )
                 .orElse(ParsedResultProcessor.EMPTY);
     }
-
-
 
     private Optional<Lexeme> buildLexeme(LexemeBuilder lexemeBuilder, JsonNode root){
 
@@ -152,7 +149,6 @@ public class POSAdjectiveParser implements PartOfSpeechParser {
         }
 
         // Populate model
-        Set<InflectionClass> inflectionClasses = lexeme.getInflectionClasses();
         AdjectiveDegreeAgreementSet agreementSet = new AdjectiveDegreeAgreementSet(lemma, optionalGrammaticalDegree.get(), lexeme.getInflectionClasses());
         agreementSet.setInflectionIndex(lexeme.getInflectionIndex());
 
