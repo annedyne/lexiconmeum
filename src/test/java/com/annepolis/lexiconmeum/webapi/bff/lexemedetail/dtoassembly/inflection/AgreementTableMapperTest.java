@@ -16,7 +16,7 @@ import java.util.*;
 import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class AgreementTableMapperTest {
+class AgreementTableMapperTest {
 
     private final AgreementTableMapper agreementTableMapper = new AgreementTableMapper();
     private final ObjectMapper objectMapper = new ObjectMapper();

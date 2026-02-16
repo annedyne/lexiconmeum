@@ -11,9 +11,9 @@ import java.util.Set;
 
 public class AdjectiveDegreeAgreementSet {
 
-    final private String degreeLemma;
-    final private GrammaticalDegree grammaticalDegree;
-    final private Set<InflectionClass> inflectionClasses;
+    private final String degreeLemma;
+    private final GrammaticalDegree grammaticalDegree;
+    private final Set<InflectionClass> inflectionClasses;
     private Map<String, Inflection> inflectionIndex = new HashMap<>();
 
     public AdjectiveDegreeAgreementSet(String degreeLemma, GrammaticalDegree grammaticalDegree, Set<InflectionClass> inflectionClasses){

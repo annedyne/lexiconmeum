@@ -34,7 +34,7 @@ public class SearchableAdjectiveFormsExtractor implements SearchableFormsExtract
      * Extract all inflected forms from all adjective sets
      */
     private void extractAdjectiveForms(AdjectiveDetails adjectiveDetails, Set<String> forms) {
-        adjectiveDetails.getDegreeInflections().values().forEach(adjectiveDegreeAgreementSet -> {
+        adjectiveDetails.getDegreeInflections().values().forEach(adjectiveDegreeAgreementSet ->
             // Extract each inflected form (and its alternative if present)
             adjectiveDegreeAgreementSet.getInflectionIndex().values().forEach(adjective -> {
                 Optional.ofNullable(adjective.getForm())
@@ -44,7 +44,7 @@ public class SearchableAdjectiveFormsExtractor implements SearchableFormsExtract
                 Optional.ofNullable(adjective.getAlternativeForm())
                         .filter(s -> !s.isBlank())
                         .ifPresent(forms::add);
-            });
-        });
+            })
+       );
     }
 }

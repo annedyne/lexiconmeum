@@ -94,12 +94,14 @@ class AutocompleteServiceSpringTest {
 
     @Test
     void pronounLoadedIntoSearch(){
-
-        List<SuggestionResponse> result = underTest.getWordsStartingWith("quis", 10);
-        result.stream()
+        String pronoun = "quis";
+        List<SuggestionResponse> result = underTest.getWordsStartingWith(pronoun, 10);
+        SuggestionResponse response = result.stream()
                 .filter(r -> r.getPartOfSpeech().equals(PartOfSpeech.PRONOUN))
                 .findAny()
                 .orElseThrow(() -> new AssertionError("'Autocomplete Suggestion for 'quis' PRONOUN not found"));
+        assertEquals(PartOfSpeech.PRONOUN, response.getPartOfSpeech());
+        assertEquals(pronoun, response.getWord());
     }
 
 }

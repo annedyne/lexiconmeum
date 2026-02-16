@@ -14,7 +14,7 @@ import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJ
 @Component
 public class POSNonInflectedFormParser implements PartOfSpeechParser {
 
-    private static final Logger logger = LogManager.getLogger(POSConjunctionParser.class);
+    private static final Logger logger = LogManager.getLogger(POSNonInflectedFormParser.class);
     ParserSupport parserSupport;
 
     public POSNonInflectedFormParser(ParserSupport parserSupport) {

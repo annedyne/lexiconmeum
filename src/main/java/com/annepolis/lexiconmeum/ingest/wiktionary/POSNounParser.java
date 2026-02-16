@@ -48,7 +48,7 @@ public class POSNounParser implements PartOfSpeechParser {
 
     private void addDeclensionForms(JsonNode formsNode, LexemeBuilder lexemeBuilder) {
         for (JsonNode formNode : formsNode) {
-            if (parserSupport.isValidFormNode(formNode, PartOfSpeech.NOUN.getInflectionType())) {
+            if (parserSupport.isValidFormNode(formNode, PartOfSpeech.NOUN.getInflectionTypeLower())) {
                 buildDeclension(formNode, ParseMode.LENIENT).ifPresent(lexemeBuilder::addInflection);
             } else {
                 //this sets genders for nouns with gender-specific inflections (Ex: 1st & 2nd, not 3rd)
