@@ -21,17 +21,17 @@ public enum POSParserKey {
     PARTICIPLE(PartOfSpeech.VERB,WiktionaryHeadTemplate.PARTICIPLE.getName(), false);
 
     private final PartOfSpeech partOfSpeech;
-    private final String HeadTemplateName;
+    private final String headTemplateName;
     private final boolean isLemma;
 
     POSParserKey(final PartOfSpeech partOfSpeech, final String HeadTemplateName, boolean isLemma) {
         this.partOfSpeech = partOfSpeech;
-        this.HeadTemplateName = HeadTemplateName;
+        this.headTemplateName = HeadTemplateName;
         this.isLemma = isLemma;
     }
 
     public String getHeadTemplateName(){
-        return HeadTemplateName;
+        return headTemplateName;
     }
     public boolean isLemma(){
         return isLemma;
@@ -48,9 +48,9 @@ public enum POSParserKey {
      */
     public static Optional<POSParserKey> fromHeadTemplateName(String headTemplateName) {
         return Arrays.stream(values())
-                .filter(POSParserKey ->
-                        headTemplateName.equalsIgnoreCase(POSParserKey.HeadTemplateName)
-                        || headTemplateName.equalsIgnoreCase(POSParserKey.partOfSpeech.name())
+                .filter(posParserKey ->
+                        headTemplateName.equalsIgnoreCase(posParserKey.headTemplateName)
+                        || headTemplateName.equalsIgnoreCase(posParserKey.partOfSpeech.name())
                 )
                 .findFirst();
     }

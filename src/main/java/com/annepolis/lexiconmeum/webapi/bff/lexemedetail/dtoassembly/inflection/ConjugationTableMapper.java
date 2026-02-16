@@ -39,11 +39,9 @@ public class ConjugationTableMapper {
         List<ConjugationTableDTO> tableDTOs = generateDTOs(conjugationsByMoodAndVoice);
 
         // Sort tense groups by voice then mood
-        List<ConjugationTableDTO> sorted = tableDTOs.stream()
+        return tableDTOs.stream()
                 .sorted(conjugationTableDTOComparator)
                 .toList();
-
-        return sorted;
     }
 
     List<Conjugation> extractConjugations(Lexeme lexeme){

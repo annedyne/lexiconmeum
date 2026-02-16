@@ -77,7 +77,7 @@ public class POSVerbParser implements PartOfSpeechParser {
     public void addInflections(LexemeBuilder lexemeBuilder, JsonNode formsNode) {
         for (JsonNode formNode : formsNode) {
             try {
-                if (parserSupport.isValidFormNode(formNode, PartOfSpeech.VERB.getInflectionType())) {
+                if (parserSupport.isValidFormNode(formNode, PartOfSpeech.VERB.getInflectionTypeLower())) {
                    
                     String formValue = formNode.path(FORM.get()).asText();
                     List<String> tags = collectTags(formNode);

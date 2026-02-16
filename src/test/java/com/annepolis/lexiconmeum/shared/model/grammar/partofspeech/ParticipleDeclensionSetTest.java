@@ -11,10 +11,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ParticipleDeclensionSetTest {
+class ParticipleDeclensionSetTest {
 
     @Test
-    public void secondFormForSameInflectionKeyGoesToAlt() {
+    void secondFormForSameInflectionKeyGoesToAlt() {
 
         // Create two participle inflections with the same key but different forms
         String mainForm = "amante";

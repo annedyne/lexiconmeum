@@ -73,7 +73,7 @@ public enum PartOfSpeechDetailFactory {
             PrepositionDetails prepositionDetails = new PrepositionDetails(GrammaticalCase.ACCUSATIVE);
             builder.setPartOfSpeechDetails(prepositionDetails);
         } else {
-            LogManager.getLogger(PartOfSpeechDetailFactory.class).debug(MarkerManager.getMarker("POS_FACTORY"),
+            LogManager.getLogger(PartOfSpeechDetailFactory.class).debug(posFactoryMarker(),
                     "gov case accusative lemma: {} pos : {} ", builder::getLemma, builder::getPartOfSpeech );
         }
     }),
@@ -83,7 +83,7 @@ public enum PartOfSpeechDetailFactory {
             PrepositionDetails prepositionDetails = new PrepositionDetails(GrammaticalCase.ABLATIVE);
             builder.setPartOfSpeechDetails(prepositionDetails);
         } else {
-            LogManager.getLogger(PartOfSpeechDetailFactory.class).debug(MarkerManager.getMarker("POS_FACTORY"),
+            LogManager.getLogger(PartOfSpeechDetailFactory.class).debug(posFactoryMarker(),
                     "gov case ablative lemma: {} pos : {} ", builder::getLemma, builder::getPartOfSpeech );
         }
     }),
@@ -93,7 +93,7 @@ public enum PartOfSpeechDetailFactory {
             PrepositionDetails prepositionDetails = new PrepositionDetails(GrammaticalCase.GENITIVE);
             builder.setPartOfSpeechDetails(prepositionDetails);
         } else {
-            LogManager.getLogger(PartOfSpeechDetailFactory.class).debug(MarkerManager.getMarker("POS_FACTORY"),
+            LogManager.getLogger(PartOfSpeechDetailFactory.class).debug(posFactoryMarker(),
                     "gov case genitive lemma: {} pos : {} ", builder::getLemma, builder::getPartOfSpeech );
         }
     }),
@@ -103,7 +103,7 @@ public enum PartOfSpeechDetailFactory {
             PrepositionDetails prepositionDetails = new PrepositionDetails(GrammaticalCase.DATIVE);
             builder.setPartOfSpeechDetails(prepositionDetails);
         } else {
-            LogManager.getLogger(PartOfSpeechDetailFactory.class).debug(MarkerManager.getMarker("POS_FACTORY"),
+            LogManager.getLogger(PartOfSpeechDetailFactory.class).debug(posFactoryMarker(),
                     "gov case dative pos : {} ", builder::getPartOfSpeech );
 
         }
@@ -120,14 +120,16 @@ public enum PartOfSpeechDetailFactory {
        }
     });
 
-    private static final Logger logger = LogManager.getLogger(PartOfSpeechDetailFactory.class);
-
     private final Set<String> tags;
     private final Consumer<LexemeBuilder> setter;
 
     PartOfSpeechDetailFactory(Set<String> tags, Consumer<LexemeBuilder> setter) {
         this.tags = tags;
         this.setter = setter;
+    }
+
+    private static org.apache.logging.log4j.Marker posFactoryMarker() {
+        return MarkerManager.getMarker("POS_FACTORY");
     }
 
     public void applyTo(LexemeBuilder d) {

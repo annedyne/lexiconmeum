@@ -20,7 +20,7 @@ import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender.M
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-public class DegreeGroupMapperTest {
+class DegreeGroupMapperTest {
 
     private final AgreementTableMapper agreementTableMapper = new AgreementTableMapper();
     private final DegreeGroupMapper degreeGroupMapper = new DegreeGroupMapper(agreementTableMapper);
@@ -51,11 +51,11 @@ public class DegreeGroupMapperTest {
 
     @Test
     void toInflectionTableDTO_generatesAllThreeDegrees() {
-        AgreementTableMapper agreementTableMapper = mock(AgreementTableMapper.class);
-        when(agreementTableMapper.toInflectionTableDTO(anyList(), anyBoolean()))
+        AgreementTableMapper mockedAgreementTableMapper = mock(AgreementTableMapper.class);
+        when(mockedAgreementTableMapper.toInflectionTableDTO(anyList(), anyBoolean()))
                 .thenReturn(mock(AgreementTableDTO.class));
 
-        DegreeGroupMapper degreeGroupMapper = new DegreeGroupMapper(agreementTableMapper);
+        DegreeGroupMapper degreeGroupMapperWithMock = new DegreeGroupMapper(mockedAgreementTableMapper);
 
         Lexeme lexeme = LexemeFixtureFactory.generateSyntheticAdjectiveLexeme(
                 AdjectiveTerminationType.TWO_TERMINATION,
@@ -75,14 +75,14 @@ public class DegreeGroupMapperTest {
         boolean expectedComparativeTwoTermination = comparativeSet.getInflectionClasses().contains(InflectionClass.THIRD);
         boolean expectedSuperlativeTwoTermination = superlativeSet.getInflectionClasses().contains(InflectionClass.THIRD);
 
-        degreeGroupMapper.toInflectionTableDTO(lexeme);
+        degreeGroupMapperWithMock.toInflectionTableDTO(lexeme);
 
         ArgumentCaptor<List<Inflection>> inflectionsCaptor = ArgumentCaptor.forClass(List.class);
         ArgumentCaptor<Boolean> twoTerminationCaptor = ArgumentCaptor.forClass(Boolean.class);
 
-        verify(agreementTableMapper, times(3))
+        verify(mockedAgreementTableMapper, times(3))
                 .toInflectionTableDTO(inflectionsCaptor.capture(), twoTerminationCaptor.capture());
-        verifyNoMoreInteractions(agreementTableMapper);
+        verifyNoMoreInteractions(mockedAgreementTableMapper);
 
         List<List<Inflection>> capturedInflections = inflectionsCaptor.getAllValues();
         List<Boolean> capturedTwoTermination = twoTerminationCaptor.getAllValues();
@@ -102,11 +102,11 @@ public class DegreeGroupMapperTest {
 
     @Test
     void toInflectionTableDTO_whenComparativeAgreementSetMissing_returnsPartialResponse() {
-        AgreementTableMapper agreementTableMapper = mock(AgreementTableMapper.class);
-        when(agreementTableMapper.toInflectionTableDTO(anyList(), anyBoolean()))
+        AgreementTableMapper mockedAgreementTableMapper = mock(AgreementTableMapper.class);
+        when(mockedAgreementTableMapper.toInflectionTableDTO(anyList(), anyBoolean()))
                 .thenReturn(mock(AgreementTableDTO.class));
 
-        DegreeGroupMapper degreeGroupMapper = new DegreeGroupMapper(agreementTableMapper);
+        DegreeGroupMapper degreeGroupMapperWithMock = new DegreeGroupMapper(mockedAgreementTableMapper);
 
         Lexeme lexeme = LexemeFixtureFactory.generateSyntheticAdjectiveLexemeWithNoComparative(
                 AdjectiveTerminationType.TWO_TERMINATION,
@@ -119,14 +119,14 @@ public class DegreeGroupMapperTest {
         );
 
         AdjectiveDetails details = (AdjectiveDetails) lexeme.getPartOfSpeechDetails();
-        degreeGroupMapper.toInflectionTableDTO(lexeme);
+        degreeGroupMapperWithMock.toInflectionTableDTO(lexeme);
 
         ArgumentCaptor<List<Inflection>> inflectionsCaptor = ArgumentCaptor.forClass(List.class);
         ArgumentCaptor<Boolean> twoTerminationCaptor = ArgumentCaptor.forClass(Boolean.class);
 
-        verify(agreementTableMapper, times(3))
+        verify(mockedAgreementTableMapper, times(3))
                 .toInflectionTableDTO(inflectionsCaptor.capture(), twoTerminationCaptor.capture());
-        verifyNoMoreInteractions(agreementTableMapper);
+        verifyNoMoreInteractions(mockedAgreementTableMapper);
 
         List<List<Inflection>> capturedInflections = inflectionsCaptor.getAllValues();
         List<Boolean> capturedTwoTermination = twoTerminationCaptor.getAllValues();

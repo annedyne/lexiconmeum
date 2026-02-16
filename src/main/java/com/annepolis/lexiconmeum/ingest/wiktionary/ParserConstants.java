@@ -4,6 +4,8 @@ import java.util.Set;
 
 public class ParserConstants {
 
+    private ParserConstants(){}
+
     public static final Set<String> COMMON_FORM_BLACKLIST = Set.of(
             "no-table-tags",
             "la-ndecl",

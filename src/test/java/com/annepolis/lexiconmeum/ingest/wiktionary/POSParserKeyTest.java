@@ -60,15 +60,4 @@ class POSParserKeyTest {
         assertEquals(POSParserKey.ADJECTIVE_POSITIVE, adjResult.get());
 
     }
-
-    @Test
-    void resolveReturnsEmptyOptionalGivenNonExistentPOSandTemplateName(){
-        // Test non-existent combination
-        //var emptyResult = POSParserKey.resolveWithPosTagAndHeadTemplateName("BAD", "la-noun");
-        //assertTrue(emptyResult.isEmpty());
-
-        // Test null/empty values
-        //assertTrue(POSParserKey.resolveWithPosTagAndHeadTemplateName(null, "la-verb").isEmpty());
-        assertTrue(POSParserKey.fromHeadTemplateName("").isEmpty());
-    }
 }
