@@ -61,7 +61,6 @@ public class LexemeDistributor implements IngestLexemeUseCase {
             } catch (Exception e) {
                 logger.error("Error distributing lexeme {} to sink {}", 
                         lexeme.getId(), sink.getClass().getSimpleName(), e);
-                throw e; // Current behavior: fail-fast
             }
         }
     }

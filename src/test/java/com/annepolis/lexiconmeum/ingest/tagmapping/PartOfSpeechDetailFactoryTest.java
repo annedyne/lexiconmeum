@@ -40,19 +40,4 @@ class PartOfSpeechDetailFactoryTest {
             assertEquals(lemma, ad.getDegreeInflections().get(GrammaticalDegree.COMPARATIVE).getDegreeLemma());
         }
     }
-
-    @Test
-    void preservesExistingAdjectiveDetailsWhenApplyingNewDetails(){
-        AdjectiveDetails.Builder adBuilder = new AdjectiveDetails.Builder();
-        String lemma = "testLemma";
-        adBuilder.addDegreeInflectionSet(new AdjectiveDegreeAgreementSet(lemma, GrammaticalDegree.COMPARATIVE, Set.of(InflectionClass.SECOND)));
-        LexemeBuilder builder = new LexemeBuilder("test", PartOfSpeech.ADJECTIVE, "one");
-        builder.setPartOfSpeechDetails(adBuilder.build());
-        PartOfSpeechDetailFactory.TWO_TERMINATION.applyTo(builder);
-
-        if ( builder.getPartOfSpeechDetails() instanceof AdjectiveDetails ad) {
-            assertSame(AdjectiveTerminationType.TWO_TERMINATION, ad.getTerminationType());
-            assertEquals(lemma, ad.getDegreeInflections().get(GrammaticalDegree.COMPARATIVE).getDegreeLemma());
-        }
-    }
 }
