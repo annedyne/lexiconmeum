@@ -1,14 +1,14 @@
 package com.annepolis.lexiconmeum.ingest.wiktionary;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -21,9 +21,11 @@ import java.util.function.Consumer;
  */
 @Component
 public class DataLinkingService {
-    private static final Logger logger = LoggerFactory.getLogger(DataLinkingService.class);
+    private static final Logger logger = LogManager.getLogger(DataLinkingService.class);
+    private static final Marker MISSING_ADJECTIVE_LEXEME = MarkerManager.getMarker("MISSING_ADJECTIVE_LEXEME");
 
     // Thread-safe staging map for non-lemma forms waiting for their parent lexemes
+
     private final Map<String, List<LinkableData>> stagedDataToLink = new ConcurrentHashMap<>();
 
     // Some 'form_of' attributes point to that non-lemma form's main form, not the parent's lemma form
@@ -69,60 +71,31 @@ public class DataLinkingService {
         stagedDataToLink.forEach((parentLemma, linkables) -> {
             logger.debug("Processing {} linkable(s) for lexeme '{}'", linkables.size(), parentLemma);
 
-            List<Lexeme> parentLexemes = new ArrayList<>();
-            if(!stagedLexemeCache.containsKey(parentLemma)){
-                // If no direct mapping to a Lexeme exists, check for a mapping to another non-lexeme
-                // and get their parent-lemmas.
-                List<String> parentLemmas = linkableDataLemmaToParentLemma.computeIfAbsent(parentLemma, k -> new CopyOnWriteArrayList<>());
-
-                // Pick up all Lexemes matching the above parentLemmas.
-                for(String lexemeLemma : parentLemmas){
-                    parentLexemes.addAll(stagedLexemeCache.getLexemesByLemma(lexemeLemma)) ;
-                }
-            } else {
-                // attempt to retrieve staged lexeme lexemes matching lexeme lemma from lexeme lemma->linkable index
-                parentLexemes = stagedLexemeCache.getLexemesByLemma(parentLemma);
-
-            }
-
-            // If no matching parentLexemes exist, update the 'unresolved' stats and skip.
-            if (parentLexemes.isEmpty()) {
-                linkables.forEach(linkable ->
-                        markUnresolved(parentLemma, linkable, linkablesUnresolved, unresolvedDetails)
-                );
-                return;
-            }
-
                 // Attach non-lemma forms to matching lexeme(s)
                 for (LinkableData dataToLink : linkables) {
-                    // Refresh parent lexemes from any changes effected in the previous iteration
-                    List<Lexeme> currentParentLexemes = stagedLexemeCache.getLexemesByLemma(parentLemma);
-                    
-                    if (currentParentLexemes.isEmpty()) {
+
+                    Optional<Lexeme> maybeMatchingParentLexeme = findMatchingLexeme(parentLemma, dataToLink, stagedLexemeCache);
+                    // If no matching parentLexemes exist, update the 'unresolved' stats and skip.
+                    if(maybeMatchingParentLexeme.isEmpty()){
                         markUnresolved(parentLemma, dataToLink, linkablesUnresolved, unresolvedDetails);
                         continue;
                     }
-                    
-                    Lexeme matchingParentLexeme = findMatchingVerb(currentParentLexemes, dataToLink);
+                    Lexeme matchingParentLexeme = maybeMatchingParentLexeme.get();
 
-                    if (matchingParentLexeme != null) {
-                        Lexeme updatedVerb = dataToLink.link(matchingParentLexeme);
+                    Lexeme updatedLexeme = dataToLink.link(matchingParentLexeme);
 
-                        // Update the staged cache with the new version
-                        stagedLexemeCache.replaceLexeme(matchingParentLexeme, updatedVerb);
+                    // Update the staged cache with the new version
+                    stagedLexemeCache.replaceLexeme(matchingParentLexeme, updatedLexeme);
 
-                        // Use callback instead of direct sink access
-                        reingestCallback.accept(updatedVerb);
+                    // Use callback instead of direct sink access
+                    reingestCallback.accept(updatedLexeme);
 
-                        linkablesAttached.incrementAndGet();
+                    linkablesAttached.incrementAndGet();
 
-                        logger.trace("Attached linkable '{}' ({}) to lexeme '{}'",
-                                dataToLink.getLemma(),
-                                dataToLink.getDataKey(),
-                                matchingParentLexeme.getLemma());
-                    } else {
-                        markUnresolved(parentLemma, dataToLink, linkablesUnresolved, unresolvedDetails);
-                    }
+                    logger.trace("Attached linkable '{}' ({}) to lexeme '{}'",
+                            dataToLink.getLemma(),
+                            dataToLink.getDataKey(),
+                            matchingParentLexeme.getLemma());
                 }
             lexemesUpdated.incrementAndGet();
         });
@@ -139,17 +112,45 @@ public class DataLinkingService {
         return report;
     }
 
-    private Lexeme findMatchingVerb(List<Lexeme> candidateLexemes, LinkableData dataToLink) {
+    private Optional<Lexeme> findMatchingLexeme(String parentLemma, LinkableData dataToLink, StagedLexemeCache stagedLexemeCache) {
+
+        List<Lexeme> candidateLexemes = resolveCandidateLexemesToLink(parentLemma, dataToLink.getParentLinkPartOfSpeech(), stagedLexemeCache);
+        if(candidateLexemes.isEmpty()){
+            if(dataToLink.getParentLinkPartOfSpeech() == PartOfSpeech.ADJECTIVE){
+                logger.debug( MISSING_ADJECTIVE_LEXEME, "Missing parent {} of lemma {} ", parentLemma, dataToLink.getLemma());
+            }
+            return Optional.empty();
+        }
         if (candidateLexemes.size() == 1) {
-            return candidateLexemes.get(0);
+            return Optional.of(candidateLexemes.get(0));
         }
 
-        // Multiple lexemes with the same lemma - match by canonical form
+        // Multiple lexemes with the same lemma - match on macronized form
         String targetCanonical = dataToLink.getLinkingLemmaWithMacrons();
-        return candidateLexemes.stream()
+         return Optional.of(candidateLexemes.stream()
                 .filter(v -> v.getCanonicalForm().equals(targetCanonical))
                 .findFirst()
-                .orElse(candidateLexemes.get(0)); // Fallback to first if no exact match
+                .orElse(candidateLexemes.get(0))); // Fallback to first if no exact match
+    }
+
+    List<Lexeme> resolveCandidateLexemesToLink(String parentLemma, PartOfSpeech parentPartOfSpeech, StagedLexemeCache stagedLexemeCache){
+        List<Lexeme> candidateLexemes = new ArrayList<>();
+
+        // If no direct mapping to a Lexeme exists,
+        // check for a mapping to another non-lemma canonical parent and get its parent-lemmas.
+        if(!stagedLexemeCache.containsKey(parentLemma)) {
+            List<String> parentLemmas = getCanonicalParentLemmas(parentLemma);
+            for(String lemma :parentLemmas){
+                candidateLexemes.addAll(stagedLexemeCache.getLexemesByLemmaAndPos(lemma, parentPartOfSpeech));
+            }
+        } else {
+            candidateLexemes.addAll(stagedLexemeCache.getLexemesByLemmaAndPos(parentLemma, parentPartOfSpeech));
+        }
+        return candidateLexemes;
+    }
+
+    List<String> getCanonicalParentLemmas(String parentLemma){
+        return linkableDataLemmaToParentLemma.computeIfAbsent(parentLemma, k -> new CopyOnWriteArrayList<>());
     }
 
     private static void markUnresolved(String parentLemma, LinkableData dataToLink, AtomicInteger linkablesUnresolved, Map<String, List<String>> unresolvedDetails) {

@@ -4,6 +4,7 @@ import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveDegreeAgreementSet;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveDetails;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 
 public class StagedAdjectiveDegreeData implements LinkableData {
     
@@ -61,5 +62,10 @@ public class StagedAdjectiveDegreeData implements LinkableData {
     @Override
     public String getDataKey() {
         return adjectiveDegreeAgreementSet.getGrammaticalDegree().name();
+    }
+
+    @Override
+    public PartOfSpeech getParentLinkPartOfSpeech() {
+        return PartOfSpeech.ADJECTIVE;
     }
 }

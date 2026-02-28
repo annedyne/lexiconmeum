@@ -2,6 +2,7 @@ package com.annepolis.lexiconmeum.ingest.wiktionary;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.ParticipleDeclensionSet;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.VerbDetails;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
@@ -104,4 +105,11 @@ public class StagedParticipleData implements LinkableData{
     public String getDataKey() {
        return getParticipleKey();
     }
+
+    @Override
+    public PartOfSpeech getParentLinkPartOfSpeech() {
+        return PartOfSpeech.VERB;
+    }
+
+
 }
