@@ -1,6 +1,6 @@
 package com.annepolis.lexiconmeum.webapi.bff.lexemedetail;
 
-import com.annepolis.lexiconmeum.TestUtil;
+import com.annepolis.lexiconmeum.ingest.wiktionary.JsonTestDataManager;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.webapi.ApiRoutes;
@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.IOException;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -106,8 +107,8 @@ class LexemeDetailControllerIntegrationTest {
     }
 
     @Test
-    void testGetDetailWithIdAndTypeEndpoint() throws JsonProcessingException {
-        UUID lexemeId = TestUtil.getNewTestVerbLexeme().getId();
+    void testGetDetailWithIdAndTypeEndpoint() throws IOException {
+        UUID lexemeId = JsonTestDataManager.INSTANCE.getParsedVerbLexeme("amo", "testDataVerb.jsonl").getId();
 
         String url = UriComponentsBuilder
                 .fromUriString(getFullBaseUrl())

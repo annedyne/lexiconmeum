@@ -3,6 +3,7 @@ package com.annepolis.lexiconmeum.ingest.wiktionary;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
 import com.annepolis.lexiconmeum.shared.util.Utilities;
 import org.apache.logging.log4j.LogManager;
@@ -24,6 +25,9 @@ public class StagedLexemeCache {
 
     private final Map<String, List<Lexeme>> lemmaToLexemesLookup = new ConcurrentHashMap<>();
 
+    // NEW: Compound index by lemma + POS for faster filtering
+    private final Map<String, List<Lexeme>> lemmaAndPosToLexemesLookup = new ConcurrentHashMap<>();
+
     private final Map<String, Lexeme> gerundiveFormToLexemeLookup = new ConcurrentHashMap<>();
 
     private final String gerundiveKey = InflectionKey.buildParticipleSetKey(GrammaticalVoice.PASSIVE, GrammaticalTense.FUTURE);
@@ -35,6 +39,13 @@ public class StagedLexemeCache {
 
         lemmaToLexemesLookup
                 .computeIfAbsent(lexeme.getLemma(), k -> new CopyOnWriteArrayList<>())
+                .add(lexeme);
+
+        // Add to compound lemma+POS index
+        String compoundKey = buildCompoundKey(lexeme.getLemma(), lexeme.getPartOfSpeech());
+
+        lemmaAndPosToLexemesLookup
+                .computeIfAbsent(compoundKey, k -> new CopyOnWriteArrayList<>())
                 .add(lexeme);
 
         putGerundiveEntry(lexeme);
@@ -57,6 +68,14 @@ public class StagedLexemeCache {
             lemmaList.add(newLexeme);
         }
 
+        // Update compound index - remove old, add new
+        String compoundKey = buildCompoundKey(newLexeme.getLemma(), newLexeme.getPartOfSpeech());
+        List<Lexeme> compoundList = lemmaAndPosToLexemesLookup.get(compoundKey);
+        if (compoundList != null) {
+            compoundList.remove(oldLexeme);
+            compoundList.add(newLexeme);
+        }
+
         putGerundiveEntry(newLexeme);
 
         logger.debug("Replaced lexeme in all indexes: {}", newLexeme);
@@ -71,9 +90,19 @@ public class StagedLexemeCache {
         }
     }
 
-    public List<Lexeme> getLexemesByLemma(String lemma) {
-        List<Lexeme> lexemes = lemmaToLexemesLookup.get(lemma);
-        return lexemes != null ? List.copyOf(lexemes) : getLexemeByGerundive(lemma);
+    public List<Lexeme> getLexemesByLemmaAndPos(String lemma, PartOfSpeech partOfSpeech) {
+        String compoundKey = buildCompoundKey(lemma, partOfSpeech);
+        List<Lexeme> lexemes = lemmaAndPosToLexemesLookup.get(compoundKey);
+        if (lexemes != null) {
+            return List.copyOf(lexemes);
+        } else {
+            if (partOfSpeech == PartOfSpeech.VERB) return getLexemeByGerundive(lemma);
+            return List.of();
+        }
+    }
+
+    private String buildCompoundKey(String lemma, PartOfSpeech pos) {
+        return lemma + "|" + pos.name();
     }
 
     public List<Lexeme> getLexemeByGerundive(String gerundive){
@@ -83,8 +112,8 @@ public class StagedLexemeCache {
 
     public boolean containsKey(String key){
         return lemmaToLexemesLookup.containsKey(key)
-        || gerundiveFormToLexemeLookup.containsKey(key);
-
+        || gerundiveFormToLexemeLookup.containsKey(key)
+        || lemmaAndPosToLexemesLookup.containsKey(key);
     }
 
     /**

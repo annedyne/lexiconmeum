@@ -1,5 +1,6 @@
 package com.annepolis.lexiconmeum.webapi.bff.textsearch.app;
 
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestConstructor;
@@ -43,10 +44,10 @@ class AutocompleteServiceSpringTest {
     }
 
     @Test
-    void getWordsStartingWithNoDupes(){
+    void getWordsStartingWithReturnsOnlyLemmaFormsOrSingleInflectedMatch(){
 
         List<SuggestionResponse> result = underTest.getWordsStartingWith("brevis", 10);
-        assertEquals(4, result.size());
+        assertEquals(3, result.size());
 
         result = underTest.getWordsStartingWith("amarem", 10);
         assertEquals(4, result.size());
@@ -80,6 +81,27 @@ class AutocompleteServiceSpringTest {
         result = underTest.getWordsStartingWith("amamus", 10);
         assertEquals(1, result.size());
 
+    }
+
+    @Test
+    void determinerLoadedIntoSearch(){
+
+        List<SuggestionResponse> result = underTest.getWordsStartingWith("ille", 10);
+
+        assertEquals(1, result.size());
+        assertEquals(PartOfSpeech.DETERMINER, result.get(0).getPartOfSpeech());
+    }
+
+    @Test
+    void pronounLoadedIntoSearch(){
+        String pronoun = "quis";
+        List<SuggestionResponse> result = underTest.getWordsStartingWith(pronoun, 10);
+        SuggestionResponse response = result.stream()
+                .filter(r -> r.getPartOfSpeech().equals(PartOfSpeech.PRONOUN))
+                .findAny()
+                .orElseThrow(() -> new AssertionError("'Autocomplete Suggestion for 'quis' PRONOUN not found"));
+        assertEquals(PartOfSpeech.PRONOUN, response.getPartOfSpeech());
+        assertEquals(pronoun, response.getWord());
     }
 
 }

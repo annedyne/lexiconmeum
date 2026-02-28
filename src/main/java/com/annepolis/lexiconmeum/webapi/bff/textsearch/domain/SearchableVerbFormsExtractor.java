@@ -23,10 +23,9 @@ public class SearchableVerbFormsExtractor implements SearchableFormsExtractor {
 
     @Override
     public Set<String> getSearchableForms(Lexeme lexeme) {
-        Set<String> forms = new LinkedHashSet<>();
 
         // Get regular conjugation forms using base extractor
-        forms.addAll(baseExtractor.getSearchableForms(lexeme));
+        Set<String> forms = new LinkedHashSet<>(baseExtractor.getSearchableForms(lexeme));
 
         // Add participle forms if present
         if (lexeme.getPartOfSpeechDetails() instanceof VerbDetails verbDetails) {
@@ -40,7 +39,7 @@ public class SearchableVerbFormsExtractor implements SearchableFormsExtractor {
      * Extract all inflected forms from all participle sets
      */
     private void extractParticipleForms(VerbDetails verbDetails, Set<String> forms) {
-        verbDetails.getParticiples().values().forEach(participleSet -> {
+        verbDetails.getParticiples().values().forEach(participleSet ->
             // Extract each inflected form (and its alternative if present)
             participleSet.getInflectionIndex().values().forEach(participle -> {
                 Optional.ofNullable(participle.getForm())
@@ -50,7 +49,7 @@ public class SearchableVerbFormsExtractor implements SearchableFormsExtractor {
                 Optional.ofNullable(participle.getAlternativeForm())
                         .filter(s -> !s.isBlank())
                         .ifPresent(forms::add);
-            });
-        });
+            })
+        );
     }
 }

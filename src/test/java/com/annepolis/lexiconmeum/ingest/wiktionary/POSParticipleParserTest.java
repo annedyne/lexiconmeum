@@ -1,9 +1,9 @@
 package com.annepolis.lexiconmeum.ingest.wiktionary;
 
-import com.annepolis.lexiconmeum.TestUtil;
 import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.Participle;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,48 +14,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.WORD;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class POSParticipleParserTest {
+class POSParticipleParserTest {
 
-   POSParticipleParser underTest;
+    POSParticipleParser underTest;
+    private static final LexicalTagResolver LEXICAL_TAG_RESOLVER = new LexicalTagResolver();
+    private static final ParserSupport PARSER_SUPPORT = new ParserSupport(LEXICAL_TAG_RESOLVER, ParseMode.STRICT);
 
    @BeforeEach
    void setUp() {
-       underTest = new POSParticipleParser(new LexicalTagResolver());
+       underTest = new POSParticipleParser(PARSER_SUPPORT);
    }
 
     @Test
-    void isParticipleEntryReturnsTrueGivenParticipleRoot() throws IOException {
-        JsonNode root = TestUtil.getJsonRootNodes().stream()
-                .filter(node -> node.path(WORD.get()).asText().equals("amans"))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Participle 'amans' not found"));
-        POSParticipleParser underTest = new POSParticipleParser(new LexicalTagResolver());
-        boolean isParticiple = underTest.isValidParticipleEntry(root);
-
-        assertTrue(isParticiple);
-    }
-
-    @Test
-    void isParticipleEntryReturnsFalseGivenAVerbRoot() throws IOException {
-        JsonNode root = TestUtil.getJsonRootNodes().stream()
-                .filter(node -> node.path(WORD.get()).asText().equals("amo"))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Verb 'amo' not found"));
-
-        boolean isParticiple = underTest.isValidParticipleEntry(root);
-
-        assertFalse(isParticiple);
-    }
-
-    @Test
     void parseParticipleEntryGeneratesExpectedStagedParticipleDataGivenPresentActiveParticiple() throws IOException {
-        JsonNode root = TestUtil.getJsonRootNodes().stream()
-                .filter(node -> node.path(WORD.get()).asText().equals("amans"))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Participle 'amans' not found"));
+        JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("amans", PartOfSpeech.VERB ,"testDataVerb.jsonl");
 
         StagedParticipleData data = underTest.parseParticipleEntry(root)
                 .orElseThrow(() -> new AssertionError("Failed to parse participle entry for 'amans'"));
@@ -68,10 +43,7 @@ public class POSParticipleParserTest {
 
     @Test
     void parseParticipleEntryGeneratesExpectedStagedParticipleDataGivenFuturePassiveParticiple() throws IOException {
-        JsonNode root = TestUtil.getJsonRootNodes().stream()
-                .filter(node -> node.path(WORD.get()).asText().equals("amandus"))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Participle 'amandus' not found"));
+        JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("amandus", PartOfSpeech.VERB,"testDataRaw.jsonl");
 
         StagedParticipleData data = underTest.parseParticipleEntry(root)
                 .orElseThrow(() -> new AssertionError("Failed to parse participle entry for 'amandus'"));
@@ -84,10 +56,7 @@ public class POSParticipleParserTest {
 
     @Test
     void parseParticipleInflectionsGeneratesExpectedInflections() throws IOException {
-        JsonNode root = TestUtil.getJsonRootNodes().stream()
-                .filter(node -> node.path(WORD.get()).asText().equals("amans"))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Participle 'amans' not found"));
+        JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("amans", PartOfSpeech.VERB, "testDataVerb.jsonl");
 
         List<Participle> inflections = underTest.parseParticipleInflections(root);
 
@@ -111,8 +80,6 @@ public class POSParticipleParserTest {
          List<String> processed = underTest.resolveParticipleTenseTags(tags);
          assertTrue(processed.contains("future_active"));   // sets tense
          assertTrue(processed.contains("active"));          // sets voice
-
-
     }
 
 }

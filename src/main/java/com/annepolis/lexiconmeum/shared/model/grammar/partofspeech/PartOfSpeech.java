@@ -1,32 +1,44 @@
 package com.annepolis.lexiconmeum.shared.model.grammar.partofspeech;
 
+import com.annepolis.lexiconmeum.shared.model.grammar.InflectionType;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
 import java.util.Optional;
 
+import static com.annepolis.lexiconmeum.shared.model.grammar.InflectionType.*;
+
 public enum PartOfSpeech {
-    ADJECTIVE("adj", "declension"),
-    ADVERB("adv", ""),
-    CONJUNCTION("conj", ""),
-    DETERMINER("det", "declension"),
-    NOUN("noun", "declension"),
-    PREPOSITION("prep", ""),
-    POSTPOSITION("postp", ""),
-    PRONOUN("pron", "declension"),
-    VERB("verb", "conjugation");
+    ADJECTIVE("adj", DECLENSION),
+    ADVERB("adv", NONE),
+    CONJUNCTION("conj", NONE),
+    DETERMINER("det", DECLENSION),
+    NOUN("noun", DECLENSION),
+    PREPOSITION("prep", NONE),
+    POSTPOSITION("postp", NONE),
+    PRONOUN("pron", DECLENSION),
+    VERB("verb", CONJUGATION);
 
 
     private final String tag;
-    private final String inflectionType;
+    private final InflectionType inflectionType;
 
-    PartOfSpeech(String tag, String inflectionType) {
+    PartOfSpeech(String tag, InflectionType inflectionType) {
         this.tag = tag;
         this.inflectionType = inflectionType;
     }
 
-    public String getInflectionType() {
+    public InflectionType getInflectionType() {
         return inflectionType;
+    }
+
+    public String getInflectionTypeLower(){
+        return StringUtils.toRootLowerCase(this.inflectionType.name());
+    }
+
+    public String getTag(){
+       return tag;
     }
 
     public static Optional<PartOfSpeech> fromTag(String tag) {

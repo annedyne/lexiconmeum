@@ -1,6 +1,8 @@
 package com.annepolis.lexiconmeum.shared.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.http.HttpStatus;
@@ -14,6 +16,8 @@ import java.util.NoSuchElementException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     private final ErrorAttributes errorAttributes;
 
@@ -49,6 +53,18 @@ public class GlobalExceptionHandler {
         return attrs;
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalState(IllegalStateException ex, HttpServletRequest request) {
+        logger.error("Illegal state encountered while handling request: {}", ex.getMessage(), ex);
 
+        ErrorAttributeOptions options = ErrorAttributeOptions.defaults()
+                .including(ErrorAttributeOptions.Include.MESSAGE);
 
+        Map<String, Object> attrs = errorAttributes.getErrorAttributes(new ServletWebRequest(request), options);
+        attrs.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        attrs.put("error", HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+        attrs.put("message", "Internal server error");
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(attrs);
+    }
 }

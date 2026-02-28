@@ -29,7 +29,7 @@ class InflectionClassSectionContributor implements LexemeDetailSectionContributo
                 .map(InflectionClass::getDisplayTag)
                 .collect(Collectors.joining(" & "));
         if (!display.isBlank()) {
-            String suffix = lexeme.getPartOfSpeech().getInflectionType();
+            String suffix = lexeme.getPartOfSpeech().getInflectionTypeLower();
             dto.setInflectionClass(display + " " + suffix);
         }
     }

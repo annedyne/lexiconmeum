@@ -18,8 +18,8 @@ public class PrepositionCaseSectionContributor implements LexemeDetailSectionCon
 
     @Override
     public void contribute(Lexeme lexeme, LexemeDetailResponse dto) {
-        if( lexeme.getPartOfSpeechDetails() instanceof PrepositionDetails){
-            dto.setGovernedCase(((PrepositionDetails) lexeme.getPartOfSpeechDetails()).governedCase());
+        if( lexeme.getPartOfSpeechDetails() instanceof PrepositionDetails details){
+            dto.setGovernedCase(details.governedCase());
         }
     }
 }

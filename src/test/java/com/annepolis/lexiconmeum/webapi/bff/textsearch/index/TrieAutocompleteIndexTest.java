@@ -1,6 +1,6 @@
 package com.annepolis.lexiconmeum.webapi.bff.textsearch.index;
 
-import com.annepolis.lexiconmeum.TestUtil;
+import com.annepolis.lexiconmeum.ingest.wiktionary.JsonTestDataManager;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
@@ -8,6 +8,8 @@ import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
 import com.annepolis.lexiconmeum.webapi.bff.textsearch.domain.FormMatch;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,9 +50,9 @@ class TrieAutocompleteIndexTest {
     }
 
     @Test
-    void givenPrefixReturnsAllUniqueMatches(){
+    void givenPrefixReturnsAllUniqueMatches() throws IOException {
         TrieAutocompleteIndex underTest = new TrieAutocompleteIndex();
-        Lexeme lexeme = TestUtil.getNewTestNounLexeme();
+        Lexeme lexeme = JsonTestDataManager.INSTANCE.getParsedNounLexeme("amicus", "testDataNoun.jsonl");
         for (Inflection inflection : lexeme.getInflections()){
             underTest.insert(inflection.getForm(), lexeme.getId());
         }
@@ -59,9 +61,9 @@ class TrieAutocompleteIndexTest {
     }
 
     @Test
-    void matchingIgnoresDiacritics(){
+    void matchingIgnoresDiacritics() throws IOException {
         TrieAutocompleteIndex underTest = new TrieAutocompleteIndex();
-        Lexeme lexeme = TestUtil.getNewTestNounLexeme();
+        Lexeme lexeme = JsonTestDataManager.INSTANCE.getParsedNounLexeme("amicus", "testDataNoun.jsonl");
         for (Inflection inflection : lexeme.getInflections()){
             underTest.insert(inflection.getForm(), lexeme.getId());
         }
@@ -70,9 +72,9 @@ class TrieAutocompleteIndexTest {
     }
 
     @Test
-    void givenSuffixReturnsAllUniqueMatches(){
+    void givenSuffixReturnsAllUniqueMatches() throws IOException {
         TrieAutocompleteIndex underTest = new TrieAutocompleteIndex();
-        List<Lexeme> lexemes = TestUtil.getMixedPartOfSpeechTestLexemes();
+        List<Lexeme> lexemes = getMixedPartOfSpeechTestLexemes();
 
 
         for(Lexeme lexeme : lexemes) {
@@ -82,8 +84,19 @@ class TrieAutocompleteIndexTest {
                 underTest.insert(word, lexeme.getId());
             }
         }
-        List<FormMatch> results = underTest.searchForMatchingForms(new StringBuilder("is").reverse().toString(), 20);
-        assertEquals(6, results.size());
+        List<FormMatch> results = underTest.searchForMatchingForms(new StringBuilder("is").reverse().toString(), 50 );
+        assertEquals(24, results.size());
+    }
+
+    public static List<Lexeme> getMixedPartOfSpeechTestLexemes() throws IOException {
+        List<Lexeme> lexemes = new ArrayList<>();
+        Lexeme noun = JsonTestDataManager.INSTANCE.getParsedNounLexeme("poculum", "testDataNoun.jsonl");
+        lexemes.add(noun);
+
+        Lexeme verb = JsonTestDataManager.INSTANCE.getParsedVerbLexeme("amo", "testDataVerb.jsonl");
+        lexemes.add(verb);
+        
+        return lexemes;
     }
 
 }

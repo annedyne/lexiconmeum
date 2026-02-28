@@ -24,13 +24,13 @@ class WiktionaryLexicalDataLoader {
 
     public WiktionaryLexicalDataLoader(IngestLexemeUseCase ingestLexemeUseCase,
                                        WiktionaryLexicalDataParser parser,
-                                       LoadProperties loadProperties, DefaultWiktionaryStagingService wiktionaryStagingService
+                                       LoadProperties loadProperties,
+                                       DefaultWiktionaryStagingService wiktionaryStagingService
 
     ) {
         this.ingestLexemeUseCase = ingestLexemeUseCase;
         this.parser = parser;
         this.wiktionaryStagingService = wiktionaryStagingService;
-        this.parser.setParseMode(loadProperties.getParseMode());
         this.lexicalData = loadProperties.getDataFile();
     }
 
@@ -45,7 +45,7 @@ class WiktionaryLexicalDataLoader {
         logger.info("PHASE 2: Finalizing participles and distributing complete lexemes");
         
         // Finalize participles and distribute everything once
-        ParticipleResolutionService.FinalizationReport report = wiktionaryStagingService.finalizeIngestion(ingestLexemeUseCase::ingest);
+        DataLinkingService.FinalizationReport report = wiktionaryStagingService.finalizeIngestion(ingestLexemeUseCase::ingest);
 
         logger.info("Load complete: {}", report.getSummary());
 

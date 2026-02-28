@@ -1,6 +1,5 @@
 package com.annepolis.lexiconmeum.ingest.wiktionary;
 
-import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalParticipleTense;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice;
@@ -21,37 +20,29 @@ import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJ
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataKeyWord.FORM_OF;
 
 @Component
-public class POSParticipleParser {
+public class POSParticipleParser implements PartOfSpeechParser {
 
-    LexicalTagResolver lexicalTagResolver;
+    ParserSupport parserSupport;
 
-    public POSParticipleParser(LexicalTagResolver lexicalTagResolver){
-        this.lexicalTagResolver = lexicalTagResolver;
+    public POSParticipleParser(ParserSupport parserSupport){
+        this.parserSupport = parserSupport;
     }
 
     static final Logger logger = LogManager.getLogger(POSParticipleParser.class);
 
-    /**
-     * Check if this verb entry is actually a participle form entry
-     */
-    protected boolean isValidParticipleEntry(JsonNode root) {
-        // Must have head_templates
-        JsonNode headTemplates = root.path(HEAD_TEMPLATES.get());
-        if (!headTemplates.isArray() || headTemplates.isEmpty()) {
-            return false;
-        }
+    @Override
+    public ParsedResultProcessor parsePartOfSpeech(JsonNode root, POSParserKey parserKey) {
 
-        // Check template name
-        String templateName = headTemplates.get(0).path(NAME.get()).asText("");
-
-       return WiktionaryLexicalDataKeyWord.TEMPLATE_HEAD_PARTICPLE.get().equals(templateName);
+        // Build the participle and return it wrapped in the appropriate processor, or EMPTY if no result
+        return parseParticipleEntry(root).map( participleData -> (ParsedResultProcessor) (
+                lexemeConsumer,
+                stagingService) -> stagingService.stageLinkableData(participleData)
+        )
+        .orElse(ParsedResultProcessor.EMPTY);
     }
 
-    /**
-     * Parse a participle entry and return staged data.
-     * This is called when processing a participle JSONL entry (not verb inflection data).
-     */
-    public Optional<StagedParticipleData> parseParticipleEntry(JsonNode root) {
+     Optional<StagedParticipleData> parseParticipleEntry(JsonNode root) {
+
         String participleLemma = root.path(WORD.get()).asText();
 
         // Build the agreement/declension attributes - case inflections.
@@ -63,7 +54,7 @@ public class POSParticipleParser {
         JsonNode formOfArray = senseNode.path(FORM_OF.get());
 
         if (formOfArray != null && !formOfArray.isEmpty()) {
-            return Optional.of(deriveParticipleDataFromSenseNodeFormOfTag(participleLemma, senseNode, inflections));
+            return deriveParticipleDataFromSenseNodeFormOfTag(participleLemma, senseNode, inflections);
         } else {
             //If form_of does not exist, pull data from etymology_text
             String etymologyText = root.path(ETYMOLOGY_TEXT.get()).asText();
@@ -71,7 +62,7 @@ public class POSParticipleParser {
         }
     }
 
-    StagedParticipleData deriveParticipleDataFromSenseNodeFormOfTag(
+    Optional<StagedParticipleData> deriveParticipleDataFromSenseNodeFormOfTag(
             String participleLemma,
             JsonNode senseNode,
             List<Participle> inflections
@@ -83,11 +74,11 @@ public class POSParticipleParser {
 
         Conjugation.Builder conjBuilder = new Conjugation.Builder(parentLemmaWithMacrons);
 
-        List<String> senseTags = collectTags(senseNode);
+        List<String> senseTags = parserSupport.collectTags(senseNode);
         senseTags = resolveParticipleTenseTags(senseTags);
 
         // resolve any conjugation attributes of participle (tense and voice)
-        lexicalTagResolver.applyAllToInflection(senseTags, conjBuilder, logger);
+        parserSupport.applyAllToInflection(senseTags, conjBuilder, logger);
 
         ParticipleDeclensionSet.Builder participleSetBuilder = new ParticipleDeclensionSet.Builder(
                 conjBuilder.getVoice(),
@@ -96,11 +87,12 @@ public class POSParticipleParser {
         );
         participleSetBuilder.addInflections(inflections);
 
-        return new StagedParticipleData(
-            parentLemma,
-            parentLemmaWithMacrons,
-            participleSetBuilder.build()
-        );
+        return participleSetBuilder.buildOptional()
+                .map(participleSet -> new StagedParticipleData(
+                        parentLemma,
+                        parentLemmaWithMacrons,
+                        participleSet
+                ));
     }
 
     Optional<StagedParticipleData> deriveParticipleDataFromEtymologyText(String participleLemma, String etymologyText, List<Participle> inflections ) {
@@ -124,20 +116,22 @@ public class POSParticipleParser {
         senseTags = resolveParticipleTenseTags(senseTags);
 
         // resolve any conjugation attributes of participle (tense and voice)
-        lexicalTagResolver.applyAllToInflection(senseTags, conjBuilder, logger);
+        parserSupport.applyAllToInflection(senseTags, conjBuilder, logger);
 
         ParticipleDeclensionSet.Builder participleSetBuilder = new ParticipleDeclensionSet.Builder(
                 conjBuilder.getVoice(),
                 conjBuilder.getTense(),
                 participleLemma
         );
+
         participleSetBuilder.addInflections(inflections);
 
-        return Optional.of(new StagedParticipleData(
-            participleLemma,
-                participleLemma,
-            participleSetBuilder.build()
-        ));
+        return participleSetBuilder.buildOptional()
+                .map(participleSet -> new StagedParticipleData(
+                        participleLemma,
+                        participleLemma,
+                        participleSet
+                ));
     }
 
     String removeMacrons(String text) {
@@ -163,7 +157,7 @@ public class POSParticipleParser {
         Participle.Builder builder = new Participle.Builder(formNode.path(FORM.get()).asText());
 
         for (JsonNode tag : formNode.path(TAGS.get())) {
-            lexicalTagResolver.applyToInflection(builder, tag.asText(), logger);
+            parserSupport.applyToInflection(builder, tag.asText(), logger);
         }
 
         return builder.build();
@@ -181,7 +175,6 @@ public class POSParticipleParser {
             String future = GrammaticalTense.FUTURE.name().toLowerCase();
             String perfect = GrammaticalTense.PERFECT.name().toLowerCase();
             String passive = GrammaticalVoice.PASSIVE.name().toLowerCase();
-
 
             if( tagListRef.contains(present)){
                 senseTags.add(GrammaticalParticipleTense.PRESENT_ACTIVE.name().toLowerCase());
@@ -210,13 +203,5 @@ public class POSParticipleParser {
     boolean isValidParticipleForm(JsonNode formNode){
         return formNode.path(SOURCE.get()).asText().equals(DECLENSION.get())
                 && !ParserConstants.COMMON_FORM_BLACKLIST.contains(formNode.path(FORM.get()).asText());
-    }
-
-    private List<String> collectTags(JsonNode tagParentNode) {
-        List<String> tags = new ArrayList<>();
-        for (JsonNode tag : tagParentNode.path(TAGS.get())) {
-            tags.add(tag.asText().toLowerCase());
-        }
-        return tags;
     }
 }

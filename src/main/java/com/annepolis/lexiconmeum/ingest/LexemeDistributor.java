@@ -1,6 +1,6 @@
 package com.annepolis.lexiconmeum.ingest;
 
-import com.annepolis.lexiconmeum.ingest.wiktionary.ParticipleResolutionService;
+import com.annepolis.lexiconmeum.ingest.wiktionary.DataLinkingService;
 import com.annepolis.lexiconmeum.shared.LexemeSink;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import org.slf4j.Logger;
@@ -21,13 +21,13 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * This class consists of two primary phases for processing lexemes:
  * 1. Staging phase: During this phase, lexemes are buffered for potential updates and not distributed.
- * 2. Finalization and distribution phase: Lexemes are finalized using the {@link ParticipleResolutionService},
+ * 2. Finalization and distribution phase: Lexemes are finalized using the {@link DataLinkingService},
  *    after which they are distributed to registered sinks.
  *
  * Fail-fast behavior is employed to handle errors during distribution to ensure proper error visibility.
  *
  * Dependencies:
- * - {@link ParticipleResolutionService}: Handles participle attachment and final data preparation.
+ * - {@link DataLinkingService}: Handles participle attachment and final data preparation.
  * - {@link LexemeSink}: Consumes finalized lexemes.
  *
  * Thread Safety:
@@ -61,7 +61,6 @@ public class LexemeDistributor implements IngestLexemeUseCase {
             } catch (Exception e) {
                 logger.error("Error distributing lexeme {} to sink {}", 
                         lexeme.getId(), sink.getClass().getSimpleName(), e);
-                throw e; // Current behavior: fail-fast
             }
         }
     }
