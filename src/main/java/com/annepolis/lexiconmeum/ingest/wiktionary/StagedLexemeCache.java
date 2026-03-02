@@ -116,6 +116,13 @@ public class StagedLexemeCache {
         || lemmaAndPosToLexemesLookup.containsKey(key);
     }
 
+    public List<Lexeme> getStagedLexemes(){
+        return lemmaAndPosToLexemesLookup.values().stream()
+                .flatMap(List::stream)
+                .toList();
+    }
+
+
     /**
      * Get count of staged participles (for monitoring during ingestion)
      */

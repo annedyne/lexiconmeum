@@ -17,14 +17,21 @@ import java.util.*;
 // create a declension table for each tense
 @Component
 public class ParticipleTableMapper {
+
     // Comparator orders individual tense groups by natural enum order
     Comparator<ParticipleDeclensionSet> participleDTOComparator =
             Comparator.comparing(ParticipleDeclensionSet::getParticipleTense,Comparator.nullsLast(Comparator.naturalOrder()));
 
     public List<ParticipleTableDTO> toInflectionTableDTO(Lexeme lexeme) {
+        Optional<Map<String, ParticipleDeclensionSet>> participleDeclensionSets = extractParticiples(lexeme);
+
+        if (participleDeclensionSets.isEmpty() || participleDeclensionSets.get().isEmpty()) {
+            return Collections.emptyList();
+        }
+
         // From the list of participle inflections grouped by tense
         // We are going to re-map them by gender, then tense
-        Map<GrammaticalGender, List<ParticipleTableDTO.ParticipleTenseDTO>> byGender = getTenseDTOsByGender(extractParticiples(lexeme));
+        Map<GrammaticalGender, List<ParticipleTableDTO.ParticipleTenseDTO>> byGender = getTenseDTOsByGender(participleDeclensionSets.get());
 
         // Now we wrap the list of tenseDTOs for a given gender into a ParticipleTableDTO
        List<ParticipleTableDTO> participles = new ArrayList<>();
@@ -119,14 +126,11 @@ public class ParticipleTableMapper {
         return byGender;
     }
 
-    Map<String, ParticipleDeclensionSet> extractParticiples(Lexeme lexeme){
+    Optional<Map<String, ParticipleDeclensionSet>> extractParticiples(Lexeme lexeme){
         if (lexeme.getPartOfSpeechDetails() instanceof VerbDetails details) {
-           return  details.getParticiples();
+           return  Optional.of(details.getParticiples());
         }
 
-        throw new IllegalStateException(
-                "Expected VerbDetails for lexeme " + lexeme.getLemma() + " but found: "
-                        + (lexeme.getPartOfSpeechDetails() == null ? "null"
-                        : lexeme.getPartOfSpeechDetails().getClass().getSimpleName()));
+        return Optional.empty();
     }
 }

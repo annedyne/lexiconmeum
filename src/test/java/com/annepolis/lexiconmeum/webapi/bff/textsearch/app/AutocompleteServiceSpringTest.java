@@ -47,7 +47,7 @@ class AutocompleteServiceSpringTest {
     void getWordsStartingWithReturnsOnlyLemmaFormsOrSingleInflectedMatch(){
 
         List<SuggestionResponse> result = underTest.getWordsStartingWith("brevis", 10);
-        assertEquals(3, result.size());
+        assertEquals(4, result.size());
 
         result = underTest.getWordsStartingWith("amarem", 10);
         assertEquals(4, result.size());
@@ -102,6 +102,18 @@ class AutocompleteServiceSpringTest {
                 .orElseThrow(() -> new AssertionError("'Autocomplete Suggestion for 'quis' PRONOUN not found"));
         assertEquals(PartOfSpeech.PRONOUN, response.getPartOfSpeech());
         assertEquals(pronoun, response.getWord());
+    }
+
+    @Test
+    void esseLoadedIntoSearch(){
+        String irregularVerb = "sum";
+        List<SuggestionResponse> result = underTest.getWordsStartingWith(irregularVerb, 10);
+        SuggestionResponse response = result.stream()
+                .filter(r -> r.getPartOfSpeech().equals(PartOfSpeech.VERB))
+                .findAny()
+                .orElseThrow(() -> new AssertionError("'Autocomplete Suggestion for 'sum' VERB not found"));
+        assertEquals(PartOfSpeech.VERB, response.getPartOfSpeech());
+        assertEquals(irregularVerb, response.getWord());
     }
 
 }
