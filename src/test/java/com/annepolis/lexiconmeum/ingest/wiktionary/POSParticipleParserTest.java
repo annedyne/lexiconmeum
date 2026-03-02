@@ -82,4 +82,13 @@ class POSParticipleParserTest {
          assertTrue(processed.contains("active"));          // sets voice
     }
 
+    @Test
+    void givenFormOfTagInOnlyOneOfMultipleSensesParserFindsParentLemma() throws IOException {
+        JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("futurus", PartOfSpeech.VERB, "testDataRaw.jsonl");
+        StagedParticipleData participleData = underTest.parseParticipleEntry(root)
+                .orElseThrow(() -> new AssertionError("Failed to parse participle entry for 'futurus'"));
+
+        assertEquals("sum", participleData.getParentLemma());
+    }
+
 }

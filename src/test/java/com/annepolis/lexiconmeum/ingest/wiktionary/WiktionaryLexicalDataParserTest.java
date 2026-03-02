@@ -4,7 +4,8 @@ import com.annepolis.lexiconmeum.ingest.tagmapping.EsseFormProvider;
 import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeFixtureFactory;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
+import com.annepolis.lexiconmeum.shared.model.grammar.*;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,11 +32,11 @@ class WiktionaryLexicalDataParserTest {
     private WiktionaryStagingServiceStub stagingServiceStub;
 
     // IF YOU ADD A VALID LEMMA NODE TO THE testDataRaw.jsonl ADD IT HERE
-    static final String[] VALID_UNSTAGED_LEXEME_LIST = { "amo", "poculum", "brevis", "brevis", "brevis",
+    static final String[] VALID_UNSTAGED_LEXEME_LIST = {"sum", "amo", "poculum", "brevis", "brevis", "brevis",
             "nox", "etsi", "ille", "ille" };
 
-    static final String[] VALID_STAGED_LEXEME_LIST = {"amo", "brevis", "pulcher", "pulso", "sequor"};
-    static final String[] NON_LEXEME_STAGED_LIST = {"amans", "sequendus", "amandus", "brevissimus", "pulchrior", "pulcherrimus"};
+    static final String[] VALID_STAGED_LEXEME_LIST = {"sum", "amo", "brevis", "pulcher", "pulso", "sequor"};
+    static final String[] NON_LEXEME_STAGED_LIST = {"doctus", "doctior", "doctissimus","futurus", "amans", "sequendus", "amandus", "brevissimus", "pulchrior", "pulcherrimus"};
     private List<Lexeme> verbLexemes;
     private List<Lexeme> adjectiveLexemes;
 
@@ -251,20 +252,24 @@ class WiktionaryLexicalDataParserTest {
     @SuppressWarnings("java:S2699") // Yes this does have an assertion
     @Test
     void glossesAreParsedAndPopulated() throws Exception {
-        getVerbLexemes().get(0).getSenses().stream()
-                .filter(s -> s.getGloss().contains("to love"))
+        getVerbLexemes().stream().filter(lexeme -> lexeme.getLemma().equals("amo"))
                 .findFirst()
-                .orElseThrow(() -> new AssertionError("Missing gloss 'to love'"));
+                .map(l -> l.getSenses().stream()
+                        .filter(s -> s.getGloss().contains("to love"))
+                        .findFirst()
+                        .orElseThrow(() -> new AssertionError("Missing gloss 'to love'")));
     }
 
     @Test
     void parserMapsFutureAndPerfectTagsToFuturePerfectTense() throws Exception {
-        Inflection tenseTag = getVerbLexemes().get(0).getInflections().stream()
-                .filter(g -> g.getForm().equals("amāverō"))
+        Optional<Inflection> tenseTag = getVerbLexemes().stream().filter(lexeme -> lexeme.getLemma().equals("amo"))
                 .findFirst()
-                .orElseThrow(() -> new AssertionError("Missing future-perfect test form"));
-
-        assertEquals(GrammaticalTense.FUTURE_PERFECT, ((Conjugation) tenseTag).getTense());
+                .map(l -> l.getInflections().stream()
+                    .filter(g -> g.getForm().equals("amāverō"))
+                    .findFirst()
+                .orElseThrow(() -> new AssertionError("Missing future-perfect test form")));
+        assertTrue(tenseTag.isPresent());
+        assertEquals(GrammaticalTense.FUTURE_PERFECT, ((Conjugation) tenseTag.get()).getTense());
     }
 
     @ParameterizedTest
@@ -323,5 +328,23 @@ class WiktionaryLexicalDataParserTest {
         assertTrue(genitive.isPresent());
     }
 
+    @Test
+    void verbEsseIsParsedAndStaged() throws IOException {
+        Resource resource = new ClassPathResource("testDataRaw.jsonl");
+        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
+            List<Lexeme> consumedLexemes = new ArrayList<>();
+            parser.parseJsonl(reader, consumedLexemes::add);
 
+            // Verify verb "sum" was staged
+            Lexeme sumStaged = stagingServiceStub.stagedLexemes.stream()
+                    .filter(l -> "sum".equals(l.getLemma()) && PartOfSpeech.VERB == l.getPartOfSpeech())
+                    .findFirst()
+                    .orElseThrow(() -> new AssertionError("'sum' not found in staging"));
+
+            assertEquals(PartOfSpeech.VERB, sumStaged.getPartOfSpeech());
+            String key = InflectionKey.joinConjugationParts(GrammaticalVoice.ACTIVE, GrammaticalMood.SUBJUNCTIVE, GrammaticalTense.PERFECT, GrammaticalPerson.FIRST, GrammaticalNumber.SINGULAR);
+            assertEquals("fuerim", sumStaged.getInflectionIndex().get(key).getForm());
+
+        }
+    }
 }

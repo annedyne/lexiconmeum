@@ -49,8 +49,8 @@ public class POSParticipleParser implements PartOfSpeechParser {
         List<Participle> inflections = parseParticipleInflections(root);
 
         // Extract parent verb information from sense node form_of tag if it exists,
-        // NB: Assuming the same tags for all senses for now
-        JsonNode senseNode = root.path(SENSES.get()).get(0);
+        JsonNode senseNode = getFormOfSenseNodeOrFirst(root);
+
         JsonNode formOfArray = senseNode.path(FORM_OF.get());
 
         if (formOfArray != null && !formOfArray.isEmpty()) {
@@ -60,6 +60,23 @@ public class POSParticipleParser implements PartOfSpeechParser {
             String etymologyText = root.path(ETYMOLOGY_TEXT.get()).asText();
             return deriveParticipleDataFromEtymologyText(participleLemma, etymologyText, inflections);
         }
+    }
+
+    // return either the sense node that has a form-of
+    // tag or if none, do, the first in the array.
+    JsonNode getFormOfSenseNodeOrFirst(JsonNode root){
+        JsonNode sensesNode = root.path(SENSES.get());
+
+        if (sensesNode.isArray()) {
+            for (JsonNode node : sensesNode) {
+                JsonNode formOfArray = node.path(FORM_OF.get());
+                if(formOfArray.isArray() && !formOfArray.isEmpty()){
+                    return node;
+                }
+            }
+        }
+        // default to first
+        return sensesNode.get(0);
     }
 
     Optional<StagedParticipleData> deriveParticipleDataFromSenseNodeFormOfTag(
