@@ -77,7 +77,7 @@ class DataLinkingServiceTest {
         underTest.stageDataToLink(gerundive);
 
         // Call finalize which contains the functionality under test
-        underTest.finalizeParticiples(this::setCachedLexeme, stagedLexemeCache);
+        underTest.finalizeLexicalDataLinking(this::setCachedLexeme, stagedLexemeCache);
 
         if(cachedLexeme.getPartOfSpeechDetails() instanceof VerbDetails verbDetails) {
             verbDetails.getParticipleSet(GrammaticalVoice.PASSIVE, GrammaticalTense.PERFECT)

@@ -1,12 +1,15 @@
 package com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.List;
 
 public class ConjugationGroupMapper implements InflectionTableMapper {
 
     ConjugationTableMapper conjugationTableMapper;
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     ParticipleTableMapper participleTableMapper;
 
     public ConjugationGroupMapper(ConjugationTableMapper conjugationTableMapper, ParticipleTableMapper participleTableMapper){
