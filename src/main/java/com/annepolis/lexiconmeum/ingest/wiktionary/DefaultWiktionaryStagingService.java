@@ -8,8 +8,9 @@ import org.springframework.stereotype.Component;
 import java.util.function.Consumer;
 
 /**
- * Service responsible for caching participles and potential parent verb lexemes pending finalization.
+ * Service responsible for caching non-head-words and potential parent lexemes pending finalization.
  * Finalization tasks including associating participles with parent verbs
+ * and comparative and superlative adjectives with positive parent adjectives
  * are performed once all lexemes have been ingested.
  */
 @Component
@@ -55,18 +56,18 @@ public class DefaultWiktionaryStagingService implements WiktionaryStagingService
         logger.info("Starting ingestion finalization...");
 
         int stagedCount = dataLinkingService.getStagedCount();
-        logger.info("Found {} staged participles to process", stagedCount);
+        logger.info("Found {} staged lexical entities to process", stagedCount);
 
         DataLinkingService.FinalizationReport report =
-                dataLinkingService.finalizeParticiples(lexemeConsumer, stagedLexemeCache);
+                dataLinkingService.finalizeLexicalDataLinking(lexemeConsumer, stagedLexemeCache);
 
         if (report.hasUnresolved()) {
-            logger.warn("Finalization completed with {} unresolved participles",
+            logger.warn("Finalization completed with {} unresolved non-lexeme entities",
                     report.linkablesUnresolved());
 
             // Log details
-            report.unresolvedDetails().forEach((verb, participles) -> logger.warn("  Verb '{}': {} unresolved - {}",
-                    verb, participles.size(), participles));
+            report.unresolvedDetails().forEach((lexeme, linkables) -> logger.warn(" Parent {}: {} unresolved - {}",
+                    lexeme, linkables.size(), linkables));
         } else {
             logger.info("All participles successfully resolved");
         }

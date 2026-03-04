@@ -58,7 +58,7 @@ public class DataLinkingService {
      * Accepts a callback to ingest finalized lexemes.
      * Returns statistics about the finalization process.
      */
-    public FinalizationReport finalizeParticiples(Consumer<Lexeme> reingestCallback,  StagedLexemeCache stagedLexemeCache) {
+    public FinalizationReport finalizeLexicalDataLinking(Consumer<Lexeme> ingestCallback, StagedLexemeCache stagedLexemeCache) {
         logger.info("Starting linkable finalization. {} parent lexemes have staged linkables",
                 stagedDataToLink.size());
 
@@ -87,9 +87,6 @@ public class DataLinkingService {
                     // Update the staged cache with the new version
                     stagedLexemeCache.replaceLexeme(matchingParentLexeme, updatedLexeme);
 
-                    // Use callback instead of direct sink access
-                    reingestCallback.accept(updatedLexeme);
-
                     linkablesAttached.incrementAndGet();
 
                     logger.trace("Attached linkable '{}' ({}) to lexeme '{}'",
@@ -100,6 +97,11 @@ public class DataLinkingService {
             lexemesUpdated.incrementAndGet();
         });
 
+        // Distribute to sinks
+        for(Lexeme lexeme : stagedLexemeCache.getStagedLexemes()){
+            ingestCallback.accept(lexeme);
+        }
+
         FinalizationReport report = new FinalizationReport(
                 lexemesUpdated.get(),
                 linkablesAttached.get(),
@@ -107,7 +109,7 @@ public class DataLinkingService {
                 unresolvedDetails
         );
 
-        logger.info("Participle finalization complete: {}", report.getSummary());
+        logger.info("Lexical Data Linking finalization complete: {}", report.getSummary());
         clearStaged();
         return report;
     }
@@ -158,7 +160,7 @@ public class DataLinkingService {
 
         linkablesUnresolved.incrementAndGet();
         unresolvedDetails.computeIfAbsent(
-                        parentLemma, k -> Collections.synchronizedList(new ArrayList<>()))
+                        dataToLink.getParentLinkPartOfSpeech() + ": '" + parentLemma + "'", k -> Collections.synchronizedList(new ArrayList<>()))
                 .add(dataToLink.getLemma());
     }
 

@@ -42,17 +42,17 @@ class WiktionaryLexicalDataLoader {
         // Stage all lexemes (no distribution yet)
         parser.parseJsonl(reader, ingestLexemeUseCase::ingest);
         
-        logger.info("PHASE 2: Finalizing participles and distributing complete lexemes");
+        logger.info("PHASE 2: Finalizing linkable data and distributing complete lexemes");
         
-        // Finalize participles and distribute everything once
+        // Finalize Linking and distribute everything once
         DataLinkingService.FinalizationReport report = wiktionaryStagingService.finalizeIngestion(ingestLexemeUseCase::ingest);
 
         logger.info("Load complete: {}", report.getSummary());
 
         if (report.hasUnresolved()) {
-            logger.warn("Some participles could not be resolved:");
-            report.unresolvedDetails().forEach((verb, participles) ->
-                    logger.warn("  Verb '{}': {}", verb, String.join(", ", participles))
+            logger.warn("Some linkable parent lemmas could not be resolved:");
+            report.unresolvedDetails().forEach((parentLemma, linkables) ->
+                    logger.warn(" {}: {}", parentLemma, String.join(", ", linkables))
             );
         }
     }
