@@ -36,3 +36,13 @@ HELP.md
 
 *.log
 *.versionsBackup
+
+### Local OS metadata ###
+.DS_Store
+**/.DS_Store
+
+### Local runtime output ###
+logs/
+
+### Node tooling ###
+node_modules/
