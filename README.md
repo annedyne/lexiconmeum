@@ -19,28 +19,34 @@ Lexical data is sourced from [Wiktionary](https://www.wiktionary.org/) and parse
 
 ### 🔄 API Contract
 
+OpenAPI docs are generated at runtime:
+
+```bash
+GET /v3/api-docs
+GET /swagger-ui/index.html
+```
+
 ##### word search endpoint:
 
 given prefix (match beginning of word)
 ```bash
-GET /api/v1/autocomplete/prefix?prefix=<string>
+GET /api/v1/lexemes/autocomplete/prefix?prefix=<string>&limit=<integer>
 
-Response: JSON array of matching words (e.g.,
-["amare", "amatus"])
+Response: JSON array of suggestion objects.
 ```
 given suffix (match end of word)
 
 ```bash
-GET /api/v1/autocomplete/suffix?suffix=<string>
-Response: JSON array of matching words (e.g.,
-["amaturus", "amonibus, "]
+GET /api/v1/lexemes/autocomplete/suffix?suffix=<string>&limit=<integer>
+
+Response: JSON array of suggestion objects.
 ```
 ##### word detail endpoints
 ```bash
-GET /api/v1/lexemes/123/detail?type=<string>  #type is optional
+GET /api/v1/lexemes/{id}/detail?type=<string>  # type is optional
 GET /api/v1/lexemes?lexemeId=<string>
-Response: JSON object (e.g.,
-["amare", "amatus"])
+
+Response: JSON object.
 ```
 
 ## Versioning and Deployment
