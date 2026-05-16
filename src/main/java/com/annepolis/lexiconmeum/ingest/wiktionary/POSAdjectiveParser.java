@@ -4,6 +4,8 @@ import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalDegree;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveDegreeAgreementSet;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveDetails;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveTerminationType;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -67,15 +69,22 @@ public class POSAdjectiveParser implements PartOfSpeechParser {
     }
 
     private Optional<Lexeme> buildLexeme(LexemeBuilder lexemeBuilder, JsonNode root){
-
+        // Initialize AdjectiveDetails so initialization is independent
+        // of tag data. If the termination-type sense tag is present, it will
+        // override the default NONE.
+        if(lexemeBuilder.getPartOfSpeechDetails() == null){
+            AdjectiveDetails.Builder adBuilder = new AdjectiveDetails.Builder();
+            adBuilder.setAdjectiveTerminationType(AdjectiveTerminationType.NONE);
+            lexemeBuilder.setPartOfSpeechDetails(adBuilder.build());
+        }
         parserSupport.addSenses(root.path(SENSES.get()), lexemeBuilder, logger);
-
         JsonNode formsNode = root.path(FORMS.get());
         addAdjectiveForms(formsNode, lexemeBuilder);
 
         return new SafeBuilder<>(PartOfSpeech.ADJECTIVE.name(), lexemeBuilder::build).build(logger, parserSupport.getParseMode());
-
     }
+
+
 
     private void addAdjectiveForms(JsonNode formsNode, LexemeBuilder lexemeBuilder) {
         for (JsonNode formNode : formsNode) {

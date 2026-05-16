@@ -41,6 +41,10 @@ public class JsonTestDataManager {
          parserRegistry.put(POSParserKey.PRONOUN, adjectiveParser);
     }
 
+    public static JsonTestDataManager getInstance() {
+        return INSTANCE;
+    }
+
     /**
      * Loads the file for the given filename, finds the given noun JSON data,
      * parses the JSON data with the application's parser,
@@ -112,6 +116,12 @@ public class JsonTestDataManager {
      */
     public Lexeme getParsedVerbLexeme(String word, String filename) throws IOException {
         JsonNode root = getRealNode(word, PartOfSpeech.VERB ,filename);
+
+        return getStagedLexeme(word, root);
+    }
+
+    public Lexeme getParsedAdjectiveLexeme(String word, String filename) throws IOException {
+        JsonNode root = getRealNode(word, PartOfSpeech.ADJECTIVE ,filename);
 
         return getStagedLexeme(word, root);
     }

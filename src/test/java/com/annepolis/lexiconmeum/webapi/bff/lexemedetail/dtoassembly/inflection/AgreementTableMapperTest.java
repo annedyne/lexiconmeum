@@ -6,11 +6,13 @@ import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveTerminationType;
+import com.annepolis.lexiconmeum.testsupport.TestSupport;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.*;
 
 import static com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender.*;
@@ -30,8 +32,16 @@ class AgreementTableMapperTest {
     static final String INFLECTIONS = "inflections";
     static final String GENDERS = "genders";
 
+    /**
+     * Wiktionary only provides distinct adjective inflection forms.
+     * For the sake of layout consistency, this api provides a full set of forms
+     * for each termination.
+     * Ex: 3 termination adj gets three sets o forms, one for each 'termination' (M, F, N)
+     * Ex: 2 termination adj gets two sets of forms, one for each 'termination' (M&F, N)
+     */
+
     @Test
-    void thirdDecl_threeTermination_expandsToSingletons() throws Exception {
+    void threeTermination_threeForms_expandsToSingletons() throws Exception {
         // Build a 3-termination Adjective Lexeme with three Nominative Singular Agreement entries, one for each gender
         Lexeme lexeme = LexemeFixtureFactory.generateSyntheticAdjectiveLexeme(
                 AdjectiveTerminationType.THREE_TERMINATION,
@@ -64,11 +74,42 @@ class AgreementTableMapperTest {
     }
 
     @Test
-    void firstSecondDecl_notTwoTermination_expandsToSingletons() throws Exception {
-        // !TWO_TERMINATION => expand {M,F,N} into three singleton entries
-        //build a three-termination adjective with a single form for all three genders
+    void threeTermination_oneForm_expandsToSingletons() throws Exception {
+        // !TWO_TERMINATION => take a single form (because same form for each gender)
+        // and duplicate it for each gender
+        // build a three-termination adjective with a single form for all three genders
         Lexeme lexeme = LexemeFixtureFactory.generateSyntheticAdjectiveLexeme(
                 AdjectiveTerminationType.THREE_TERMINATION, // or a dedicated 1st/2nd type in your model
+                List.of(
+                        LexemeFixtureFactory.generateSyntheticAgreement(
+                                Set.of(MASCULINE, GrammaticalGender.FEMININE, GrammaticalGender.NEUTER),
+                                GrammaticalNumber.PLURAL, GrammaticalCase.ACCUSATIVE, "formX")
+                )
+        );
+
+        JsonNode root = objectMapper.readTree(objectMapper.writeValueAsString(agreementTableMapper.toInflectionTableDTO(lexeme)));
+        ArrayNode agreements = (ArrayNode) root.get(AGREEMENTS);
+        assertThat(agreements).hasSize(3);
+    }
+
+    @Test
+    void oneTermination_twoForms_expandsToTwoSets() throws IOException {
+        Lexeme lexeme = TestSupport.getInstance().getJsonTestDataManager()
+                .getParsedAdjectiveLexeme("caelebs", "testDataAdjective.jsonl");
+
+        boolean isTwoOrOneTermination = true;
+        JsonNode root = objectMapper.readTree(objectMapper.writeValueAsString(agreementTableMapper.toInflectionTableDTO(lexeme.getInflections(), isTwoOrOneTermination)));
+        ArrayNode agreements = (ArrayNode) root.get(AGREEMENTS);
+        assertThat(agreements).hasSize(2);
+    }
+
+    @Test
+    void NoTermination_oneForm_expandsToSingletons() throws Exception {
+        // !TWO_TERMINATION => take a single form (because same form for each gender)
+        // and duplicate it for each gender
+        // build a three-termination adjective with a single form for all three genders
+        Lexeme lexeme = LexemeFixtureFactory.generateSyntheticAdjectiveLexeme(
+                AdjectiveTerminationType.NONE, // or a dedicated 1st/2nd type in your model
                 List.of(
                         LexemeFixtureFactory.generateSyntheticAgreement(
                                 Set.of(MASCULINE, GrammaticalGender.FEMININE, GrammaticalGender.NEUTER),
