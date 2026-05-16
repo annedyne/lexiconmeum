@@ -3,5 +3,6 @@ package com.annepolis.lexiconmeum.shared.model.grammar.partofspeech;
 public enum AdjectiveTerminationType {
     THREE_TERMINATION,
     TWO_TERMINATION,
-    ONE_TERMINATION
+    ONE_TERMINATION,
+    NONE
 }

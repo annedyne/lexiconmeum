@@ -36,8 +36,9 @@ public class DegreeGroupMapper implements InflectionTableMapper {
             );
         }
 
-        boolean positiveTwoTermination = details.getTerminationType() == AdjectiveTerminationType.TWO_TERMINATION;
-        AgreementTableDTO positive = generateAgreementTableDTO(lexeme.getInflections(), positiveTwoTermination);
+        boolean positiveTwoOrOneTermination = details.getTerminationType() == AdjectiveTerminationType.TWO_TERMINATION
+                || details.getTerminationType() == AdjectiveTerminationType.ONE_TERMINATION;
+        AgreementTableDTO positive = generateAgreementTableDTO(lexeme.getInflections(), positiveTwoOrOneTermination);
 
         AdjectiveDegreeAgreementSet comparativeAgreementSet =
                 (details.getDegreeInflections() == null)
@@ -72,7 +73,7 @@ public class DegreeGroupMapper implements InflectionTableMapper {
         return classes != null && classes.contains(InflectionClass.THIRD);
     }
 
-    AgreementTableDTO generateAgreementTableDTO(List<Inflection> inflections, boolean twoTermination) {
-        return agreementTableMapper.toInflectionTableDTO(inflections, twoTermination);
+    AgreementTableDTO generateAgreementTableDTO(List<Inflection> inflections, boolean twoOrOneTermination) {
+        return agreementTableMapper.toInflectionTableDTO(inflections, twoOrOneTermination);
     }
 }

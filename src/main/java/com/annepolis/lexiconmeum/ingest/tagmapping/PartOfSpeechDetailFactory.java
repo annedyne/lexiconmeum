@@ -29,7 +29,16 @@ public enum PartOfSpeechDetailFactory {
         NounDetails nounDetails = new NounDetails(GrammaticalGender.NEUTER);
         builder.setPartOfSpeechDetails(nounDetails);
     }),
-
+    ONE_TERMINATION(Set.of("one-termination"), builder ->  {
+        if( builder.getPartOfSpeechDetails() instanceof AdjectiveDetails details) {
+            details = details.toBuilder().setAdjectiveTerminationType(AdjectiveTerminationType.ONE_TERMINATION).build();
+            builder.setPartOfSpeechDetails(details);
+        } else if(builder.getPartOfSpeechDetails() == null){
+            AdjectiveDetails.Builder adBuilder = new AdjectiveDetails.Builder();
+            adBuilder.setAdjectiveTerminationType(AdjectiveTerminationType.ONE_TERMINATION);
+            builder.setPartOfSpeechDetails(adBuilder.build());
+        }
+    }),
     TWO_TERMINATION(Set.of("two-termination"), builder ->  {
         if( builder.getPartOfSpeechDetails() instanceof AdjectiveDetails details) {
             details = details.toBuilder().setAdjectiveTerminationType(AdjectiveTerminationType.TWO_TERMINATION).build();
