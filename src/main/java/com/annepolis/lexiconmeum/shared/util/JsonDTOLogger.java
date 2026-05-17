@@ -1,10 +1,10 @@
 package com.annepolis.lexiconmeum.shared.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @Component
 public class JsonDTOLogger implements JsonLogger{
@@ -21,7 +21,7 @@ public class JsonDTOLogger implements JsonLogger{
         if (logger.isDebugEnabled()) {
             try {
                 logger.debug("DTO JSON: {}", mapper.writeValueAsString(dto));
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 logger.warn("Could not serialize DTO", e);
             }
         }

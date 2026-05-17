@@ -7,11 +7,11 @@ import com.annepolis.lexiconmeum.shared.model.grammar.*;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +79,7 @@ public class POSVerbParser implements PartOfSpeechParser {
             try {
                 if (parserSupport.isValidFormNode(formNode, PartOfSpeech.VERB.getInflectionTypeLower())) {
                    
-                    String formValue = formNode.path(FORM.get()).asText();
+                    String formValue = formNode.path(FORM.get()).asString();
                     List<String> tags = collectTags(formNode);
 
                     Optional<Conjugation> optionalConjugation = buildConjugation(formValue, tags);
@@ -178,7 +178,7 @@ public class POSVerbParser implements PartOfSpeechParser {
     private List<String> collectTags(JsonNode formNode) {
         List<String> tags = new ArrayList<>();
         for (JsonNode tag : formNode.path(TAGS.get())) {
-            tags.add(tag.asText().toLowerCase());
+            tags.add(tag.asString().toLowerCase());
         }
         return tags;
     }

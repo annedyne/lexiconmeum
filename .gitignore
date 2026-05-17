@@ -4,38 +4,14 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-
 ### IntelliJ IDEA ###
 .idea
 *.iws
 *.iml
 *.ipr
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
 ### VS Code ###
 .vscode/
-HELP.md
-../../../Library/Application Support/JetBrains/IntelliJIdea2023.2/scratches/jsonExample.jsonl
-
-*.log
-*.versionsBackup
 
 ### Local OS metadata ###
 .DS_Store
@@ -44,5 +20,6 @@ HELP.md
 ### Local runtime output ###
 logs/
 
-### Node tooling ###
-node_modules/
+### Stuff that has been and could get generated in project directory
+*.log
+*.versionsBackup

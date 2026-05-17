@@ -4,10 +4,10 @@ import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.Declension;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
 
 import java.util.Optional;
 
@@ -58,10 +58,10 @@ public class POSNounParser implements PartOfSpeechParser {
     }
 
     Optional<Declension> buildDeclension(JsonNode formNode, ParseMode mode) {
-        Declension.Builder builder = new Declension.Builder(formNode.path(FORM.get()).asText());
+        Declension.Builder builder = new Declension.Builder(formNode.path(FORM.get()).asString());
 
         for (JsonNode tag : formNode.path(TAGS.get())) {
-            parserSupport.applyToInflection(builder, tag.asText(), logger);
+            parserSupport.applyToInflection(builder, tag.asString(), logger);
         }
 
         return new SafeBuilder<>(DECLENSION.get(), builder::build).build(logger, mode);
@@ -72,9 +72,9 @@ public class POSNounParser implements PartOfSpeechParser {
         JsonNode tags = formNode.path(TAGS.get());
         for (int i = 0; i < tags.size(); i++) {
             //if first tag is CANONICAL then next is gender
-            if (CANONICAL.name().equalsIgnoreCase(tags.get(i).asText()) && i + 1 < tags.size()) {
-                lexemeBuilder.addCanonicalForm(formNode.path(FORM.get()).asText());
-                parserSupport.applyToLexeme(tags.get(i + 1).asText(), lexemeBuilder, logger);
+            if (CANONICAL.name().equalsIgnoreCase(tags.get(i).asString()) && i + 1 < tags.size()) {
+                lexemeBuilder.addCanonicalForm(formNode.path(FORM.get()).asString());
+                parserSupport.applyToLexeme(tags.get(i + 1).asString(), lexemeBuilder, logger);
             }
         }
     }

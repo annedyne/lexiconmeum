@@ -7,10 +7,10 @@ import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveTerminationType;
 import com.annepolis.lexiconmeum.testsupport.TestSupport;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
 
 import java.io.IOException;
 import java.util.*;
@@ -130,8 +130,8 @@ class AgreementTableMapperTest {
             Map<Set<String>, String> out = new LinkedHashMap<>();
             for (JsonNode node : agreements) {
                 Set<String> genders = new LinkedHashSet<>();
-                for (JsonNode g : node.get(GENDERS)) genders.add(g.asText());
-                String form = node.get(INFLECTIONS).get(number.name()).get(grammaticalCase.name()).asText();
+                for (JsonNode g : node.get(GENDERS)) genders.add(g.asString());
+                String form = node.get(INFLECTIONS).get(number.name()).get(grammaticalCase.name()).asString();
                 out.put(genders, form);
             }
             return out;

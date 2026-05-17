@@ -7,15 +7,14 @@ import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.ParticipleDeclensionSet;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.VerbDetails;
 import com.annepolis.lexiconmeum.shared.model.inflection.Participle;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,13 +39,12 @@ class ParticipleTableMapperTest {
         List<ParticipleDeclensionSet> participleSets = new ArrayList<>();
 
         // Build a participle set for each voice/tense
-        for (Iterator<String> it = root.path("participles").fieldNames(); it.hasNext(); ) {
-            String tenseKey = it.next();
+        for (String tenseKey : root.path("participles").propertyNames()) {
             JsonNode tenseNode = root.path("participles").path(tenseKey);
 
-            String voiceStr = tenseNode.path("voice").asText();
-            String tenseStr = tenseNode.path("tense").asText();
-            String baseForm = tenseNode.path("baseForm").asText();
+            String voiceStr = tenseNode.path("voice").asString();
+            String tenseStr = tenseNode.path("tense").asString();
+            String baseForm = tenseNode.path("baseForm").asString();
 
             // build the declensions for this participle set
             List<Participle> inflections = buildParticipleInflections(tenseNode);
@@ -86,22 +84,19 @@ class ParticipleTableMapperTest {
         List<Participle> inflections = new ArrayList<>();
 
         JsonNode inflectionsNode = tenseNode.path("inflections");
-        Iterator<String> keys = inflectionsNode.fieldNames();
-
-        while (keys.hasNext()) {
-            String key = keys.next();
+        for (String key : inflectionsNode.propertyNames()) {
             JsonNode entry = inflectionsNode.get(key);
-            String form = entry.path("form").asText();
+            String form = entry.path("form").asString();
 
             JsonNode gendersNode = entry.path("genders");
             Participle.Builder builder = new Participle.Builder(form);
             for (JsonNode genderNode : gendersNode) {
-                builder.addGender(GrammaticalGender.valueOf(genderNode.asText()));
+                builder.addGender(GrammaticalGender.valueOf(genderNode.asString()));
             }
 
-            String number = entry.path("number").asText();
+            String number = entry.path("number").asString();
             builder.setNumber(GrammaticalNumber.valueOf(number));
-            String grammaticalCase = entry.path("grammaticalCase").asText();
+            String grammaticalCase = entry.path("grammaticalCase").asString();
             builder.setGrammaticalCase(GrammaticalCase.valueOf(grammaticalCase));
 
             inflections.add(builder.build());

@@ -1,14 +1,14 @@
 package com.annepolis.lexiconmeum.ingest.wiktionary;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import com.fasterxml.jackson.core.io.JsonEOFException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -53,9 +53,9 @@ class WiktionaryLexicalDataParser {
                 JsonNode root = mapper.readTree(line);
                 processJson(root, lexemeConsumer);
 
-            }  catch(JsonEOFException eofException) {
-                logger.error(LogMsg.JSONL_FORMAT_ERROR, eofException);
-                throw eofException;
+            }  catch(JacksonException jacksonException) {
+                logger.error(LogMsg.JSONL_FORMAT_ERROR, jacksonException);
+                throw jacksonException;
             }
         }
     }
@@ -100,7 +100,7 @@ class WiktionaryLexicalDataParser {
             logger.trace(PARSER_DELEGATION_ISSUE, LogMsg.MISSING_NODES, HEAD_TEMPLATES.name() + NAME.name());
             return Optional.empty();
         } else if ("head".equalsIgnoreCase(name)) {
-            String arg2 = firstTemplate.path("args").path("2").asText();
+            String arg2 = firstTemplate.path("args").path("2").asString();
             if (arg2.isEmpty()) {
                 logger.trace(PARSER_DELEGATION_ISSUE, LogMsg.MISSING_NODES, HEAD_TEMPLATES.name() + ARGS.name() );
                 return Optional.empty();

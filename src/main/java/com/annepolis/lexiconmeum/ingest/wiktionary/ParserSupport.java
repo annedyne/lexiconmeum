@@ -6,15 +6,16 @@ import com.annepolis.lexiconmeum.shared.model.Sense;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionBuilder;
 import com.annepolis.lexiconmeum.shared.util.Utilities;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.*;
+
 /**
  * Helper lass for common POSParser-specific parsing tasks
  */
@@ -51,9 +52,9 @@ public class ParserSupport {
 
     public Optional<POSPrimaryKeyData> extractPrimaryKeyData(JsonNode root, Logger logger){
         // Get primary keys
-        String lemma = root.path(WORD.get()).asText();
-        String posTag = root.path(PART_OF_SPEECH.get()).asText();
-        String etymologyNumber = normalizeEtymologyNumber(root.path(ETYMOLOGY_NUMBER.get()).asText());
+        String lemma = root.path(WORD.get()).asString();
+        String posTag = root.path(PART_OF_SPEECH.get()).asString();
+        String etymologyNumber = normalizeEtymologyNumber(root.path(ETYMOLOGY_NUMBER.get()).asString());
 
         Optional<PartOfSpeech> optionalPartOfSpeech = PartOfSpeech.resolveWithWarning(posTag, logger);
         if (optionalPartOfSpeech.isEmpty()) {
@@ -71,12 +72,12 @@ public class ParserSupport {
     }
 
     public boolean isValidFormNode(JsonNode formNode, String inflectionType) {
-        return formNode.path(SOURCE.get()).asText().equals(inflectionType)
-                && !ParserConstants.COMMON_FORM_BLACKLIST.contains(formNode.path(FORM.get()).asText());
+        return formNode.path(SOURCE.get()).asString().equals(inflectionType)
+                && !ParserConstants.COMMON_FORM_BLACKLIST.contains(formNode.path(FORM.get()).asString());
     }
 
     public boolean isValidForm(JsonNode formNode){
-       return !ParserConstants.COMMON_FORM_BLACKLIST.contains(formNode.path(FORM.get()).asText());
+       return !ParserConstants.COMMON_FORM_BLACKLIST.contains(formNode.path(FORM.get()).asString());
     }
 
     /**
@@ -90,8 +91,8 @@ public class ParserSupport {
             JsonNode tags = formNode.path(TAGS.get());
             if (tags.isArray()) {
                 for (JsonNode tag : tags) {
-                    if (CANONICAL.name().equalsIgnoreCase(tag.asText())) {
-                        builder.addCanonicalForm(formNode.path(FORM.get()).asText());
+                    if (CANONICAL.name().equalsIgnoreCase(tag.asString())) {
+                        builder.addCanonicalForm(formNode.path(FORM.get()).asString());
                     }
                 }
             }
@@ -107,8 +108,8 @@ public class ParserSupport {
         if (!tags.isArray()) return;
 
         for (JsonNode tag : tags) {
-            if (CANONICAL.name().equalsIgnoreCase(tag.asText())) {
-                lexemeBuilder.addCanonicalForm(formNode.path(FORM.get()).asText());
+            if (CANONICAL.name().equalsIgnoreCase(tag.asString())) {
+                lexemeBuilder.addCanonicalForm(formNode.path(FORM.get()).asString());
                 break;
             }
         }
@@ -129,7 +130,7 @@ public class ParserSupport {
         if(tags.isArray() && !tags.isEmpty()){
             for(JsonNode tag : tags){
                 // Route all sense-level tags through the facade
-                lexicalTagResolver.applyToLexeme(tag.asText(), lexemeBuilder, logger);
+                lexicalTagResolver.applyToLexeme(tag.asString(), lexemeBuilder, logger);
             }
         }
 
@@ -137,7 +138,7 @@ public class ParserSupport {
         if (glosses.isArray() && !glosses.isEmpty()) {
 
             for(JsonNode gloss: glosses){
-                builder.addGloss(gloss.asText());
+                builder.addGloss(gloss.asString());
             }
         }
         return builder.build();
@@ -159,7 +160,7 @@ public class ParserSupport {
     List<String> collectTags(JsonNode tagParentNode) {
         List<String> tags = new ArrayList<>();
         for (JsonNode tag : tagParentNode.path(TAGS.get())) {
-            tags.add(tag.asText().toLowerCase());
+            tags.add(tag.asString().toLowerCase());
         }
         return tags;
     }

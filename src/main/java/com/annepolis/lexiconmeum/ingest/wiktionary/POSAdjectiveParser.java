@@ -8,10 +8,10 @@ import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveDeta
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveTerminationType;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
 
 import java.util.List;
 import java.util.Optional;
@@ -106,10 +106,10 @@ public class POSAdjectiveParser implements PartOfSpeechParser {
         if (!formNode.has(SOURCE.get())) {
             return false;
         }
-        String source = formNode.path(SOURCE.get()).asText();
+        String source = formNode.path(SOURCE.get()).asString();
 
         // wrong inflection table header or pos in wiktionary data
-        String formValue = formNode.path(FORM.get()).asText();
+        String formValue = formNode.path(FORM.get()).asString();
 
         if (!DECLENSION.get().equalsIgnoreCase(source) && !INFLECTION.get().equalsIgnoreCase(source)){
             logger.trace(ParserSupport.LogMsg.UNEXPECTED_INFLECTION_SOURCE, source, formValue);
@@ -119,17 +119,17 @@ public class POSAdjectiveParser implements PartOfSpeechParser {
 
     // Build adjective inflected form
     Agreement buildAgreement(JsonNode formNode) {
-        Agreement.Builder builder = new Agreement.Builder(formNode.path(FORM.get()).asText());
+        Agreement.Builder builder = new Agreement.Builder(formNode.path(FORM.get()).asString());
 
         for (JsonNode tag : formNode.path(TAGS.get())) {
-            parserSupport.applyToInflection(builder, tag.asText(), logger);
+            parserSupport.applyToInflection(builder, tag.asString(), logger);
         }
 
         return builder.build();
     }
 
     Optional<StagedAdjectiveDegreeData> parseDegreeForms(JsonNode root) {
-        String lemma = root.path(WORD.get()).asText();
+        String lemma = root.path(WORD.get()).asString();
 
         // Build Lexeme from root of adjective degree
         Optional<Lexeme> optionalLexeme = parserSupport.initLexemeBuilderFromRoot(root, logger)
@@ -169,7 +169,7 @@ public class POSAdjectiveParser implements PartOfSpeechParser {
     // extract parent from formOf node
     Optional<String> extractParentLemma(JsonNode formOfArray){
         if (formOfArray != null && !formOfArray.isEmpty()) {
-            String text = formOfArray.get(0).path(WORD.get()).asText();
+            String text = formOfArray.get(0).path(WORD.get()).asString();
             return !text.isEmpty() ? Optional.of(text) : Optional.empty();
         }
 
