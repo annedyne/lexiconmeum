@@ -4,9 +4,9 @@ import com.annepolis.lexiconmeum.ingest.tagmapping.EsseFormProvider;
 import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.io.ClassPathResource;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -39,6 +39,10 @@ public class JsonTestDataManager {
          parserRegistry.put(POSParserKey.ADJECTIVE_SUPERLATIVE, adjectiveParser);
          parserRegistry.put(POSParserKey.DETERMINER, adjectiveParser);
          parserRegistry.put(POSParserKey.PRONOUN, adjectiveParser);
+    }
+
+    public static JsonTestDataManager getInstance() {
+        return INSTANCE;
     }
 
     /**
@@ -116,6 +120,12 @@ public class JsonTestDataManager {
         return getStagedLexeme(word, root);
     }
 
+    public Lexeme getParsedAdjectiveLexeme(String word, String filename) throws IOException {
+        JsonNode root = getRealNode(word, PartOfSpeech.ADJECTIVE ,filename);
+
+        return getStagedLexeme(word, root);
+    }
+
     private Lexeme getStagedLexeme(String word, JsonNode root) {
         WiktionaryStagingServiceStub stagingStub = getStagingServiceStub();
 
@@ -135,7 +145,7 @@ public class JsonTestDataManager {
         // Process the required filename
         List<JsonNode> nodes = loadFile(filename);
         Optional<JsonNode> match = nodes.stream()
-                .filter(n -> n.path("word").asText().equalsIgnoreCase(word) && n.path("pos").asText().equals(pos.getTag() ))
+                .filter(n -> n.path("word").asString().equalsIgnoreCase(word) && n.path("pos").asString().equals(pos.getTag() ))
                 .findFirst();
         if (match.isPresent()) return match.get();
 
@@ -143,7 +153,7 @@ public class JsonTestDataManager {
         for (String file : additionalFilenames) {
             nodes = loadFile(file);
             match = nodes.stream()
-                    .filter(n -> n.path("word").asText().equalsIgnoreCase(word) && n.path("pos").asText().equals(pos.getTag()) )
+                    .filter(n -> n.path("word").asString().equalsIgnoreCase(word) && n.path("pos").asString().equals(pos.getTag()) )
                     .findFirst();
             if (match.isPresent()) return match.get();
         }

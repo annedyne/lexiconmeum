@@ -1,19 +1,19 @@
 package com.annepolis.lexiconmeum.webapi.bff.textsearch;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.client.RestClient;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import static com.annepolis.lexiconmeum.webapi.ApiRoutes.PREFIX;
 import static com.annepolis.lexiconmeum.webapi.ApiRoutes.SUFFIX;
@@ -41,7 +41,8 @@ class TextSearchControllerIntegrationTest {
     private int port;
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    private RestClient restClient;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -53,7 +54,7 @@ class TextSearchControllerIntegrationTest {
     void testPrefixSearchEndpoint() {
         String url = getFullBaseUrl() + PREFIX + "?prefix=ama";
 
-        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
         logger.info(response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
@@ -62,7 +63,7 @@ class TextSearchControllerIntegrationTest {
     void testSuffixSearchEndpoint() {
         String url = getFullBaseUrl() + SUFFIX + "?suffix=re";
 
-        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
         logger.info(response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
@@ -71,7 +72,7 @@ class TextSearchControllerIntegrationTest {
     void testTextSuggestionResultClientLimit() throws JsonProcessingException {
         String url = getFullBaseUrl() + PREFIX + "?prefix=ama" + "&limit=12";
 
-        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
         String result = response.getBody();
         assertNotNull(result);
 
@@ -86,7 +87,7 @@ class TextSearchControllerIntegrationTest {
     void testTextSuggestionResultClientLimitMax() throws JsonProcessingException {
         String url = getFullBaseUrl() + PREFIX + "?prefix=ama" + "&limit=100";
 
-        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
         String result = response.getBody();
         assertNotNull(result);
 
@@ -101,7 +102,7 @@ class TextSearchControllerIntegrationTest {
     void testTextSuggestionResultLimitDefault() throws JsonProcessingException {
         String url = getFullBaseUrl() + PREFIX + "?prefix=am";
 
-        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
         String result = response.getBody();
         assertNotNull(result);
 

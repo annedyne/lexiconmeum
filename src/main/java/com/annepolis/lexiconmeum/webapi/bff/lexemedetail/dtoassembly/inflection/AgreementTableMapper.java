@@ -19,15 +19,15 @@ public class AgreementTableMapper  implements InflectionTableMapper {
         return  generateDTO(lexeme.getInflections(), false);
     }
 
-    AgreementTableDTO toInflectionTableDTO(List<Inflection> inflections,  boolean twoTermination) {
-       return generateDTO(inflections, twoTermination);
+    AgreementTableDTO toInflectionTableDTO(List<Inflection> inflections,  boolean twoOrOneTermination) {
+       return generateDTO(inflections, twoOrOneTermination);
     }
 
-    private AgreementTableDTO generateDTO(List<Inflection> inflections,  boolean twoTermination) {
+    private AgreementTableDTO generateDTO(List<Inflection> inflections,  boolean twoOrOneTermination) {
         Map<Set<GrammaticalGender>,
                 Map<GrammaticalNumber, Map<GrammaticalCase, String>>> table = new LinkedHashMap<>();
 
-        generateInflectionTable(inflections, twoTermination, table);
+        generateInflectionTable(inflections, twoOrOneTermination, table);
 
         List<AgreementEntryDTO> entries = table.entrySet().stream()
                 .map(e -> {
@@ -47,7 +47,7 @@ public class AgreementTableMapper  implements InflectionTableMapper {
 
     private static void generateInflectionTable(
             List<Inflection> inflections,
-            boolean twoTermination,
+            boolean twoOrOneTermination,
             Map<Set<GrammaticalGender>, Map<GrammaticalNumber, Map<GrammaticalCase, String>>> table
     ) {
         if (inflections == null || inflections.isEmpty()) {
@@ -60,23 +60,24 @@ public class AgreementTableMapper  implements InflectionTableMapper {
                 .forEach(agreement -> {
                     Set<GrammaticalGender> genders = agreement.getGenders();
                     List<Set<GrammaticalGender>> genderGroups;
-
-                    if (twoTermination && genders.containsAll(Set.of(
+                    // If all three genders are present, but adjective is not three-termination --
+                    if (twoOrOneTermination && genders.containsAll(Set.of(
                             GrammaticalGender.MASCULINE,
                             GrammaticalGender.FEMININE,
                             GrammaticalGender.NEUTER))) {
-                        // 3rd decl: split M+F vs N
+                        // Merge masculine and feminine into one gender group.
                         genderGroups = List.of(
                                 Set.of(GrammaticalGender.MASCULINE, GrammaticalGender.FEMININE),
                                 Set.of(GrammaticalGender.NEUTER)
                         );
-                    } else if (!twoTermination) {
-                        // 1st/2nd: expand into singletons
+                    } else if (!twoOrOneTermination) {
+                        // if it's a three termination (1st or 2nd declension)
+                        //
                         genderGroups = genders.stream()
                                 .map(Set::of)
                                 .toList();
                     } else {
-                        // otherwise, keep the full set
+                        // otherwise, just use sets as they are in the data
                         genderGroups = List.of(new TreeSet<>(genders));
                     }
 

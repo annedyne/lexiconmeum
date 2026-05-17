@@ -7,10 +7,10 @@ import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.ParticipleDec
 import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.inflection.Participle;
 import com.annepolis.lexiconmeum.shared.util.Utilities;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +43,7 @@ public class POSParticipleParser implements PartOfSpeechParser {
 
      Optional<StagedParticipleData> parseParticipleEntry(JsonNode root) {
 
-        String participleLemma = root.path(WORD.get()).asText();
+        String participleLemma = root.path(WORD.get()).asString();
 
         // Build the agreement/declension attributes - case inflections.
         List<Participle> inflections = parseParticipleInflections(root);
@@ -57,7 +57,7 @@ public class POSParticipleParser implements PartOfSpeechParser {
             return deriveParticipleDataFromSenseNodeFormOfTag(participleLemma, senseNode, inflections);
         } else {
             //If form_of does not exist, pull data from etymology_text
-            String etymologyText = root.path(ETYMOLOGY_TEXT.get()).asText();
+            String etymologyText = root.path(ETYMOLOGY_TEXT.get()).asString();
             return deriveParticipleDataFromEtymologyText(participleLemma, etymologyText, inflections);
         }
     }
@@ -86,7 +86,7 @@ public class POSParticipleParser implements PartOfSpeechParser {
     ) {
         // NB: Assuming the same tags for all senses for now
         JsonNode formOfArray = senseNode.path(FORM_OF.get());
-        String parentLemmaWithMacrons = formOfArray.get(0).path(WORD.get()).asText();
+        String parentLemmaWithMacrons = formOfArray.get(0).path(WORD.get()).asString();
         String parentLemma = removeMacrons(parentLemmaWithMacrons);
 
         Conjugation.Builder conjBuilder = new Conjugation.Builder(parentLemmaWithMacrons);
@@ -171,10 +171,10 @@ public class POSParticipleParser implements PartOfSpeechParser {
 
     // Build adjective inflected form
     Participle buildParticipleInflection(JsonNode formNode) {
-        Participle.Builder builder = new Participle.Builder(formNode.path(FORM.get()).asText());
+        Participle.Builder builder = new Participle.Builder(formNode.path(FORM.get()).asString());
 
         for (JsonNode tag : formNode.path(TAGS.get())) {
-            parserSupport.applyToInflection(builder, tag.asText(), logger);
+            parserSupport.applyToInflection(builder, tag.asString(), logger);
         }
 
         return builder.build();
@@ -218,7 +218,7 @@ public class POSParticipleParser implements PartOfSpeechParser {
     }
 
     boolean isValidParticipleForm(JsonNode formNode){
-        return formNode.path(SOURCE.get()).asText().equals(DECLENSION.get())
-                && !ParserConstants.COMMON_FORM_BLACKLIST.contains(formNode.path(FORM.get()).asText());
+        return formNode.path(SOURCE.get()).asString().equals(DECLENSION.get())
+                && !ParserConstants.COMMON_FORM_BLACKLIST.contains(formNode.path(FORM.get()).asString());
     }
 }

@@ -5,19 +5,19 @@ import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.webapi.ApiRoutes;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -41,7 +41,7 @@ class LexemeDetailControllerIntegrationTest {
     private int port;
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    private RestClient restClient;
 
     String getFullBaseUrl(){
         return baseUrl + ":" + port + path;
@@ -58,7 +58,7 @@ class LexemeDetailControllerIntegrationTest {
                 .queryParam("lexemeId", lexemeId.toString())
                 .toUriString();
 
-        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
         ObjectMapper objectMapper = new ObjectMapper();
         Object jsonObject = objectMapper.readValue(response.getBody(), Object.class);
         String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
@@ -78,7 +78,7 @@ class LexemeDetailControllerIntegrationTest {
                 .buildAndExpand(lexemeId)
                 .toUriString();
 
-        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
         ObjectMapper objectMapper = new ObjectMapper();
         Object jsonObject = objectMapper.readValue(response.getBody(), Object.class);
         String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
@@ -97,7 +97,7 @@ class LexemeDetailControllerIntegrationTest {
                 .buildAndExpand(lexemeId)
                 .toUriString();
 
-        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
         ObjectMapper objectMapper = new ObjectMapper();
         Object jsonObject = objectMapper.readValue(response.getBody(), Object.class);
         String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
@@ -117,7 +117,7 @@ class LexemeDetailControllerIntegrationTest {
                 .buildAndExpand(lexemeId)
                 .toUriString();
 
-        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
         ObjectMapper objectMapper = new ObjectMapper();
         Object jsonObject = objectMapper.readValue(response.getBody(), Object.class);
         String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
@@ -139,7 +139,7 @@ class LexemeDetailControllerIntegrationTest {
                 .buildAndExpand(lexemeId)
                 .toUriString();
 
-        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
         logger.info("Type mismatch error message: {}", response.getBody());
@@ -155,7 +155,7 @@ class LexemeDetailControllerIntegrationTest {
                 .buildAndExpand(nonExistentId)
                 .toUriString();
 
-        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertTrue(response.getBody().contains("Lexeme not found"), "Body should contain the error message");
