@@ -144,9 +144,15 @@ public class POSAdjectiveParser implements PartOfSpeechParser {
         JsonNode senseNode = root.path(SENSES.get()).get(0);
 
         // extract info for linking to positive degree form
-        Optional<String> optionalParentLemmaWithMacrons = extractParentLemma(senseNode.path(FORM_OF.get()));
+        Optional<String> optionalParentLemmaWithMacrons = extractParentLemmaFromFormOfArray(senseNode.path(FORM_OF.get()));
+
         if(optionalParentLemmaWithMacrons.isEmpty()){
-            return Optional.empty();
+            // if no form-of tag, this may be a 'canonical' as well as a superlative
+            // Try to extract positive parent from elsewhere
+            optionalParentLemmaWithMacrons = extractPositiveParentFromRoot(root);
+            if(optionalParentLemmaWithMacrons.isEmpty()){
+                return Optional.empty();
+            }
         }
         String parentLemmaWithMacrons = optionalParentLemmaWithMacrons.get();
         String parentLemma = parserSupport.normalizeDiacritics(parentLemmaWithMacrons);
@@ -167,7 +173,7 @@ public class POSAdjectiveParser implements PartOfSpeechParser {
     }
 
     // extract parent from formOf node
-    Optional<String> extractParentLemma(JsonNode formOfArray){
+    Optional<String> extractParentLemmaFromFormOfArray(JsonNode formOfArray){
         if (formOfArray != null && !formOfArray.isEmpty()) {
             String text = formOfArray.get(0).path(WORD.get()).asString();
             return !text.isEmpty() ? Optional.of(text) : Optional.empty();
@@ -175,6 +181,12 @@ public class POSAdjectiveParser implements PartOfSpeechParser {
 
         return Optional.empty();
     }
+
+    Optional<String> extractPositiveParentFromRoot(JsonNode root){
+        String positive = root.path(HEAD_TEMPLATES.get()).path(0).path(ARGS.get()).path(WiktionaryLexicalDataJsonKey.POSITIVE.get()).asString();
+        return positive.isEmpty() ? Optional.empty() : Optional.of(positive);
+    }
+
 
     // resolve all tags into dummy Agreement builder and extract degree from builder
     Optional<GrammaticalDegree> extractGrammaticalDegreeFromSenseNode(JsonNode senseNode){
@@ -184,4 +196,6 @@ public class POSAdjectiveParser implements PartOfSpeechParser {
         GrammaticalDegree degree = agreementBuilder.build().getDegree();
         return degree != null ? Optional.of(degree) : Optional.empty();
     }
+
+
 }
