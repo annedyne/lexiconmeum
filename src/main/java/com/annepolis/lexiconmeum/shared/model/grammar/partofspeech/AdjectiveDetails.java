@@ -40,7 +40,8 @@ public final class AdjectiveDetails implements PartOfSpeechDetails {
         }
 
         public Builder addDegreeInflectionSet(AdjectiveDegreeAgreementSet degreeInflectionSet){
-            degreeInflectionSets.put(degreeInflectionSet.getGrammaticalDegree(), degreeInflectionSet);
+
+            degreeInflectionSets.putIfAbsent(degreeInflectionSet.getGrammaticalDegree(), degreeInflectionSet);
             return this;
         }
 
