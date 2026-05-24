@@ -32,7 +32,7 @@ import java.util.UUID;
 
         boolean matches = expectedType.equals(lexeme.getPartOfSpeech());
         if (!matches) {
-            throw new LexemeTypeMismatchException("Expected lexeme of type " + expectedType.name());
+            throw new LexemeTypeMismatchException("Expected lexeme of type " + expectedType.name(), lexemeId);
         }
 
         return lexeme;
