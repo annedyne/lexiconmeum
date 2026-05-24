@@ -1,9 +1,11 @@
 package com.annepolis.lexiconmeum.webapi.bff.textsearch.app;
 
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.UUID;
 
+@Schema(description = "Represents a single lexeme suggestion returned by the text search API.")
 public class SuggestionResponse {
     private final String word;
     private final UUID lexemeId;
