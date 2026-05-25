@@ -4,6 +4,7 @@ import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -14,8 +15,8 @@ import java.util.Map;
  * Table format:
  * Map<Number (e.g. "SINGULAR"), Map<GrammaticalCase (e.g. "NOMINATIVE"), Form (e.g. "pōculum">>
  */
-class DeclensionTableDTO implements InflectionTableDTO {
-
+@Schema(description = "Contains declensions for a given noun")
+public class DeclensionTableDTO implements InflectionTableDTO {
     @JsonIgnore
     private Map<GrammaticalNumber, Map<GrammaticalCase, String>> table  = new EnumMap<>(GrammaticalNumber.class);
 
