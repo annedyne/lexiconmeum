@@ -53,7 +53,7 @@ This roadmap outlines the next planned stages of work for the project. It is int
 **Goal:** Reduce boot-time work and separate data preparation from API serving.
 
 - [ ] Extract parsing into a dedicated service or CLI workflow
-- [ ] Generate and store parsed output as a reusable snapshot
+- [ ] Generate and store parsed output as a reusable snapshot (Ex: Kryo)
 - [ ] Load the API from pre-parsed data to reduce startup latency
 - [ ] Support on-demand data refresh or versioned data switching
 
@@ -61,7 +61,8 @@ This roadmap outlines the next planned stages of work for the project. It is int
 
 **Goal:** Add targeted infrastructure and runtime improvements without overcomplicating the current architecture.
 
-- [ ] Add a public-facing architecture diagram and reference it from `README.md`
+- [X] Add a public-facing architecture diagram and reference it from `README.md`
+- [ ] Run backend tests in CI
 - [ ] Add support for data refresh via webhook, polling, or admin endpoint
 - [ ] Experiment with Redis or off-heap cache options for lexical data
 - [ ] Containerize parser, API, and frontend for more consistent local and development environments
