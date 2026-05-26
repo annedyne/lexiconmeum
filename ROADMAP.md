@@ -1,76 +1,75 @@
-# 📘 LexiconMeum Roadmap
+# LexiconMeum Roadmap
 
-A staged development plan to balance MVP delivery, engineering quality, and learning goals.
+This roadmap outlines the next planned stages of work for the project. It is intended to show current priorities clearly without overstating project maturity.
 
----
+## Phase 1 — Product Completeness and UX Polish
 
-## ✅ Phase 1 – MVP Completion (User-Facing Polish)
+**Goal:** Improve feature completeness and frontend usability on top of the current backend/API foundation.
 
-**Goal:** Deliver a usable, professional-feeling interface that serves basic learner needs.
+### Dictionary and grammar coverage
 
-- [ ] Add support for all word types (e.g. adjectives, adverbs, etc.)
+- [ ] Add support for remaining word-type gaps where needed
     - [x] nouns
     - [x] verbs
     - [x] adjectives
     - [x] adverbs
-    - [x] prepositions 
+    - [x] prepositions
     - [x] conjunctions
-    - [x] pronouns 
-- [ ] Complete verb support (add passive voice and any missing tenses/moods)
-    - [x] Add Participles to Detail API
-    - [x] Add Passive Inflections to Detail API 
-- [X] Include positive, comparative, and superlative adjective forms in a single detail response 
-- [ ] Fix dropdown arrow navigation in search field
+    - [x] pronouns
+
+### Verb and adjective detail completeness
+
+- [ ] Complete remaining verb support, including passive voice and any missing tense or mood combinations
+    - [x] Add participles to the detail API
+    - [x] Add passive inflections to the detail API
+- [x] Include positive, comparative, and superlative adjective forms in a single detail response
+
+### Frontend polish
+
+- [ ] Fix dropdown arrow-key navigation in the search field
 - [ ] Automatically clear error messages when input changes or retry succeeds
 
----
+## Phase 1.5 — Frontend Deployment
 
-## 🔁 Phase 1.5 – Front-End Deployment Automation
+**Goal:** Make frontend deployment more predictable and easier to verify.
 
-**Goal:** Match the backend's seamless deploy process to reduce friction and risk.
+- [x] Automate frontend build and deployment
+- [ ] Use `rsync` or another safe deletion strategy to avoid accidental file loss
+- [ ] Version build output for traceability
+- [ ] Make deploy logs clearly indicate success or failure
+- [ ] Align Vite output with server/runtime expectations
 
-- [x] Automate front-end build and deployment (GitHub Actions or local script)
-- [ ] Use `rsync` or safe delete strategy to prevent accidental file loss
-- [ ] Version build output for traceability (e.g., `lexiconmeum-frontend-20250725`)
-- [ ] Ensure deploy logs clearly show success/failure
-- [ ] Match Vite output to server expectations
+## Phase 1.6 — Frontend Test Coverage
 
----
-
-## 🧪 Phase 1.6 – Front-End Testing
+**Goal:** Improve confidence in UI behavior and reduce regression risk.
 
 - [x] Set up Vitest for unit testing
-- [x] Write tests for suggestion box logic, error handling, etc.
-- [ ] Test keyboard navigation behavior in dropdown
-- [ ] Run tests in CI (GitHub Actions or locally)
+- [x] Add tests for suggestion-box logic and error handling
+- [ ] Add keyboard navigation tests for the dropdown
+- [ ] Run frontend tests in CI
 
----
+## Phase 2 — Startup Performance and Service Separation
 
-## ⚙️ Phase 2 – Performance & Service Structure
+**Goal:** Reduce boot-time work and separate data preparation from API serving.
 
-**Goal:** Improve responsiveness and prepare for future reliability and redundancy.
+- [ ] Extract parsing into a dedicated service or CLI workflow
+- [ ] Generate and store parsed output as a reusable snapshot (Ex: Kryo)
+- [ ] Load the API from pre-parsed data to reduce startup latency
+- [ ] Support on-demand data refresh or versioned data switching
 
-- [ ] Extract parser into a dedicated service (or CLI) to isolate boot-time logic
-- [ ] Generate and store parsed output as a snapshot JSON file for faster boot time
-- [ ] Let main API load from pre-parsed file to reduce startup latency
-- [ ] Enable on-demand data refresh or versioned data switching
+## Phase 3 — Scalability and Operations
 
----
+**Goal:** Add targeted infrastructure and runtime improvements without overcomplicating the current architecture.
 
-## ⚙️ Phase 3 – Scalability, Redundancy & System Enhancements
-
-**Goal:** Extend the platform with targeted enhancements that improve startup time, enable redundancy, and support future scalability.
-- 
-- [ ] Create a visual architecture diagram and include it in `README.md`
+- [X] Add a public-facing architecture diagram and reference it from `README.md`
+- [ ] Run backend tests in CI
 - [ ] Add support for data refresh via webhook, polling, or admin endpoint
-- [ ] Experiment with Redis or off-heap cache for inflection storage
-- [ ] Containerize parser + API + frontend for consistent dev environment
-- [ ] Document tradeoffs and patterns used in `ARCHITECTURE.md` or blog post
+- [ ] Experiment with Redis or off-heap cache options for lexical data
+- [ ] Containerize parser, API, and frontend for more consistent local and development environments
+- [ ] Expand architecture documentation around major tradeoffs and patterns
 
----
+## Related documents
 
-## 🔗 Related
-
-- [ ] [README.md](./README.md) – Project overview and deployment notes
-- [ ] [GitHub Issues](../../issues) – Task tracking
-- [ ] [GitHub Actions](../../actions) – Deployment status
+- [README.md](README.md) — project overview and local run instructions
+- [ARCHITECTURE.md](docs/ARCHITECTURE.md) — system design and runtime flow
+- [docs/RELEASING.md](docs/RELEASING.md) — maintainer release and deployment workflow
