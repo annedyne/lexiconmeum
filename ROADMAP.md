@@ -1,6 +1,6 @@
 # LexiconMeum Roadmap
 
-This roadmap outlines the next planned stages of work for the project. It is intended to show current priorities clearly without overstating project maturity.
+This roadmap outlines the next planned stages of work for the project. 
 
 ## Phase 1 — Product Completeness and UX Polish
 
