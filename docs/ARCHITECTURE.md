@@ -21,7 +21,10 @@ tagmapping factories
 shared Lexeme domain model
         |
         v
-in-memory cache and search indexes
+in-memory cache
+        |
+        v
+trie-based search indexes + Caffeine cache
         |
         v
 webapi BFF controllers and response assemblers
@@ -100,8 +103,9 @@ Relevant package:
 This layer is responsible for:
 
 - deriving searchable forms from lexemes
-- indexing principal forms and other useful lookup forms
-- supporting prefix and suffix queries
+- indexing principal forms and other useful lookup forms in trie-based indexes
+- supporting prefix and suffix autocomplete queries
+- using Caffeine caching for repeated query/result paths
 - mapping matched results into suggestion responses
 
 ### Search tradeoffs
