@@ -45,7 +45,7 @@ class LexemeDetailController {
         @PathVariable UUID id,
         @RequestParam(name = "type", required = false) PartOfSpeech expectedType
 ) {
-    Lexeme lexeme = getLexeme(id);
+    Lexeme lexeme = findLexeme(id);
 
     if (expectedType != null && lexeme.getPartOfSpeech() != expectedType) {
         throw new LexemeTypeMismatchException("Expected " + expectedType + " but got " + lexeme.getPartOfSpeech(), lexeme.getId());
@@ -60,16 +60,15 @@ class LexemeDetailController {
         summary = "Get raw lexeme model by ID",
         description = "Returns the raw lexeme domain model as JSON. This endpoint is primarily intended for inspection, debugging, and comparison with the curated lexeme detail response, rather than for direct presentation in clients."
 )
-    Lexeme getLexeme(@RequestParam String lexemeId){
+    Lexeme getLexeme(@RequestParam UUID lexemeId){
         logger.debug("fetching lexeme: {}", lexemeId);
-        UUID uuid = UUID.fromString(lexemeId);
-        Lexeme lexeme = getLexeme(uuid);
+        Lexeme lexeme = findLexeme(lexemeId);
 
         jsonDTOLogger.logAsJson(lexeme);
         return lexeme;
     }
 
-    private Lexeme getLexeme(UUID lexemeId ){
+    private Lexeme findLexeme(UUID lexemeId ){
         return lexemeReader.getLexemeIfPresent(lexemeId)
                 .orElseThrow(() -> {
                     logger.warn("Lexeme not found: {}", lexemeId);
