@@ -8,26 +8,49 @@ LexiconMeum is a Spring Boot service that provides Latin lexical lookup APIs. Th
 
 At a high level:
 
-```text
-Wiktionary/Kaikki JSONL
-        |
-        v
-ingest/wiktionary parsers and staging
-        |
-        v
-tagmapping factories
-        |
-        v
-shared Lexeme domain model
-        |
-        v
-in-memory cache
-        |
-        v
-trie-based search indexes + Caffeine cache
-        |
-        v
-webapi BFF controllers and response assemblers
+```mermaid
+flowchart TD
+    A([Wiktionary/Kaikki JSONL]) --> B["Ingest & Parsing — ingest/wiktionary"]
+    B --> C["Tag Mapping — ingest/tagmapping"]
+    C --> D[Staging & Linking]
+    D --> E["Lexeme Domain Objects — shared/model"]
+    E --> F[("In-Memory Cache — cache/inmemory")]
+    F --> G["Trie-Based Search Indexes — webapi/bff/textsearch"]
+    F --> H["Lexeme Detail Assembly — webapi/bff/lexemedetail"]
+    G -->|Caffeine result cache| I[Autocomplete Endpoints]
+    H --> J[Detail Endpoints]
+    I --> K["REST API / BFF — webapi"]
+    J --> K
+```
+
+At request time, the two main paths through the system are:
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant Ctrl as BFF Controller
+    participant TS as Text Search
+    participant IC as In-Memory Cache
+    participant DA as Detail Assembler
+
+    Note over C,DA: Autocomplete request
+    C->>Ctrl: autocomplete query
+    Ctrl->>TS: query(prefix)
+    alt Caffeine cache hit
+        TS-->>Ctrl: cached suggestions
+    else cache miss
+        TS->>TS: query trie indexes
+        TS-->>Ctrl: suggestions
+    end
+    Ctrl-->>C: suggestion list
+
+    Note over C,DA: Lexeme detail request
+    C->>Ctrl: detail request by id
+    Ctrl->>IC: lookup(id)
+    IC-->>Ctrl: Lexeme
+    Ctrl->>DA: assemble(Lexeme)
+    DA-->>Ctrl: structured response sections
+    Ctrl-->>C: lexeme detail response
 ```
 
 
@@ -80,13 +103,15 @@ Relevant package:
 
 - `src/main/java/com/annepolis/lexiconmeum/shared/model`
 
-Important concepts include:
+### Core concepts include:
 
-- `Lexeme`
-- `Sense`
-- inflections and inflection keys
-- grammar enums for case, number, gender, person, tense, mood, voice, and degree
-- part-of-speech-specific detail types
+- **Lexeme**: The fundamental dictionary entry (e.g., _amō_). Each contains a unique ID derived from its lemma, part of speech, and etymology.
+- **Sense**: The definitions, glosses, and English translations tied to a `Lexeme`.
+- **Inflections**: The written inflected forms of a lexeme (e.g., _"amat"_).
+- **Inflection Key**: A serialized string identifying a specific grammatical slot.
+    - _Example Key:_ `ACTIVE|INDICATIVE|PRESENT|THIRD|SINGULAR`
+- **Grammar Enums**: Strongly typed Java enums enforcing valid linguistic categories (`Case`, `Number`, `Gender`, `Person`, `Tense`, `Mood`, `Voice`, `Degree`).
+- **Part-of-Speech Details**: Specific metadata models for distinct word classes (e.g., noun declensions, verb conjugations).
 
 ### Design rationale
 
@@ -103,7 +128,7 @@ Relevant package:
 This layer is responsible for:
 
 - deriving searchable forms from lexemes
-- indexing principal forms and other useful lookup forms in trie-based indexes
+- indexing principal and other useful lookup forms in trie-based indexes
 - supporting prefix and suffix autocomplete queries
 - using Caffeine caching for repeated query/result paths
 - mapping matched results into suggestion responses
@@ -192,12 +217,7 @@ This keeps parsing rules, grammar modeling, search behavior, and response shapin
 
 ## Diagrams
 
-Existing diagram sources live in:
-
-- `docs/diagrams/src/after.puml`
-- `docs/diagrams/src/textsearch_component.puml`
-
-These are useful starting points for a more public-facing architecture diagram if one is added later.
+The overview flowchart in this document is the primary architecture diagram. It is maintained inline as a Mermaid block and renders on GitHub.
 
 ## Design constraints
 
