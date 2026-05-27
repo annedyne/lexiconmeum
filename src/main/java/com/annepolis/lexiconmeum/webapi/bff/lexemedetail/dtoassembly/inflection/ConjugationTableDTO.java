@@ -1,7 +1,10 @@
 package com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.List;
 
+@Schema(name = "ConjugationTable")
 class ConjugationTableDTO implements InflectionTableDTO  {
 
     private String voice;

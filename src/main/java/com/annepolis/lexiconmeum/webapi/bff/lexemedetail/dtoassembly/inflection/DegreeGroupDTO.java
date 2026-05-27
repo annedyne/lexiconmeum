@@ -1,8 +1,11 @@
 package com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.List;
 import java.util.Optional;
 
+@Schema(description = "Contains positive, comparative, and superlative forms of a given adjective")
 class DegreeGroupDTO implements InflectionTableDTO {
 
     private final AgreementTableDTO positive;

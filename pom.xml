@@ -5,13 +5,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.8</version>
+        <version>4.0.6</version>
         <relativePath/> <!-- lookup parent from the repository -->
     </parent>
 
     <groupId>com.annepolis</groupId>
     <artifactId>lexiconmeum</artifactId>
-    <version>0.11.2</version>
+    <version>0.12.0</version>
     <name>lexiconmeum</name>
     <description>lexiconmeum</description>
 
@@ -36,9 +36,17 @@
         <dependencies>
 
             <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-bom</artifactId>
+                <version>3.0.3</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-bom</artifactId>
-                <version>2.25.3</version>
+                <version>2.26.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -47,7 +55,7 @@
             <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
-                <version>5.11.4</version>
+                <version>6.0.3</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -66,6 +74,11 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-web</artifactId>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             </dependency>
 
             <dependency>
@@ -91,12 +104,11 @@
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-api</artifactId>
             </dependency>
+
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-core</artifactId>
-                <version>2.25.3</version>
             </dependency>
-
 
             <dependency>
                 <groupId>org.springframework.boot</groupId>
@@ -107,11 +119,6 @@
                         <artifactId>spring-boot-starter-logging</artifactId> <!-- This is Logback -->
                     </exclusion>
                 </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-log4j2</artifactId> <!-- This enables Log4j2 -->
             </dependency>
 
             <!-- TEST -->

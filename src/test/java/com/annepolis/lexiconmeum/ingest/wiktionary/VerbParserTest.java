@@ -9,10 +9,10 @@ import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import tools.jackson.databind.JsonNode;
 
 import java.io.IOException;
 import java.util.ArrayList;

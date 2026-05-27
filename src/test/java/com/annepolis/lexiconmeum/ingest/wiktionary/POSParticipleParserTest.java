@@ -5,9 +5,9 @@ import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.Participle;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
 
 import java.io.IOException;
 import java.util.ArrayList;
