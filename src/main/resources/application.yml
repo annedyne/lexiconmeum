@@ -14,6 +14,12 @@ app:
 api:
   base-path: /api/v1
 
+springdoc:
+  swagger-ui:
+    path: /api/v1/swagger-ui
+  api-docs:
+    path: /api/v1/api-docs
+
 server:
   port: 8085
 
