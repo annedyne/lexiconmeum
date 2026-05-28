@@ -111,8 +111,8 @@ After deployment, verify:
 
 Useful checks:
 ```bash 
-GET /swagger-ui/index.html 
-GET /v3/api-docs 
+GET /api/v1/swagger-ui/index.html 
+GET /api/v1/api-docs 
 GET /api/v1/lexemes/autocomplete/prefix?prefix=am&limit=5
 ```
 
