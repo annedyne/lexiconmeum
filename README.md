@@ -87,8 +87,8 @@ Or build and run the JAR:
 
 OpenAPI docs are generated at runtime:
 ```bash
-GET /v3/api-docs 
-GET /swagger-ui/index.html
+GET  /api/v1/api-docs 
+GET  /api/v1/swagger-ui/index.html
 ```
 ### Autocomplete
 ```bash
