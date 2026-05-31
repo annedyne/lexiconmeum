@@ -21,6 +21,7 @@ springdoc:
     path: /api/v1/api-docs
 
 server:
+  forward-headers-strategy: native
   port: 8085
 
 logging:
