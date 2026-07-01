@@ -134,10 +134,13 @@ public class ParserSupport {
             }
         }
 
-        JsonNode glosses = senseNode.path(GLOSSES.get());
+        JsonNode glosses = senseNode.path(RAW_GLOSSES.get());
+        // Handle words with no raw glosses
+        if ( glosses.isEmpty()) {
+            glosses = senseNode.path(GLOSSES.get());
+        }
         if (glosses.isArray() && !glosses.isEmpty()) {
-
-            for(JsonNode gloss: glosses){
+            for (JsonNode gloss : glosses) {
                 builder.addGloss(gloss.asString());
             }
         }

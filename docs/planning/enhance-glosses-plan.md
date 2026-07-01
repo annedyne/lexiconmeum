@@ -68,3 +68,8 @@ But we want to properly reflect the hierarchical structure of the glosses so tha
         1. great, much, abundant, considerable (of measure, weight, quantity)
         2. (rare, of time) synonym of longus, multus 
         3. loud, powerful, strong, mighty (of voice)
+
+## Fallback to 'glosses'
+
+Not all Wiktionary sense nodes include a `raw_glosses` field (e.g. `amo`). In `buildSense`, after checking `raw_glosses`, fall back to the `glosses` array if `raw_glosses` is absent or empty. This keeps backward compatibility for entries that only have `glosses`, while preferring the richer `raw_glosses` data when available.
+

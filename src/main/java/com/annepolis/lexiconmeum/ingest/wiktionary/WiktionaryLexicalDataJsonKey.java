@@ -11,6 +11,7 @@ public enum WiktionaryLexicalDataJsonKey {
     FORM("form"),
     FORMS("forms"),
     GLOSSES("glosses"),
+    RAW_GLOSSES("raw_glosses"),
     HEAD("head"),
     HEAD_TEMPLATES("head_templates"),
     POSITIVE("positive"),
