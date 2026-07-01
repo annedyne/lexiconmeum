@@ -46,6 +46,13 @@ public class LexemeDetailResponse {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     List<DefinitionNode> definitions = new ArrayList<>();
 
+    @Schema(
+            description = "A single, concise one-line definition suitable for compact display. Omitted when null.",
+            example = "to love, like; to be fond of"
+    )
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    String shortDefinition;
+
     //INFLECTION RELATED FIELDS
     @Schema(example = "1st conjugation")
     String inflectionClass;
@@ -186,6 +193,13 @@ public class LexemeDetailResponse {
         this.definitions = definitions;
     }
 
+    public String getShortDefinition() {
+        return shortDefinition;
+    }
+
+    public void setShortDefinition(String shortDefinition) {
+        this.shortDefinition = shortDefinition;
+    }
 
     public String getInflectionClass() {
         return inflectionClass;
