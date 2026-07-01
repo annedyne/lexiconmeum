@@ -260,6 +260,18 @@ class WiktionaryLexicalDataParserTest {
                         .orElseThrow(() -> new AssertionError("Missing gloss 'to love'")));
     }
 
+    @SuppressWarnings("java:S2699")
+    @Test
+    void rawGlossesAreParsedAndPopulated() throws Exception {
+        getAdjectiveLexemes().stream()
+                .filter(lexeme -> lexeme.getLemma().equals("magnus"))
+                .findFirst()
+                .map(l -> l.getSenses().stream()
+                        .filter(s -> s.getGloss().contains("great, large, big; (of things) vast, extensive, spacious (of physical size or quantity)"))
+                        .findFirst()
+                        .orElseThrow(() -> new AssertionError("Missing raw gloss for magnus")));
+    }
+
     @Test
     void parserMapsFutureAndPerfectTagsToFuturePerfectTense() throws Exception {
         Optional<Inflection> tenseTag = getVerbLexemes().stream().filter(lexeme -> lexeme.getLemma().equals("amo"))

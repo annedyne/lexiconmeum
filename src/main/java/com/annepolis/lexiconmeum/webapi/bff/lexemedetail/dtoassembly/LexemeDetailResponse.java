@@ -41,10 +41,10 @@ public class LexemeDetailResponse {
     GrammaticalCase governedCase;
 
     @Schema(description = "omitted when empty", example = """
-           ["to love", "to be fond of, like, admire"]
+           [{"text": "(literally):", "children": [{"text": "to love"}]}]
            """)
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    List<String> definitions = new ArrayList<>();
+    List<DefinitionNode> definitions = new ArrayList<>();
 
     //INFLECTION RELATED FIELDS
     @Schema(example = "1st conjugation")
@@ -178,12 +178,12 @@ public class LexemeDetailResponse {
         this.governedCase = governedCase;
     }
 
-    public List<String> getDefinitions() {
+    public List<DefinitionNode> getDefinitions() {
         return definitions;
     }
 
-    public void addDefinition(String definition) {
-        this.getDefinitions().add(definition);
+    public void setDefinitions(List<DefinitionNode> definitions) {
+        this.definitions = definitions;
     }
 
 
