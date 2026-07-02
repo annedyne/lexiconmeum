@@ -18,6 +18,7 @@ public class LexemeBuilder {
     private final PartOfSpeech partOfSpeech;
     private final String etymologyNumber;
     private PartOfSpeechDetails partOfSpeechDetails;
+    private String shortDefinition;
     private final List<Sense> senses = new ArrayList<>();
     private final Map<String, Inflection> inflectionIndex = new HashMap<>();
     private final Set<InflectionClass> inflectionClasses = new TreeSet<>();
@@ -67,6 +68,13 @@ public class LexemeBuilder {
 
     public LexemeBuilder setPartOfSpeechDetails(PartOfSpeechDetails partOfSpeechDetails) {
         this.partOfSpeechDetails = partOfSpeechDetails;
+        return this;
+    }
+
+    public String getShortDefinition() { return shortDefinition; }
+
+    public LexemeBuilder setShortDefinition(String shortDefinition) {
+        this.shortDefinition = shortDefinition;
         return this;
     }
 
@@ -152,6 +160,8 @@ public class LexemeBuilder {
         if (lexeme.getPartOfSpeechDetails() != null) {
             builder.setPartOfSpeechDetails(lexeme.getPartOfSpeechDetails());
         }
+
+        builder.setShortDefinition(lexeme.getShortDefinition());
 
         return builder;
     }

@@ -24,11 +24,9 @@ class DefinitionsSectionContributor implements LexemeDetailSectionContributor {
             List<String> path = sense.getGloss();
             if (!path.isEmpty()) {
                 insertPath(roots, path, 0);
-                if (dto.getShortDefinition() == null) {
-                    dto.setShortDefinition(path.get(path.size() - 1));
-                }
             }
         }
+        dto.setShortDefinition(lexeme.getShortDefinition());
         dto.setDefinitions(roots);
     }
 

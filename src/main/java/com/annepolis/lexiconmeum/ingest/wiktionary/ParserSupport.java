@@ -115,12 +115,24 @@ public class ParserSupport {
         }
     }
 
-    // Build sense nodes and add to builder
+    // Build sense nodes and add to builder; seed shortDefinition from first sense's glosses
     void addSenses(JsonNode sensesNode, LexemeBuilder lexemeBuilder, Logger logger) {
         if (sensesNode.isArray()) {
+            boolean first = true;
             for (JsonNode senseNode : sensesNode) {
+                if (first) {
+                    seedShortDefinition(senseNode, lexemeBuilder);
+                    first = false;
+                }
                 lexemeBuilder.addSense(buildSense(senseNode, lexemeBuilder, logger));
             }
+        }
+    }
+
+    private void seedShortDefinition(JsonNode senseNode, LexemeBuilder lexemeBuilder) {
+        JsonNode glosses = senseNode.path(GLOSSES.get());
+        if (glosses.isArray() && !glosses.isEmpty()) {
+            lexemeBuilder.setShortDefinition(glosses.get(glosses.size() - 1).asString());
         }
     }
 

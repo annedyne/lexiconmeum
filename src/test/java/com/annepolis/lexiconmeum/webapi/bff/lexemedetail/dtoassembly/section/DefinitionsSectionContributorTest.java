@@ -8,13 +8,15 @@ import com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.LexemeDetai
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class DefinitionsSectionContributorTest {
 
     private final DefinitionsSectionContributor contributor = new DefinitionsSectionContributor();
 
-    private Lexeme lexemeWithSenses(Sense... senses) {
+    private Lexeme lexeme(String shortDefinition, Sense... senses) {
         LexemeBuilder builder = new LexemeBuilder("test", PartOfSpeech.VERB, "1");
+        builder.setShortDefinition(shortDefinition);
         for (Sense sense : senses) {
             builder.addSense(sense);
         }
@@ -22,32 +24,25 @@ class DefinitionsSectionContributorTest {
     }
 
     @Test
-    void shortDefinitionIsLeafOfFirstSensePath() {
+    void shortDefinitionIsPassedThroughFromLexeme() {
         Sense sense = new Sense.Builder()
                 .addGloss("(literally):")
                 .addGloss("to love, like; to be fond of")
                 .build();
 
         LexemeDetailResponse dto = new LexemeDetailResponse();
-        contributor.contribute(lexemeWithSenses(sense), dto);
+        contributor.contribute(lexeme("to love, like; to be fond of", sense), dto);
 
         assertEquals("to love, like; to be fond of", dto.getShortDefinition());
     }
 
     @Test
-    void shortDefinitionComesFromFirstNonEmptySense() {
-        Sense first = new Sense.Builder()
-                .addGloss("(literally):")
-                .addGloss("to love")
-                .build();
-        Sense second = new Sense.Builder()
-                .addGloss("(figurative):")
-                .addGloss("to cherish")
-                .build();
+    void shortDefinitionIsNullWhenNotSetOnLexeme() {
+        Sense sense = new Sense.Builder().addGloss("to love").build();
 
         LexemeDetailResponse dto = new LexemeDetailResponse();
-        contributor.contribute(lexemeWithSenses(first, second), dto);
+        contributor.contribute(lexeme(null, sense), dto);
 
-        assertEquals("to love", dto.getShortDefinition());
+        assertNull(dto.getShortDefinition());
     }
 }
