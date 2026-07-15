@@ -26,7 +26,7 @@ This roadmap outlines the next planned stages of work for the project.
 
 ### Frontend polish
 
-- [ ] Fix dropdown arrow-key navigation in the search field
+- [x] Fix dropdown arrow-key navigation in the search field
 - [ ] Automatically clear error messages when input changes or retry succeeds
 
 ## Phase 1.5 — Frontend Deployment
@@ -45,7 +45,7 @@ This roadmap outlines the next planned stages of work for the project.
 
 - [x] Set up Vitest for unit testing
 - [x] Add tests for suggestion-box logic and error handling
-- [ ] Add keyboard navigation tests for the dropdown
+- [x] Add keyboard navigation tests for the dropdown
 - [ ] Run frontend tests in CI
 
 ## Phase 2 — Startup Performance and Service Separation
