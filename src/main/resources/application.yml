@@ -8,8 +8,8 @@ app:
     parse-mode: LENIENT
 
   text-search:
-    default-limit: 50
-    result-limit-max: 50
+    default-limit: 500
+    result-limit-max: 500
 
 api:
   base-path: /api/v1

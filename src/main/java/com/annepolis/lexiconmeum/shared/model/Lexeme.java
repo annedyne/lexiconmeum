@@ -27,6 +27,7 @@ public class Lexeme {
     private final Set<InflectionClass> inflectionClasses;
     private final List<Sense> senses;
     private final Map<String, Inflection> inflections;
+    private final String shortDefinition;
 
     Lexeme(LexemeBuilder builder) {
         this.lemma = builder.getLemma();
@@ -38,6 +39,7 @@ public class Lexeme {
         this.inflectionClasses = builder.getInflectionClasses();
         this.partOfSpeechDetails = builder.getPartOfSpeechDetails();
         this.canonicalForms = builder.getCanonicalForms();
+        this.shortDefinition = builder.getShortDefinition();
     }
 
     public UUID getId() {
@@ -83,6 +85,8 @@ public class Lexeme {
     }
 
     public List<Sense> getSenses() { return senses; }
+
+    public String getShortDefinition() { return shortDefinition; }
 
     @Override
     public boolean equals(Object o) {

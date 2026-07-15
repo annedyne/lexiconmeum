@@ -8,7 +8,7 @@ class LexemeTest {
     void equalsContract() {
         EqualsVerifier.forClass(Lexeme.class)
                 .usingGetClass()
-                .withIgnoredFields("id", "inflectionClasses", "senses", "inflections", "partOfSpeechDetails", "canonicalForms")
+                .withIgnoredFields("id", "inflectionClasses", "shortDefinition","senses", "inflections", "partOfSpeechDetails", "canonicalForms")
                 .verify();
     }
 }

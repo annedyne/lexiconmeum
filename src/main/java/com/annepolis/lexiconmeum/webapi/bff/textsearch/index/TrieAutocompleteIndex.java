@@ -60,7 +60,7 @@ class TrieAutocompleteIndex implements AutocompleteIndexBackend {
 
             //Normalize key so we can search without adding macrons
             String normalizedWordCharacter = Normalizer.normalize(Character.toString(wordCharacter), Normalizer.Form.NFD);
-            Character normalizedCharacterKey = normalizedWordCharacter.charAt(0);
+            Character normalizedCharacterKey = Character.toLowerCase(normalizedWordCharacter.charAt(0));
 
             //if key doesn't exist in childNode-map yet, add it with new associated node
             node.getCharacterNodeMap().putIfAbsent(normalizedCharacterKey, new TrieNode());
@@ -100,7 +100,7 @@ class TrieAutocompleteIndex implements AutocompleteIndexBackend {
         // Navigate down the trie searching for each character of the prefix array
         for (char prefixCharacter : prefix.toCharArray()) {
             String normalizedPrefixCharacter = Normalizer.normalize(Character.toString(prefixCharacter), Normalizer.Form.NFD);
-            Character normalizedCharacterKey = normalizedPrefixCharacter.charAt(0);
+            Character normalizedCharacterKey = Character.toLowerCase(normalizedPrefixCharacter.charAt(0));
 
             if (!node.getCharacterNodeMap().containsKey(normalizedCharacterKey)) {
                 return results;
