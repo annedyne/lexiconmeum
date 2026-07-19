@@ -1,13 +1,21 @@
 package com.annepolis.lexiconmeum.ingest.wiktionary;
 
+import com.annepolis.lexiconmeum.ingest.tagmapping.EsseFormProvider;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.ParticipleDeclensionSet;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.VerbDetails;
+import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
+import com.annepolis.lexiconmeum.shared.model.inflection.Participle;
 import org.junit.jupiter.api.Test;
+
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -22,7 +30,8 @@ class DataLinkingServiceTest {
         // was not being refreshed after a participle was added
 
         // Instantiate Class under test.
-        DataLinkingService underTest = new DataLinkingService();
+        DataLinkingService underTest = new DataLinkingService(
+                new CompoundInflectionGenerator(new EsseFormProvider()));
 
         // Set up parent Lexeme lemmas.
         String parentLemma = "amo";
@@ -97,6 +106,50 @@ class DataLinkingServiceTest {
         }
 
        assertEquals(4, getNumParticiples());
+    }
+
+    @Test
+    void genderedCompoundFormsAreAddedAfterLinking(){
+        DataLinkingService underTest = new DataLinkingService(
+                new CompoundInflectionGenerator(new EsseFormProvider()));
+
+        String parentLemma = "amo";
+        String parentLemmaWithMacrons = "amō";
+
+        LexemeBuilder lexemeBuilder = new LexemeBuilder(parentLemma, PartOfSpeech.VERB, "1");
+        Lexeme parentLexeme = lexemeBuilder.build();
+        StagedLexemeCache stagedLexemeCache = new StagedLexemeCache();
+        stagedLexemeCache.putLexeme(parentLexeme);
+
+        // Perfect passive participle set with the gendered nominatives needed for compounds.
+        ParticipleDeclensionSet perfectPassiveSet = new ParticipleDeclensionSet.Builder(
+                        GrammaticalVoice.PASSIVE, GrammaticalTense.PERFECT, "amātus")
+                .addInflection(nominative("amātus", GrammaticalNumber.SINGULAR, GrammaticalGender.MASCULINE))
+                .addInflection(nominative("amāta", GrammaticalNumber.SINGULAR, GrammaticalGender.FEMININE))
+                .addInflection(nominative("amātum", GrammaticalNumber.SINGULAR, GrammaticalGender.NEUTER))
+                .addInflection(nominative("amātī", GrammaticalNumber.PLURAL, GrammaticalGender.MASCULINE))
+                .addInflection(nominative("amātae", GrammaticalNumber.PLURAL, GrammaticalGender.FEMININE))
+                .addInflection(nominative("amāta", GrammaticalNumber.PLURAL, GrammaticalGender.NEUTER))
+                .build();
+
+        underTest.stageDataToLink(new StagedParticipleData(parentLemma, parentLemmaWithMacrons, perfectPassiveSet));
+        underTest.finalizeLexicalDataLinking(this::setCachedLexeme, stagedLexemeCache);
+
+        Map<String, Inflection> inflections = cachedLexeme.getInflectionIndex();
+        assertEquals("amāta sum",
+                inflections.get("PASSIVE|INDICATIVE|PERFECT|FIRST|SINGULAR|FEMININE").getForm());
+        assertEquals("amātum sum",
+                inflections.get("PASSIVE|INDICATIVE|PERFECT|FIRST|SINGULAR|NEUTER").getForm());
+        assertEquals("amātae sumus",
+                inflections.get("PASSIVE|INDICATIVE|PERFECT|FIRST|PLURAL|FEMININE").getForm());
+    }
+
+    private static Participle nominative(String form, GrammaticalNumber number, GrammaticalGender gender) {
+        return new Participle.Builder(form)
+                .setGrammaticalCase(GrammaticalCase.NOMINATIVE)
+                .setNumber(number)
+                .addGender(gender)
+                .build();
     }
 
     int getNumParticiples(){

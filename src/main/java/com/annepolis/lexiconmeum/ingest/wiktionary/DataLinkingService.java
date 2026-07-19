@@ -1,7 +1,12 @@
 package com.annepolis.lexiconmeum.ingest.wiktionary;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
+import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.ParticipleDeclensionSet;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.VerbDetails;
+import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
@@ -31,6 +36,12 @@ public class DataLinkingService {
     // Some 'form_of' attributes point to that non-lemma form's main form, not the parent's lemma form
     // Map them here so they can be traced to the parent lemma.
     private final Map<String, List<String>> linkableDataLemmaToParentLemma = new ConcurrentHashMap<>();
+
+    private final CompoundInflectionGenerator compoundInflectionGenerator;
+
+    public DataLinkingService(CompoundInflectionGenerator compoundInflectionGenerator) {
+        this.compoundInflectionGenerator = compoundInflectionGenerator;
+    }
 
     /**
      * Stage a linkable for later attachment during finalization.
@@ -97,6 +108,9 @@ public class DataLinkingService {
             lexemesUpdated.incrementAndGet();
         });
 
+        // Now that participle forms are attached, expand compound tenses to all genders.
+        addGenderedCompoundForms(stagedLexemeCache);
+
         // Distribute to sinks
         for(Lexeme lexeme : stagedLexemeCache.getStagedLexemes()){
             ingestCallback.accept(lexeme);
@@ -112,6 +126,34 @@ public class DataLinkingService {
         logger.info("Lexical Data Linking finalization complete: {}", report.getSummary());
         clearStaged();
         return report;
+    }
+
+    /**
+     * For each verb with a perfect participle set, generate the feminine and neuter
+     * (and number-agreeing masculine) compound perfect-system forms and add them to
+     * the lexeme. Only possible here because the gendered participle forms are attached
+     * during linking above.
+     */
+    private void addGenderedCompoundForms(StagedLexemeCache stagedLexemeCache) {
+        for (Lexeme lexeme : stagedLexemeCache.getStagedLexemes()) {
+            if (!(lexeme.getPartOfSpeechDetails() instanceof VerbDetails verbDetails)) {
+                continue;
+            }
+
+            List<Conjugation> genderedForms = new ArrayList<>();
+            for (ParticipleDeclensionSet participleSet : verbDetails.getParticiples().values()) {
+                if (participleSet.getTense() == GrammaticalTense.PERFECT) {
+                    genderedForms.addAll(compoundInflectionGenerator.generateAllGenderedCompoundForms(participleSet));
+                }
+            }
+            if (genderedForms.isEmpty()) {
+                continue;
+            }
+
+            LexemeBuilder builder = LexemeBuilder.fromLexeme(lexeme);
+            genderedForms.forEach(builder::addInflection);
+            stagedLexemeCache.replaceLexeme(lexeme, builder.build());
+        }
     }
 
     private Optional<Lexeme> findMatchingLexeme(String parentLemma, LinkableData dataToLink, StagedLexemeCache stagedLexemeCache) {

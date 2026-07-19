@@ -98,6 +98,10 @@ public class CompoundInflectionGenerator {
         List<Conjugation> compoundForms = new ArrayList<>();
         for (GrammaticalPerson person : GrammaticalPerson.values()) {
             String esseForm = esseFormProvider.getForm(mood, tense, number, person);
+            // Combinations esse does not form (e.g. subjunctive future perfect) are not real tenses.
+            if (esseForm == null) {
+                continue;
+            }
             compoundForms.add(new Conjugation.Builder(participleBase + " " + esseForm)
                     .setVoice(voice)
                     .setMood(mood)
@@ -106,6 +110,23 @@ public class CompoundInflectionGenerator {
                     .setPerson(person)
                     .setGender(gender)
                     .build());
+        }
+        return compoundForms;
+    }
+
+    /**
+     * Builds the gendered compound forms for every perfect-system tense of the
+     * participle set. The compound voice follows the participle's own voice
+     * (passive for regular verbs, active for deponents). Mood/tense combinations
+     * that esse does not form are skipped, so only real compound tenses result.
+     */
+    public List<Conjugation> generateAllGenderedCompoundForms(ParticipleDeclensionSet participleSet) {
+        List<Conjugation> compoundForms = new ArrayList<>();
+        for (GrammaticalMood mood : GrammaticalMood.values()) {
+            for (GrammaticalTense tense : GrammaticalTense.values()) {
+                compoundForms.addAll(generateGenderedCompoundForms(
+                        participleSet, participleSet.getVoice(), mood, tense));
+            }
         }
         return compoundForms;
     }
