@@ -52,7 +52,7 @@ class WiktionaryLexicalDataParserTest {
         EsseFormProvider esseFormProvider = new EsseFormProvider();
 
         POSConjunctionParser conjunctionParser = new POSConjunctionParser(PARSER_SUPPORT);
-        POSVerbParser verbParser = new POSVerbParser(esseFormProvider, PARSER_SUPPORT);
+        POSVerbParser verbParser = new POSVerbParser(new CompoundInflectionGenerator(esseFormProvider), PARSER_SUPPORT);
         POSNounParser nounParser = new POSNounParser(PARSER_SUPPORT);
         POSAdjectiveParser adjectiveParser = new POSAdjectiveParser(PARSER_SUPPORT);
         POSParticipleParser participleParser = new POSParticipleParser(PARSER_SUPPORT);
