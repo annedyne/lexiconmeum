@@ -5,12 +5,15 @@ import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalMood;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPerson;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.ParticipleDeclensionSet;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.VerbDetails;
+import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
 import com.annepolis.lexiconmeum.shared.model.inflection.Participle;
 import org.junit.jupiter.api.Test;
@@ -18,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class DataLinkingServiceTest {
     public Lexeme cachedLexeme;
@@ -142,6 +146,42 @@ class DataLinkingServiceTest {
                 inflections.get("PASSIVE|INDICATIVE|PERFECT|FIRST|SINGULAR|NEUTER").getForm());
         assertEquals("amātae sumus",
                 inflections.get("PASSIVE|INDICATIVE|PERFECT|FIRST|PLURAL|FEMININE").getForm());
+    }
+
+    @Test
+    void genderedCompoundFormsSupersedeUngenderedBaseline(){
+        DataLinkingService underTest = new DataLinkingService(
+                new CompoundInflectionGenerator(new EsseFormProvider()));
+
+        String parentLemma = "amo";
+        String parentLemmaWithMacrons = "amō";
+
+        // Seed the parent with the parse-time baseline, which reuses the singular base for plurals.
+        LexemeBuilder lexemeBuilder = new LexemeBuilder(parentLemma, PartOfSpeech.VERB, "1");
+        lexemeBuilder.addInflection(new Conjugation.Builder("amātus sumus")
+                .setVoice(GrammaticalVoice.PASSIVE)
+                .setMood(GrammaticalMood.INDICATIVE)
+                .setTense(GrammaticalTense.PERFECT)
+                .setPerson(GrammaticalPerson.FIRST)
+                .setNumber(GrammaticalNumber.PLURAL)
+                .build());
+        Lexeme parentLexeme = lexemeBuilder.build();
+        StagedLexemeCache stagedLexemeCache = new StagedLexemeCache();
+        stagedLexemeCache.putLexeme(parentLexeme);
+
+        ParticipleDeclensionSet perfectPassiveSet = new ParticipleDeclensionSet.Builder(
+                        GrammaticalVoice.PASSIVE, GrammaticalTense.PERFECT, "amātus")
+                .addInflection(nominative("amātī", GrammaticalNumber.PLURAL, GrammaticalGender.MASCULINE))
+                .build();
+
+        underTest.stageDataToLink(new StagedParticipleData(parentLemma, parentLemmaWithMacrons, perfectPassiveSet));
+        underTest.finalizeLexicalDataLinking(this::setCachedLexeme, stagedLexemeCache);
+
+        Map<String, Inflection> inflections = cachedLexeme.getInflectionIndex();
+        // Ungendered baseline removed; number-agreeing gendered form takes its place.
+        assertNull(inflections.get("PASSIVE|INDICATIVE|PERFECT|FIRST|PLURAL"));
+        assertEquals("amātī sumus",
+                inflections.get("PASSIVE|INDICATIVE|PERFECT|FIRST|PLURAL|MASCULINE").getForm());
     }
 
     private static Participle nominative(String form, GrammaticalNumber number, GrammaticalGender gender) {

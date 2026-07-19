@@ -7,6 +7,7 @@ import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.ParticipleDeclensionSet;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.VerbDetails;
 import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
+import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
@@ -151,7 +152,17 @@ public class DataLinkingService {
             }
 
             LexemeBuilder builder = LexemeBuilder.fromLexeme(lexeme);
-            genderedForms.forEach(builder::addInflection);
+            for (Conjugation genderedForm : genderedForms) {
+                // Drop the ungendered baseline this gendered form supersedes; the
+                // parse-time baseline reused the singular participle base for plurals.
+                builder.removeInflection(InflectionKey.joinConjugationParts(
+                        genderedForm.getVoice(),
+                        genderedForm.getMood(),
+                        genderedForm.getTense(),
+                        genderedForm.getPerson(),
+                        genderedForm.getNumber()));
+                builder.addInflection(genderedForm);
+            }
             stagedLexemeCache.replaceLexeme(lexeme, builder.build());
         }
     }

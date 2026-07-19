@@ -82,7 +82,9 @@ public class ConjugationTableMapper {
     Map<GrammaticalTense, List<String>> groupByTense(List<Conjugation> groupConjugations) {
         return groupConjugations.stream()
                 .sorted(Comparator.comparing(Conjugation::getNumber, Comparator.nullsLast(Comparator.naturalOrder()))
-                        .thenComparing(Conjugation::getPerson, Comparator.nullsLast(Comparator.naturalOrder())))
+                        .thenComparing(Conjugation::getPerson, Comparator.nullsLast(Comparator.naturalOrder()))
+                        // Keep gendered compound variants in a stable order within a person/number cell.
+                        .thenComparing(Conjugation::getGender, Comparator.nullsLast(Comparator.naturalOrder())))
                 .collect(Collectors.groupingBy(
                         Conjugation::getTense,
                         // TreeMap keeps order of GrammaticalTense enum
