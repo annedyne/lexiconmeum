@@ -72,6 +72,30 @@ class LexemeDetailControllerIntegrationTest {
     }
 
     @Test
+    void genderedPerfectPassiveCompoundFormsPresentForAmo() {
+        LexemeBuilder lexemeBuilder = new LexemeBuilder("amo", PartOfSpeech.VERB, "1");
+        UUID lexemeId = lexemeBuilder.build().getId();
+
+        String url = UriComponentsBuilder
+                .fromUriString(getFullBaseUrl())
+                .path(ApiRoutes.LEXEMES)
+                .queryParam("lexemeId", lexemeId.toString())
+                .toUriString();
+
+        ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
+        String body = response.getBody();
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(body);
+        // All three genders of the first person perfect passive.
+        assertTrue(body.contains("amātus sum"), "masculine perfect passive missing");
+        assertTrue(body.contains("amāta sum"), "feminine perfect passive missing");
+        assertTrue(body.contains("amātum sum"), "neuter perfect passive missing");
+        // Plural uses the number-agreeing participle base, not the singular one.
+        assertTrue(body.contains("amātī sumus"), "number-agreeing masculine plural missing");
+    }
+
+    @Test
     void testDetailEndpoint() {
         LexemeBuilder lexemeBuilder = new LexemeBuilder("poculum", PartOfSpeech.NOUN, "1");
         UUID lexemeId = lexemeBuilder.build().getId();
