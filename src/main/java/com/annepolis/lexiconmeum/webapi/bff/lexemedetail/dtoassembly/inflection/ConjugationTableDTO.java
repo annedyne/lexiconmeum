@@ -1,8 +1,10 @@
 package com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
+import java.util.Map;
 
 @Schema(name = "ConjugationTable")
 class ConjugationTableDTO implements InflectionTableDTO  {
@@ -35,10 +37,13 @@ class ConjugationTableDTO implements InflectionTableDTO  {
         this.tenses = tenses;
     }
 
+    // Simple tenses populate forms; compound tenses populate formsByGender. Only one is set per tense.
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class TenseDTO {
         private String defaultName;
         private String altName;
         private List<String> forms;
+        private Map<String, List<String>> formsByGender;
 
         public String getDefaultName() {
             return defaultName;
@@ -62,6 +67,14 @@ class ConjugationTableDTO implements InflectionTableDTO  {
 
         public void setForms(List<String> forms) {
             this.forms = forms;
+        }
+
+        public Map<String, List<String>> getFormsByGender() {
+            return formsByGender;
+        }
+
+        public void setFormsByGender(Map<String, List<String>> formsByGender) {
+            this.formsByGender = formsByGender;
         }
     }
 

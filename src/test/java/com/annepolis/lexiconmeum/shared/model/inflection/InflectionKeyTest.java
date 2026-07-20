@@ -34,6 +34,35 @@ class InflectionKeyTest {
 
 
     @Test
+    void nullGenderOmitsGenderPartFromConjugationKey() {
+        Conjugation conjugation = new Conjugation.Builder("amō")
+                .setVoice(GrammaticalVoice.ACTIVE)
+                .setMood(GrammaticalMood.INDICATIVE)
+                .setTense(GrammaticalTense.PRESENT)
+                .setPerson(GrammaticalPerson.FIRST)
+                .setNumber(GrammaticalNumber.SINGULAR)
+                .build();
+        assertEquals("ACTIVE|INDICATIVE|PRESENT|FIRST|SINGULAR", InflectionKey.of(conjugation));
+    }
+
+    @Test
+    void conjugationsDifferingOnlyByGenderProduceDistinctKeys() {
+        Conjugation.Builder base = new Conjugation.Builder("amātus sum")
+                .setVoice(GrammaticalVoice.PASSIVE)
+                .setMood(GrammaticalMood.INDICATIVE)
+                .setTense(GrammaticalTense.PERFECT)
+                .setPerson(GrammaticalPerson.FIRST)
+                .setNumber(GrammaticalNumber.SINGULAR);
+
+        String masculineKey = InflectionKey.of(base.setGender(GrammaticalGender.MASCULINE).build());
+        String feminineKey = InflectionKey.of(base.setGender(GrammaticalGender.FEMININE).build());
+
+        assertEquals("PASSIVE|INDICATIVE|PERFECT|FIRST|SINGULAR|MASCULINE", masculineKey);
+        assertEquals("PASSIVE|INDICATIVE|PERFECT|FIRST|SINGULAR|FEMININE", feminineKey);
+        Assertions.assertNotEquals(masculineKey, feminineKey);
+    }
+
+    @Test
     void buildsValidFirstPrincipalPartKey(){
         InflectionKey builder = new InflectionKey();
         String key = builder.buildFirstPrincipalPartKey();

@@ -117,6 +117,12 @@ public class LexemeBuilder {
         return this;
     }
 
+    // Remove the inflection stored under the given key, if present.
+    public LexemeBuilder removeInflection(String key) {
+        inflectionIndex.remove(key);
+        return this;
+    }
+
     public Map<String,Inflection> getInflections() {
         return inflectionIndex;
     }

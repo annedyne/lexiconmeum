@@ -52,7 +52,7 @@ class WiktionaryLexicalDataParserTest {
         EsseFormProvider esseFormProvider = new EsseFormProvider();
 
         POSConjunctionParser conjunctionParser = new POSConjunctionParser(PARSER_SUPPORT);
-        POSVerbParser verbParser = new POSVerbParser(esseFormProvider, PARSER_SUPPORT);
+        POSVerbParser verbParser = new POSVerbParser(new CompoundInflectionGenerator(esseFormProvider), PARSER_SUPPORT);
         POSNounParser nounParser = new POSNounParser(PARSER_SUPPORT);
         POSAdjectiveParser adjectiveParser = new POSAdjectiveParser(PARSER_SUPPORT);
         POSParticipleParser participleParser = new POSParticipleParser(PARSER_SUPPORT);
@@ -320,7 +320,7 @@ class WiktionaryLexicalDataParserTest {
         assertTrue(brevis.isPresent(), "Brevis lexeme not found");
         assertEquals(Set.of(THIRD), brevis.get().getInflectionClasses());
 
-        brevis.get().getInflections().stream()
+        brevis.get().getInflections()
                 .forEach(i -> {
                     if (i instanceof Agreement ag) {
                         assert ag.getNumber() != null : "GrammaticalNumber is null in Agreement: " + ag;

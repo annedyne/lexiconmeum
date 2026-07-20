@@ -36,7 +36,7 @@ class VerbParserTest {
         if (sequorLexemeBuilder == null) {
             JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("sequor", PartOfSpeech.VERB,"testDataVerb.jsonl");
 
-            POSVerbParser parser = new POSVerbParser(new EsseFormProvider(), PARSER_SUPPORT);
+            POSVerbParser parser = new POSVerbParser(new CompoundInflectionGenerator(new EsseFormProvider()), PARSER_SUPPORT);
             sequorLexemeBuilder = new LexemeBuilder("testLemma", PartOfSpeech.VERB, "1");
             parser.addInflections(sequorLexemeBuilder, root.path(FORMS.get()) );
         }

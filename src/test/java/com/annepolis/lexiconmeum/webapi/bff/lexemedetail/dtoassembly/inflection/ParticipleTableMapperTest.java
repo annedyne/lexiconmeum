@@ -72,7 +72,7 @@ class ParticipleTableMapperTest {
         return lexemeBuilder.setPartOfSpeechDetails(verbDetailsBuilder.build()).build();
     }
 
-    private JsonNode loadTestParticiplesJsonRoot() throws IOException {
+    private JsonNode loadTestParticiplesJsonRoot() {
 
         ObjectMapper mapper = new ObjectMapper();
         InputStream is = getClass().getClassLoader().getResourceAsStream("participles.json");

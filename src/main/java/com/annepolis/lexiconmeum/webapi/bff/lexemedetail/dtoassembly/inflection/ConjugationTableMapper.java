@@ -1,6 +1,7 @@
 package com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalMood;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice;
@@ -69,7 +70,7 @@ public class ConjugationTableMapper {
 
         for (Map.Entry<MoodVoiceKey, List<Conjugation>> moodAndVoiceEntry : byMoodAndVoiceList.entrySet()) {
 
-            Map<GrammaticalTense, List<String>> byTense = groupByTense(moodAndVoiceEntry.getValue());
+            Map<GrammaticalTense, List<Conjugation>> byTense = groupByTense(moodAndVoiceEntry.getValue());
             List<ConjugationTableDTO.TenseDTO> tenseDTOs = createTenseDTOs(byTense);
 
             MoodVoiceKey moodAndVoiceInfo = moodAndVoiceEntry.getKey();
@@ -78,8 +79,8 @@ public class ConjugationTableMapper {
         return tableDTOs;
     }
 
-    // Map forms for each tense to their respective GrammaticalTense in enum order
-    Map<GrammaticalTense, List<String>> groupByTense(List<Conjugation> groupConjugations) {
+    // Group conjugations by tense (enum order), each list ordered by number then person.
+    Map<GrammaticalTense, List<Conjugation>> groupByTense(List<Conjugation> groupConjugations) {
         return groupConjugations.stream()
                 .sorted(Comparator.comparing(Conjugation::getNumber, Comparator.nullsLast(Comparator.naturalOrder()))
                         .thenComparing(Conjugation::getPerson, Comparator.nullsLast(Comparator.naturalOrder())))
@@ -87,20 +88,48 @@ public class ConjugationTableMapper {
                         Conjugation::getTense,
                         // TreeMap keeps order of GrammaticalTense enum
                         TreeMap::new,
-                        Collectors.mapping(Conjugation::getForm, Collectors.toList())
+                        Collectors.toList()
                 ));
     }
 
-    List<ConjugationTableDTO.TenseDTO> createTenseDTOs(Map<GrammaticalTense, List<String>> inflectionsByTense){
-       return inflectionsByTense.entrySet().stream()
+    List<ConjugationTableDTO.TenseDTO> createTenseDTOs(Map<GrammaticalTense, List<Conjugation>> conjugationsByTense){
+       return conjugationsByTense.entrySet().stream()
                 .map(e -> {
                     ConjugationTableDTO.TenseDTO dto = new ConjugationTableDTO.TenseDTO();
                     dto.setDefaultName(e.getKey().getHistoricalName());
                     dto.setAltName(e.getKey().getAlternativeName());
-                    dto.setForms(e.getValue());
+                    setTenseForms(dto, e.getValue());
                     return dto;
                 })
                 .toList();
+    }
+
+    // Compound tenses carry a gender; expose those bucketed by gender. Simple tenses stay a flat list.
+    void setTenseForms(ConjugationTableDTO.TenseDTO dto, List<Conjugation> tenseConjugations) {
+        if (isGendered(tenseConjugations)) {
+            dto.setFormsByGender(bucketFormsByGender(tenseConjugations));
+        } else {
+            dto.setForms(tenseConjugations.stream().map(Conjugation::getForm).toList());
+        }
+    }
+
+    private boolean isGendered(List<Conjugation> tenseConjugations) {
+        return tenseConjugations.stream().anyMatch(c -> c.getGender() != null);
+    }
+
+    // Bucket forms by gender in natural gender order, preserving the incoming number/person order.
+    private Map<String, List<String>> bucketFormsByGender(List<Conjugation> tenseConjugations) {
+        Map<GrammaticalGender, List<String>> byGender = tenseConjugations.stream()
+                .filter(c -> c.getGender() != null)
+                .collect(Collectors.groupingBy(
+                        Conjugation::getGender,
+                        () -> new EnumMap<>(GrammaticalGender.class),
+                        Collectors.mapping(Conjugation::getForm, Collectors.toList())
+                ));
+
+        Map<String, List<String>> formsByGender = new LinkedHashMap<>();
+        byGender.forEach((gender, forms) -> formsByGender.put(gender.getTag(), forms));
+        return formsByGender;
     }
 
     ConjugationTableDTO createConjugationDTO(MoodVoiceKey moodAndVoiceInfo, List<ConjugationTableDTO.TenseDTO> tenseDTOs){

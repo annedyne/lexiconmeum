@@ -72,6 +72,30 @@ class LexemeDetailControllerIntegrationTest {
     }
 
     @Test
+    void genderedPerfectPassiveCompoundFormsPresentForAmo() {
+        LexemeBuilder lexemeBuilder = new LexemeBuilder("amo", PartOfSpeech.VERB, "1");
+        UUID lexemeId = lexemeBuilder.build().getId();
+
+        String url = UriComponentsBuilder
+                .fromUriString(getFullBaseUrl())
+                .path(ApiRoutes.LEXEMES)
+                .queryParam("lexemeId", lexemeId.toString())
+                .toUriString();
+
+        ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
+        String body = response.getBody();
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(body);
+        // All three genders of the first person perfect passive.
+        assertTrue(body.contains("amātus sum"), "masculine perfect passive missing");
+        assertTrue(body.contains("amāta sum"), "feminine perfect passive missing");
+        assertTrue(body.contains("amātum sum"), "neuter perfect passive missing");
+        // Plural uses the number-agreeing participle base, not the singular one.
+        assertTrue(body.contains("amātī sumus"), "number-agreeing masculine plural missing");
+    }
+
+    @Test
     void testDetailEndpoint() {
         LexemeBuilder lexemeBuilder = new LexemeBuilder("poculum", PartOfSpeech.NOUN, "1");
         UUID lexemeId = lexemeBuilder.build().getId();
@@ -127,6 +151,28 @@ class LexemeDetailControllerIntegrationTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
+
+    @Test
+    void genderedCompoundFormsBucketedByGenderInDetailResponse() throws IOException {
+        UUID lexemeId = JsonTestDataManager.INSTANCE.getParsedVerbLexeme("amo", "testDataVerb.jsonl").getId();
+
+        String url = UriComponentsBuilder
+                .fromUriString(getFullBaseUrl())
+                .path(ApiRoutes.LEXEME_DETAIL)
+                .queryParam("type", "VERB")
+                .buildAndExpand(lexemeId)
+                .toUriString();
+
+        ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
+        String body = response.getBody();
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(body);
+        // Compound tenses expose gender-bucketed forms; a plural agrees within its gender bucket.
+        assertTrue(body.contains("\"formsByGender\""), "compound tense should expose formsByGender");
+        assertTrue(body.contains("\"feminine\""), "feminine bucket missing");
+        assertTrue(body.contains("amātae sumus"), "number-agreeing feminine plural missing from bucket");
+    }
 
     @Test
     void testTypeMismatchReturnsConflict() {
