@@ -1,6 +1,5 @@
 package com.annepolis.lexiconmeum.webapi.bff.textsearch;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
@@ -69,7 +68,7 @@ class TextSearchControllerIntegrationTest {
     }
 
     @Test
-    void testTextSuggestionResultClientLimit() throws JsonProcessingException {
+    void testTextSuggestionResultClientLimit() {
         String url = getFullBaseUrl() + PREFIX + "?prefix=ama" + "&limit=12";
 
         ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
@@ -84,7 +83,7 @@ class TextSearchControllerIntegrationTest {
     }
 
     @Test
-    void testTextSuggestionResultClientLimitMax() throws JsonProcessingException {
+    void testTextSuggestionResultClientLimitMax() {
         String url = getFullBaseUrl() + PREFIX + "?prefix=ama" + "&limit=100";
 
         ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
@@ -99,7 +98,7 @@ class TextSearchControllerIntegrationTest {
     }
 
     @Test
-    void testTextSuggestionResultLimitDefault() throws JsonProcessingException {
+    void testTextSuggestionResultLimitDefault() {
         String url = getFullBaseUrl() + PREFIX + "?prefix=am";
 
         ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
