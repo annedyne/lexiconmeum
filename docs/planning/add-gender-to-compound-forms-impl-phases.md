@@ -39,3 +39,21 @@ Confirm the new forms reach the API and de-duplicate against the fallback.
 - **webapi/bff/lexemedetail**: verify gendered forms appear in the detail response; ensure masculine fallback and post-link masculine do not double-add (merge on key).
 
 Test: detail-response coverage for a perfect passive tense showing all three genders.
+
+## Phase 6 - Partition compound forms by gender within each tense
+Today all genders are jumbled into one tense's flat forms list (compoundTenseCurrent.json), so the front-end cannot triage by gender. Keep the existing table and tense structure and ordering unchanged; a compound tense exposes its forms bucketed by gender via a separate field. The front-end reads the active gender's list per tense. Non-gendered (simple) tenses keep their flat list.
+
+Decision: use two optional fields on the tense (`forms` for simple tenses, `formsByGender` for compound), rather than making the single `forms` field polymorphic, duplicating whole tense lists per gender, or keying tenses by name.
+- Preserves the curated tense order and adds no duplication of non-gendered forms.
+- Both fields stay strictly typed, so the OpenAPI schema and generated clients keep their guarantees (a polymorphic `forms` would degrade to a loose `object`/`oneOf`).
+- The front-end does a presence check and renders `formsByGender[activeGender]` directly - the server has already bucketed - instead of type-sniffing or grouping client-side.
+- Rejected: whole per-gender conjugation lists (triplicates non-gendered tenses and misattributes them to a gender) and tense-keyed maps (front-end must know subjective tense keys; object key order is not a reliable ordering channel).
+
+- **ConjugationTableDTO.TenseDTO (webapi/bff/lexemedetail/dtoassembly/inflection)**: add a `formsByGender` field (per-gender map of ordered form lists) beside the existing `forms`; only one is populated per tense. Tense identity, order, and names are untouched.
+- **ConjugationTableMapper**: when a tense's forms carry a gender, bucket them by gender - each gender's list ordered by number then person, genders in natural order - and set `formsByGender`; otherwise set the flat `forms` as today. Drop the Phase 5 gender interleave sort, which the per-gender bucketing supersedes.
+
+Notes:
+- All linked verbs have gendered compound tenses, so a compound tense always emits `formsByGender` with all three genders. The flat `forms` path remains for simple tenses (and any unlinked-participle fallback).
+- ConjugationGroupDTO keeps its existing `conjugations` / `participles` shape; no new top-level section.
+
+Test: a compound tense serializes `formsByGender` (gender-keyed, each a clean single-gender paradigm in number/person order) and no flat `forms`; a simple tense still serializes flat `forms` and no `formsByGender`; tense order within a table is unchanged.

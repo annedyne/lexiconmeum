@@ -15,8 +15,10 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class ConjugationTableMapperTest {
 
@@ -67,12 +69,13 @@ class ConjugationTableMapperTest {
     }
 
     @Test
-    void genderedPerfectPassiveFormsSurfaceInGenderOrder() {
+    void genderedPerfectPassiveFormsBucketedByGender() {
         ConjugationTableMapper mapper = new ConjugationTableMapper();
 
-        // Insert scrambled to prove the mapper imposes the order, not insertion.
+        // Insert scrambled to prove the mapper imposes gender order and number/person order.
         LexemeBuilder builder = new LexemeBuilder("amo", PartOfSpeech.VERB, "1");
         builder.addInflection(perfectPassive("amātum sum", GrammaticalNumber.SINGULAR, GrammaticalGender.NEUTER));
+        builder.addInflection(perfectPassive("amātī sumus", GrammaticalNumber.PLURAL, GrammaticalGender.MASCULINE));
         builder.addInflection(perfectPassive("amātus sum", GrammaticalNumber.SINGULAR, GrammaticalGender.MASCULINE));
         builder.addInflection(perfectPassive("amāta sum", GrammaticalNumber.SINGULAR, GrammaticalGender.FEMININE));
         Lexeme lexeme = builder.build();
@@ -87,8 +90,13 @@ class ConjugationTableMapperTest {
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Missing perfect-tense forms"));
 
-        // Masculine, feminine, neuter within the same person/number cell.
-        assertEquals(List.of("amātus sum", "amāta sum", "amātum sum"), perfect.getForms());
+        // Compound tense exposes formsByGender, not a flat forms list.
+        assertNull(perfect.getForms());
+        Map<String, List<String>> byGender = perfect.getFormsByGender();
+        assertEquals(List.of("masculine", "feminine", "neuter"), List.copyOf(byGender.keySet()));
+        assertEquals(List.of("amātus sum", "amātī sumus"), byGender.get("masculine"));
+        assertEquals(List.of("amāta sum"), byGender.get("feminine"));
+        assertEquals(List.of("amātum sum"), byGender.get("neuter"));
     }
 
     private static Conjugation perfectPassive(String form, GrammaticalNumber number, GrammaticalGender gender) {

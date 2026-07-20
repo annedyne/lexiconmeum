@@ -153,6 +153,28 @@ class LexemeDetailControllerIntegrationTest {
 
 
     @Test
+    void genderedCompoundFormsBucketedByGenderInDetailResponse() throws IOException {
+        UUID lexemeId = JsonTestDataManager.INSTANCE.getParsedVerbLexeme("amo", "testDataVerb.jsonl").getId();
+
+        String url = UriComponentsBuilder
+                .fromUriString(getFullBaseUrl())
+                .path(ApiRoutes.LEXEME_DETAIL)
+                .queryParam("type", "VERB")
+                .buildAndExpand(lexemeId)
+                .toUriString();
+
+        ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
+        String body = response.getBody();
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(body);
+        // Compound tenses expose gender-bucketed forms; a plural agrees within its gender bucket.
+        assertTrue(body.contains("\"formsByGender\""), "compound tense should expose formsByGender");
+        assertTrue(body.contains("\"feminine\""), "feminine bucket missing");
+        assertTrue(body.contains("amātae sumus"), "number-agreeing feminine plural missing from bucket");
+    }
+
+    @Test
     void testTypeMismatchReturnsConflict() {
         LexemeBuilder lexemeBuilder = new LexemeBuilder("poculum", PartOfSpeech.NOUN, "1");
         UUID lexemeId = lexemeBuilder.build().getId();
