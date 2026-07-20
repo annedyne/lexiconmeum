@@ -30,7 +30,8 @@ public final class InflectionKey {
                 conjugation.getMood(),
                 conjugation.getTense(),
                 conjugation.getPerson(),
-                conjugation.getNumber()
+                conjugation.getNumber(),
+                conjugation.getGender()
                 );
     }
 
@@ -41,11 +42,23 @@ public final class InflectionKey {
             GrammaticalPerson person,
             GrammaticalNumber number
     ){
+        return joinConjugationParts(voice, mood, tense, person, number, null);
+    }
+
+    public static String joinConjugationParts(
+            GrammaticalVoice voice,
+            GrammaticalMood mood,
+            GrammaticalTense tense,
+            GrammaticalPerson person,
+            GrammaticalNumber number,
+            GrammaticalGender gender
+    ){
         return buildKeyPart(voice, true)
         + buildKeyPart(mood)
         + buildKeyPart(tense)
         + buildKeyPart(person)
-        + buildKeyPart(number);
+        + buildKeyPart(number)
+        + buildKeyPart(gender);
     }
 
     private static String buildKeyPart(Enum<?>  part){

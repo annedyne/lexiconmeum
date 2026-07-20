@@ -15,6 +15,8 @@ public class Conjugation implements Inflection {
     private final GrammaticalPerson person;
     private final GrammaticalNumber number;
     private final GrammaticalParticipleTense participleTense;
+    // Non-null only for compound/participial tenses whose form agrees in gender.
+    private final GrammaticalGender gender;
 
 
     public Conjugation(Builder builder){
@@ -24,6 +26,7 @@ public class Conjugation implements Inflection {
         this.person = builder.getPerson();
         this.number = builder.getNumber();
         this.participleTense = builder.getParticipleTense();
+        this.gender = builder.getGender();
         this.form = builder.getForm();
         this.alternativeForm = builder.getAlternativeForm();
     }
@@ -47,6 +50,7 @@ public class Conjugation implements Inflection {
                 .setNumber(number)
                 .setMood(mood)
                 .setParticipleTense(participleTense)
+                .setGender(gender)
                 .setAlternativeForm(alternativeForm);
     }
 
@@ -56,6 +60,7 @@ public class Conjugation implements Inflection {
     public GrammaticalNumber getNumber() { return number; }
     public GrammaticalMood getMood() { return mood; }
     public GrammaticalParticipleTense getParticipleTense() {return participleTense; }
+    public GrammaticalGender getGender() { return gender; }
 
     public static class Builder implements InflectionBuilder {
 
@@ -65,6 +70,7 @@ public class Conjugation implements Inflection {
         private GrammaticalPerson person;
         private GrammaticalNumber number;
         private GrammaticalParticipleTense participle;
+        private GrammaticalGender gender;
 
         private final String form;
         private String alternativeForm;
@@ -124,6 +130,15 @@ public class Conjugation implements Inflection {
 
         public Conjugation.Builder setParticipleTense(GrammaticalParticipleTense participle) {
             this.participle = participle;
+            return this;
+        }
+
+        public GrammaticalGender getGender() {
+            return gender;
+        }
+
+        public Conjugation.Builder setGender(GrammaticalGender gender) {
+            this.gender = gender;
             return this;
         }
 

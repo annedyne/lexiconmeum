@@ -28,7 +28,7 @@ public class JsonTestDataManager {
         EsseFormProvider esseFormProvider = new EsseFormProvider();
         LexicalTagResolver lexicalTagResolver = new LexicalTagResolver();
         ParserSupport parserSupport = new ParserSupport(lexicalTagResolver, ParseMode.STRICT);
-        POSVerbParser verbParser = new POSVerbParser(esseFormProvider, parserSupport);
+        POSVerbParser verbParser = new POSVerbParser(new CompoundInflectionGenerator(esseFormProvider), parserSupport);
         POSNounParser nounParser = new POSNounParser(parserSupport);
         POSAdjectiveParser adjectiveParser = new POSAdjectiveParser(parserSupport);
 

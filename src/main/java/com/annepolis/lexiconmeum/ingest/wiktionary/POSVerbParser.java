@@ -1,6 +1,5 @@
 package com.annepolis.lexiconmeum.ingest.wiktionary;
 
-import com.annepolis.lexiconmeum.ingest.tagmapping.EsseFormProvider;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.grammar.*;
@@ -43,11 +42,11 @@ public class POSVerbParser implements PartOfSpeechParser {
             "PASSIVE|SUBJUNCTIVE|FUTURE_PERFECT"
     );
 
-    private final EsseFormProvider esseFormProvider;
+    private final CompoundInflectionGenerator compoundInflectionGenerator;
     private final ParserSupport parserSupport;
 
-    public POSVerbParser(EsseFormProvider esseFormProvider, ParserSupport parserSupport){
-        this.esseFormProvider = esseFormProvider;
+    public POSVerbParser(CompoundInflectionGenerator compoundInflectionGenerator, ParserSupport parserSupport){
+        this.compoundInflectionGenerator = compoundInflectionGenerator;
         this.parserSupport = parserSupport;
     }
 
@@ -121,27 +120,16 @@ public class POSVerbParser implements PartOfSpeechParser {
      *                      number, and person) are derived to construct compound forms
      */
     private void addCompoundInflectionForms(LexemeBuilder lexemeBuilder, Conjugation conjugation) {
-
-        String participleBase = conjugation.getForm();
-        // NB: Even if this inflection has previously been built with all forms.
-        // We still need to fetch it from the Lexeme to set the current form as the alternative.
-        for (GrammaticalNumber number : GrammaticalNumber.values()) {
-            for (GrammaticalPerson person : GrammaticalPerson.values()) {
-                String esseForm = esseFormProvider.getForm(conjugation.getMood(), conjugation.getTense(), number, person);
-
-                String compoundForm = participleBase + " " + esseForm;
-
-                Conjugation compoundConjugation = new Conjugation.Builder(compoundForm)
-                        .setVoice(conjugation.getVoice())
-                        .setMood(conjugation.getMood())
-                        .setTense(conjugation.getTense())
-                        .setNumber(number)
-                        .setPerson(person)
-                        .build();
-
-                lexemeBuilder.addInflection(compoundConjugation);
-            }
-        }
+        // The main-verb data carries only the masculine participle base, so this
+        // generates the ungendered baseline (gender null). Feminine/neuter variants
+        // are added post-link once the participle declension sets are available.
+        compoundInflectionGenerator.generateCompoundForms(
+                        conjugation.getForm(),
+                        conjugation.getVoice(),
+                        conjugation.getMood(),
+                        conjugation.getTense(),
+                        null)
+                .forEach(lexemeBuilder::addInflection);
     }
 
 
