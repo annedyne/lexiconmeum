@@ -137,34 +137,38 @@ public class DataLinkingService {
      */
     private void addGenderedCompoundForms(StagedLexemeCache stagedLexemeCache) {
         for (Lexeme lexeme : stagedLexemeCache.getStagedLexemes()) {
-            if (!(lexeme.getPartOfSpeechDetails() instanceof VerbDetails verbDetails)) {
-                continue;
-            }
-
-            List<Conjugation> genderedForms = new ArrayList<>();
-            for (ParticipleDeclensionSet participleSet : verbDetails.getParticiples().values()) {
-                if (participleSet.getTense() == GrammaticalTense.PERFECT) {
-                    genderedForms.addAll(compoundInflectionGenerator.generateAllGenderedCompoundForms(participleSet));
-                }
-            }
-            if (genderedForms.isEmpty()) {
-                continue;
-            }
-
-            LexemeBuilder builder = LexemeBuilder.fromLexeme(lexeme);
-            for (Conjugation genderedForm : genderedForms) {
-                // Drop the ungendered baseline this gendered form supersedes; the
-                // parse-time baseline reused the singular participle base for plurals.
-                builder.removeInflection(InflectionKey.joinConjugationParts(
-                        genderedForm.getVoice(),
-                        genderedForm.getMood(),
-                        genderedForm.getTense(),
-                        genderedForm.getPerson(),
-                        genderedForm.getNumber()));
-                builder.addInflection(genderedForm);
-            }
-            stagedLexemeCache.replaceLexeme(lexeme, builder.build());
+            enrichVerbWithGenderedCompoundForms(lexeme, stagedLexemeCache);
         }
+    }
+
+    private void enrichVerbWithGenderedCompoundForms(Lexeme lexeme, StagedLexemeCache stagedLexemeCache) {
+        if (!(lexeme.getPartOfSpeechDetails() instanceof VerbDetails verbDetails)) {
+            return;
+        }
+
+        List<Conjugation> genderedForms = new ArrayList<>();
+        for (ParticipleDeclensionSet participleSet : verbDetails.getParticiples().values()) {
+            if (participleSet.getTense() == GrammaticalTense.PERFECT) {
+                genderedForms.addAll(compoundInflectionGenerator.generateAllGenderedCompoundForms(participleSet));
+            }
+        }
+        if (genderedForms.isEmpty()) {
+            return;
+        }
+
+        LexemeBuilder builder = LexemeBuilder.fromLexeme(lexeme);
+        for (Conjugation genderedForm : genderedForms) {
+            // Drop the ungendered baseline this gendered form supersedes; the
+            // parse-time baseline reused the singular participle base for plurals.
+            builder.removeInflection(InflectionKey.joinConjugationParts(
+                    genderedForm.getVoice(),
+                    genderedForm.getMood(),
+                    genderedForm.getTense(),
+                    genderedForm.getPerson(),
+                    genderedForm.getNumber()));
+            builder.addInflection(genderedForm);
+        }
+        stagedLexemeCache.replaceLexeme(lexeme, builder.build());
     }
 
     private Optional<Lexeme> findMatchingLexeme(String parentLemma, LinkableData dataToLink, StagedLexemeCache stagedLexemeCache) {
