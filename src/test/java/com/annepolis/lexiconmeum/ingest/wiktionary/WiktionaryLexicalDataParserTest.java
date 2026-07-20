@@ -320,7 +320,7 @@ class WiktionaryLexicalDataParserTest {
         assertTrue(brevis.isPresent(), "Brevis lexeme not found");
         assertEquals(Set.of(THIRD), brevis.get().getInflectionClasses());
 
-        brevis.get().getInflections().stream()
+        brevis.get().getInflections()
                 .forEach(i -> {
                     if (i instanceof Agreement ag) {
                         assert ag.getNumber() != null : "GrammaticalNumber is null in Agreement: " + ag;
