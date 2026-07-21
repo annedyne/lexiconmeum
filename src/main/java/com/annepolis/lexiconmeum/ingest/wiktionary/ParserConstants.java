@@ -13,6 +13,7 @@ public class ParserConstants {
             "la-conj",
             "la-adecl",
             "two-termination",
-            "sigmatic"
+            "sigmatic",
+            "lg" // 'ego has this no idea what it is'
     );
 }

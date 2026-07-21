@@ -70,15 +70,19 @@ public class AgreementTableMapper  implements InflectionTableMapper {
                                 Set.of(GrammaticalGender.MASCULINE, GrammaticalGender.FEMININE),
                                 Set.of(GrammaticalGender.NEUTER)
                         );
-                    } else if (!twoOrOneTermination) {
+                    } else if (!twoOrOneTermination && genders.size() == 3) {
                         // if it's a three termination (1st or 2nd declension)
                         //
                         genderGroups = genders.stream()
                                 .map(Set::of)
                                 .toList();
                     } else {
+
                         // otherwise, just use sets as they are in the data
-                        genderGroups = List.of(new TreeSet<>(genders));
+                        genderGroups = genders.size() != 0 ? List.of(new TreeSet<>(genders)) :
+                                List.of(Set.of(GrammaticalGender.MASCULINE,
+                                        GrammaticalGender.FEMININE,
+                                        GrammaticalGender.NEUTER ));
                     }
 
                     for (Set<GrammaticalGender> genderSet : genderGroups) {
