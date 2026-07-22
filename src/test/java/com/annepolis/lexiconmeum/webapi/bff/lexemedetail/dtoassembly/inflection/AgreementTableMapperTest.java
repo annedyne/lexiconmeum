@@ -104,6 +104,29 @@ class AgreementTableMapperTest {
     }
 
     @Test
+    void noGender_defaultsToAllThreeGenders() throws Exception {
+        // Genderless agreements (e.g. personal pronoun 'ego') were dropped entirely.
+        // They should now map to a single entry covering all three genders.
+        Lexeme lexeme = LexemeFixtureFactory.generateSyntheticAdjectiveLexeme(
+                AdjectiveTerminationType.NONE,
+                List.of(
+                        LexemeFixtureFactory.generateSyntheticAgreement(
+                                Set.of(),
+                                GrammaticalNumber.SINGULAR, GrammaticalCase.NOMINATIVE, "egō̆")
+                )
+        );
+
+        JsonNode root = objectMapper.readTree(objectMapper.writeValueAsString(agreementTableMapper.toInflectionTableDTO(lexeme)));
+        ArrayNode agreements = (ArrayNode) root.get(AGREEMENTS);
+
+        assertThat(agreements).hasSize(1);
+        Map<Set<String>, String> gendersToForm =
+                JsonAsserts.gendersToFormAt(agreements, GrammaticalNumber.SINGULAR, GrammaticalCase.NOMINATIVE);
+        assertThat(gendersToForm)
+                .containsEntry(Set.of(MASCULINE.name(), FEMININE.name(), NEUTER.name()), "egō̆");
+    }
+
+    @Test
     void NoTermination_oneForm_expandsToSingletons() throws Exception {
         // !TWO_TERMINATION => take a single form (because same form for each gender)
         // and duplicate it for each gender
