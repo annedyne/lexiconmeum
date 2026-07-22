@@ -34,6 +34,9 @@ Requires ego present in bundled data (added).
 - Build the child lexeme via the existing pronoun path to obtain those agreements.
 - Checkpoint: ego shows nos plural forms and tu shows vos plural forms in the detail response; parent singular forms intact.
 
+**Deferred — parent gloss still says "singular"**
+- After merging, ego/tu retain a gloss describing them as singular (e.g. tu: "you (singular)"), which reads as confusing now that plural forms appear in the same view. Decide how to present number on suppletive personal pronouns (adjust gloss, or surface number per-form section). Address after phases 1-3.
+
 **Phase 3 — Verify search + tests**
 - Confirm merged plural forms (nos/vos and their cases) still resolve via search to the parent lexeme.
 - Tests: linking merges nos into ego and vos into tu; child not emitted standalone; merged plural forms searchable; unresolved-parent case degrades gracefully.

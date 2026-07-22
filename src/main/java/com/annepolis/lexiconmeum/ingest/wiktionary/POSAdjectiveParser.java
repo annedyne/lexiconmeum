@@ -34,9 +34,39 @@ public class POSAdjectiveParser implements PartOfSpeechParser {
         return switch (parserKey) {
             case ADJECTIVE_POSITIVE -> stageLexeme(root);
             case ADJECTIVE_COMPARATIVE, ADJECTIVE_SUPERLATIVE -> stageAdjective(root);
-            case DETERMINER, PRONOUN -> processImmediately(root);
+            case PRONOUN -> parsePronoun(root);
+            case DETERMINER -> processImmediately(root);
             default -> processImmediately(root);
         };
+    }
+
+    // Suppletive plural pronouns (nos, vos) are staged for linking to their singular
+    // parent (ego, tu); those parents are staged so the linker can find them at
+    // finalization. All other pronouns remain standalone lexemes.
+    private ParsedResultProcessor parsePronoun(JsonNode root) {
+        String lemma = root.path(WORD.get()).asString();
+        String parentLemma = ParserConstants.SUPPLETIVE_PRONOUN_PARENTS.get(lemma);
+        if (parentLemma != null) {
+            return stageChildPronoun(root, lemma, parentLemma);
+        }
+        if (ParserConstants.SUPPLETIVE_PRONOUN_PARENTS.containsValue(lemma)) {
+            return stageLexeme(root);
+        }
+        return processImmediately(root);
+    }
+
+    // Build the child pronoun to capture its plural agreements, then stage them for
+    // linking onto the parent lexeme during finalization.
+    private ParsedResultProcessor stageChildPronoun(JsonNode root, String childLemma, String parentLemma) {
+        return parserSupport.initLexemeBuilderFromRoot(root, logger)
+                .flatMap(lexemeBuilder -> buildLexeme(lexemeBuilder, root))
+                .map(childLexeme -> {
+                    StagedPronounData pronounData =
+                            new StagedPronounData(childLemma, parentLemma, childLexeme.getInflections());
+                    return (ParsedResultProcessor) (lexemeConsumer, stagingService) ->
+                            stagingService.stageLinkableData(pronounData);
+                })
+                .orElse(ParsedResultProcessor.EMPTY);
     }
 
     private ParsedResultProcessor processImmediately(JsonNode root){
