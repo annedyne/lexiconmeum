@@ -14,6 +14,11 @@ import org.springframework.web.client.RestClient;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
+import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
+
+import java.util.UUID;
+
 import static com.annepolis.lexiconmeum.webapi.ApiRoutes.PREFIX;
 import static com.annepolis.lexiconmeum.webapi.ApiRoutes.SUFFIX;
 import static org.junit.jupiter.api.Assertions.*;
@@ -56,6 +61,25 @@ class TextSearchControllerIntegrationTest {
         ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
         logger.info(response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void reflexivePronounFormResolvesToSuiLexeme() {
+        UUID suiId = new LexemeBuilder("sui", PartOfSpeech.PRONOUN, "1").build().getId();
+        String url = getFullBaseUrl() + PREFIX + "?prefix=sib&limit=50";
+
+        ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        JsonNode root = objectMapper.readTree(response.getBody());
+        boolean found = false;
+        for (JsonNode suggestion : root) {
+            if (suiId.toString().equals(suggestion.path("lexemeId").asText())) {
+                found = true;
+                break;
+            }
+        }
+        assertTrue(found, "reflexive form 'sibī̆' should resolve to the sui lexeme");
     }
 
     @Test

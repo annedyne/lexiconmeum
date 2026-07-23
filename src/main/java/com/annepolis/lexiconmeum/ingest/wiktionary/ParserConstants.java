@@ -25,4 +25,16 @@ public class ParserConstants {
             "nos", "ego",
             "vos", "tu"
     );
+
+    // Reflexive pronoun lemmas whose entries Wiktionary tags as a non-lemma
+    // "pronoun form" head template, so they resolve to no parser key and are
+    // skipped. Flagged by name so parser-key derivation rescues them as PRONOUN.
+    public static final Set<String> REFLEXIVE_PRONOUN_LEMMAS = Set.of(
+            "sui"
+    );
+
+    // The non-lemma head-template name that flagged reflexive pronouns carry.
+    // Gating the rescue on this leaves the noun/verb form entries on the same
+    // page ("noun form" / "verb form") correctly skipped.
+    public static final String PRONOUN_FORM_HEAD_TEMPLATE = "pronoun form";
 }

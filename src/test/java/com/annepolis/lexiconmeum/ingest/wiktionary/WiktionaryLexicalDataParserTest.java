@@ -12,8 +12,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import com.annepolis.lexiconmeum.testsupport.TestSupport;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import tools.jackson.databind.JsonNode;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -358,5 +360,27 @@ class WiktionaryLexicalDataParserTest {
             assertEquals("fuerim", sumStaged.getInflectionIndex().get(key).getForm());
 
         }
+    }
+
+    // The reflexive pronoun 'sui' is tagged as a non-lemma "pronoun form"; it is flagged by
+    // name so parser-key derivation rescues it as PRONOUN rather than skipping it.
+    @Test
+    void reflexivePronounSuiDerivesPronounParserKey() throws Exception {
+        JsonNode suiPronoun = TestSupport.getInstance().getJsonTestDataManager()
+                .getRealNode("sui", PartOfSpeech.PRONOUN, "testDataPronoun.jsonl");
+
+        assertEquals(Optional.of(POSParserKey.PRONOUN), parser.deriveParserKeyFromRoot(suiPronoun));
+    }
+
+    // The noun-form and verb-form 'sui' entries on the same page are not "pronoun form",
+    // so the rescue does not apply and they derive no key.
+    @Test
+    void suiNounAndVerbFormEntriesDeriveNoParserKey() throws Exception {
+        JsonTestDataManager data = TestSupport.getInstance().getJsonTestDataManager();
+
+        assertEquals(Optional.empty(),
+                parser.deriveParserKeyFromRoot(data.getRealNode("sui", PartOfSpeech.NOUN, "testDataPronoun.jsonl")));
+        assertEquals(Optional.empty(),
+                parser.deriveParserKeyFromRoot(data.getRealNode("sui", PartOfSpeech.VERB, "testDataPronoun.jsonl")));
     }
 }
