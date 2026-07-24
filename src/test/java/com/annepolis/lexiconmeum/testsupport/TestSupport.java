@@ -2,9 +2,6 @@
 package com.annepolis.lexiconmeum.testsupport;
 
 import com.annepolis.lexiconmeum.ingest.wiktionary.JsonTestDataManager;
-import com.annepolis.lexiconmeum.shared.model.LexemeFixtureFactory;
-
-import java.util.stream.Stream;
 
 /**
  * Central access to shared test support classes.
@@ -22,10 +19,6 @@ public final class TestSupport {
 
     public static TestSupport getInstance() {
         return INSTANCE;
-    }
-
-    public static Stream<String> expectedPulcherForms() {
-        return LexemeFixtureFactory.expectedPulcherForms();
     }
 
     public JsonTestDataManager getJsonTestDataManager() {

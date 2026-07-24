@@ -60,7 +60,7 @@ public class AgreementTableMapper  implements InflectionTableMapper {
                 .forEach(agreement -> {
                     Set<GrammaticalGender> genders = agreement.getGenders();
                     List<Set<GrammaticalGender>> genderGroups;
-                    // If all three genders are present, but adjective is not three-termination --
+                    // If all three genders are present, but adjective is not three-termination
                     if (twoOrOneTermination && genders.containsAll(Set.of(
                             GrammaticalGender.MASCULINE,
                             GrammaticalGender.FEMININE,
@@ -71,15 +71,15 @@ public class AgreementTableMapper  implements InflectionTableMapper {
                                 Set.of(GrammaticalGender.NEUTER)
                         );
                     } else if (!twoOrOneTermination && genders.size() == 3) {
-                        // if it's a three termination (1st or 2nd declension)
-                        //
+                        // if all genders are present, and it's not a 2 or 1-termination
+
                         genderGroups = genders.stream()
                                 .map(Set::of)
                                 .toList();
                     } else {
 
                         // otherwise, just use sets as they are in the data
-                        genderGroups = genders.size() != 0 ? List.of(new TreeSet<>(genders)) :
+                        genderGroups = genders.isEmpty() ? List.of(new TreeSet<>(genders)) :
                                 List.of(Set.of(GrammaticalGender.MASCULINE,
                                         GrammaticalGender.FEMININE,
                                         GrammaticalGender.NEUTER ));

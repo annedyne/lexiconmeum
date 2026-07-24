@@ -69,6 +69,29 @@ public class JsonTestDataManager {
         return captured.get();
     }
 
+    public Lexeme getParsedPronounLexeme(String word, String filename) throws IOException {
+        JsonNode root = getRealNode(word, PartOfSpeech.PRONOUN ,filename);
+        return getUnstagedLexeme(root);
+    }
+
+    public Lexeme getUnstagedLexeme(JsonNode root){
+        WiktionaryStagingServiceStub stagingStub = getStagingServiceStub();
+
+        WiktionaryLexicalDataParser parser = getLexicalDataParser(parserRegistry, stagingStub);
+        AtomicReference<Lexeme> captured = new AtomicReference<>();
+        Consumer<Lexeme> consumer = captured::set;
+
+        parser.processJson(root, consumer);
+
+        return captured.get();
+    }
+
+    public Lexeme getParsedStagedPronounLexeme(String word, String filename) throws IOException {
+        JsonNode root = getRealNode(word, PartOfSpeech.PRONOUN ,filename);
+
+        return getStagedLexeme(word, root);
+    }
+
     private WiktionaryLexicalDataParser getLexicalDataParser(Map<POSParserKey, PartOfSpeechParser> parsers, WiktionaryStagingService stagingStub) {
         return new WiktionaryLexicalDataParser(
                 parsers,
