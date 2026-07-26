@@ -54,37 +54,44 @@ public class AgreementTableMapper  implements InflectionTableMapper {
             return;
         }
 
+        /*
+         * This loop places each inflection form under the appropriate gender (group) column,
+         * depending on the termination type of the parent adjective
+         * and the genders associated with the given form.
+         */
         inflections.stream()
                 .filter(Agreement.class::isInstance)
                 .map(Agreement.class::cast)
                 .forEach(agreement -> {
                     Set<GrammaticalGender> genders = agreement.getGenders();
                     List<Set<GrammaticalGender>> genderGroups;
-                    // If all three genders are present, but adjective is not three-termination
+                    // If form is associated with all three genders, but adjective is not three-termination
                     if (twoOrOneTermination && genders.containsAll(Set.of(
                             GrammaticalGender.MASCULINE,
                             GrammaticalGender.FEMININE,
                             GrammaticalGender.NEUTER))) {
-                        // Merge masculine and feminine into one gender group.
+
+                        // Create a single column for masculine/feminine form
+                        // And a separate one for neuter.
                         genderGroups = List.of(
                                 Set.of(GrammaticalGender.MASCULINE, GrammaticalGender.FEMININE),
                                 Set.of(GrammaticalGender.NEUTER)
                         );
-                    } else if (!twoOrOneTermination && genders.size() == 3) {
-                        // if all genders are present, and it's not a 2 or 1-termination
-
+                    } else if (!twoOrOneTermination && !genders.isEmpty()) {
+                        // creates one singleton group (column) per gender in genders
+                        // [ {MASCULINE}, {FEMININE}, {NEUTER} ]
                         genderGroups = genders.stream()
                                 .map(Set::of)
                                 .toList();
                     } else {
-
-                        // otherwise, just use sets as they are in the data
-                        genderGroups = genders.isEmpty() ? List.of(new TreeSet<>(genders)) :
-                                List.of(Set.of(GrammaticalGender.MASCULINE,
-                                        GrammaticalGender.FEMININE,
-                                        GrammaticalGender.NEUTER ));
+                        // creates a single group (column) for all associated genders
+                        // [ {FEMININE, MASCULINE, NEUTER} ]
+                        genderGroups = genders.isEmpty() ?
+                                List.of(Set.of(GrammaticalGender.MASCULINE, GrammaticalGender.FEMININE, GrammaticalGender.NEUTER )) :
+                                List.of(new TreeSet<>(genders));
                     }
 
+                    // Adds form to the table under the appropriate number and gender (group)
                     for (Set<GrammaticalGender> genderSet : genderGroups) {
                         table.computeIfAbsent(genderSet, g -> new EnumMap<>(GrammaticalNumber.class))
                                 .computeIfAbsent(agreement.getNumber(),

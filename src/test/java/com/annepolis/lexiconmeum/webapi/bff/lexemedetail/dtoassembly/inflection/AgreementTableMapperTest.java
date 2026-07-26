@@ -1,11 +1,15 @@
 package com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
+import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.LexemeFixtureFactory;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveTerminationType;
+import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
+import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
+import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
 import com.annepolis.lexiconmeum.testsupport.TestSupport;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.JsonNode;
@@ -94,14 +98,15 @@ class AgreementTableMapperTest {
     }
 
     @Test
-    void oneTermination_twoForms_expandsToTwoSets() throws IOException {
+    // Note that you can have a 'one-termination' when there are actually two termination types
+    // because the official 'termination type' only applies to nominative singular.
+    void oneTermination_twoGenderGroups_expandsToTwoSets() throws IOException {
         Lexeme lexeme = TestSupport.getInstance().getJsonTestDataManager()
                 .getParsedAdjectiveLexeme("caelebs", "testDataAdjective.jsonl");
 
         boolean isTwoOrOneTermination = true;
-        JsonNode root = objectMapper.readTree(objectMapper.writeValueAsString(agreementTableMapper.toInflectionTableDTO(lexeme.getInflections(), isTwoOrOneTermination)));
-        ArrayNode agreements = (ArrayNode) root.get(AGREEMENTS);
-        assertThat(agreements).hasSize(2);
+        AgreementTableDTO agreementTableDTO = agreementTableMapper.toInflectionTableDTO(lexeme.getInflections(), isTwoOrOneTermination);
+        assertThat(agreementTableDTO.getAgreements()).hasSize(2);
     }
 
     @Test
@@ -141,39 +146,51 @@ class AgreementTableMapperTest {
                 )
         );
 
-        JsonNode root = objectMapper.readTree(objectMapper.writeValueAsString(agreementTableMapper.toInflectionTableDTO(lexeme)));
-        ArrayNode agreements = (ArrayNode) root.get(AGREEMENTS);
-        assertThat(agreements).hasSize(3);
+        AgreementTableDTO agreementTableDTO = agreementTableMapper.toInflectionTableDTO(lexeme);
+        assertThat(agreementTableDTO.getAgreements()).hasSize(3);
     }
 
     @Test
     void firstAndSecondPersonPersonalPronounsHaveASingleAgreementColumn() throws IOException {
         Lexeme lexeme = testSupport.getJsonTestDataManager().getParsedStagedPronounLexeme("ego", "testDataPronoun.jsonl");
-        JsonNode root = objectMapper.readTree(objectMapper.writeValueAsString(agreementTableMapper.toInflectionTableDTO(lexeme)));
-        ArrayNode agreements = (ArrayNode) root.get(AGREEMENTS);
-        assertThat(agreements).hasSize(1);
+        AgreementTableDTO agreementTableDTO = agreementTableMapper.toInflectionTableDTO(lexeme);
+        assertThat(agreementTableDTO.getAgreements()).hasSize(1);
 
         lexeme = testSupport.getJsonTestDataManager().getParsedStagedPronounLexeme("tu", "testDataPronoun.jsonl");
-        root = objectMapper.readTree(objectMapper.writeValueAsString(agreementTableMapper.toInflectionTableDTO(lexeme)));
-        agreements = (ArrayNode) root.get(AGREEMENTS);
-        assertThat(agreements).hasSize(1);
+        agreementTableDTO = agreementTableMapper.toInflectionTableDTO(lexeme);
+        assertThat(agreementTableDTO.getAgreements()).hasSize(1);
     }
 
     @Test
     void thirdPersonPersonalPronounsHaveASingleAgreementColumn() throws IOException {
         Lexeme lexeme = testSupport.getJsonTestDataManager().getParsedPronounLexeme("sui", "testDataPronoun.jsonl");
-        JsonNode root = objectMapper.readTree(objectMapper.writeValueAsString(agreementTableMapper.toInflectionTableDTO(lexeme)));
-        ArrayNode agreements = (ArrayNode) root.get(AGREEMENTS);
-        assertThat(agreements).hasSize(1);
 
+        Lexeme updatedLexeme = normalizeNullNumbersToPlural(lexeme);
+
+        AgreementTableDTO agreementTableDTO = agreementTableMapper.toInflectionTableDTO(updatedLexeme);
+        assertThat(agreementTableDTO.getAgreements()).hasSize(1);
+
+    }
+
+    private static Lexeme normalizeNullNumbersToPlural(Lexeme lexeme) {
+        LexemeBuilder builder = LexemeBuilder.fromLexeme(lexeme);
+        for (Inflection inflection : lexeme.getInflections()) {
+            if (inflection instanceof Agreement agreement && agreement.getNumber() == null) {
+                Agreement updated = agreement.toBuilder()
+                        .setNumber(GrammaticalNumber.PLURAL)
+                        .build();
+                builder.removeInflection(InflectionKey.of(agreement));
+                builder.addInflection(updated);
+            }
+        }
+        return builder.build();
     }
 
     @Test
     void firstAndSecondPersonPersonalPronounsd() throws IOException {
         Lexeme lexeme = testSupport.getJsonTestDataManager().getParsedStagedPronounLexeme("ego", "testDataPronoun.jsonl");
-        JsonNode root = objectMapper.readTree(objectMapper.writeValueAsString(agreementTableMapper.toInflectionTableDTO(lexeme)));
-        ArrayNode agreements = (ArrayNode) root.get(AGREEMENTS);
-        assertThat(agreements).hasSize(1);
+        AgreementTableDTO agreementTableDTO = agreementTableMapper.toInflectionTableDTO(lexeme);
+        assertThat(agreementTableDTO.getAgreements()).hasSize(1);
     }
 
 
