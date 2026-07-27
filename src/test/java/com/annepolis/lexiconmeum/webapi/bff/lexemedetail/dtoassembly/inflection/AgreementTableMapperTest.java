@@ -168,7 +168,7 @@ class AgreementTableMapperTest {
         Lexeme updatedLexeme = normalizeNullNumbersToPlural(lexeme);
 
         AgreementTableDTO agreementTableDTO = agreementTableMapper.toInflectionTableDTO(updatedLexeme);
-        assertThat(agreementTableDTO.getAgreements()).hasSize(1);
+        assertThat(agreementTableDTO.getAgreements()).hasSize(3);
 
     }
 

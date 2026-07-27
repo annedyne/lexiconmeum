@@ -45,3 +45,8 @@ noun and verb form entries stay correctly skipped.
 - Ingest/detail: 'sui' loads and its forms (sui, sibi, se, sese) appear in the response and
   are searchable.
 - Checkpoint: full test suite green.
+
+### Review
+
+This implementation works, but only if I add plural tags to the reflexive form jsonl. I don't want to doctor the data directly, because that will have to be re-done every time the data is updated. We need a better solution.
+
