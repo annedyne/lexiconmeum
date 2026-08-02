@@ -6,6 +6,7 @@ import org.springframework.core.io.Resource;
 @ConfigurationProperties(prefix = "app.load")
 public class LoadProperties {
     private Resource dataFile;
+    private Resource overrideFile;
     private ParseMode parseMode;
 
 
@@ -23,6 +24,14 @@ public class LoadProperties {
 
     public void setDataFile(Resource dataFile) {
         this.dataFile = dataFile;
+    }
+
+    public Resource getOverrideFile() {
+        return overrideFile;
+    }
+
+    public void setOverrideFile(Resource overrideFile) {
+        this.overrideFile = overrideFile;
     }
 
 }

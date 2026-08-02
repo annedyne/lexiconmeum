@@ -6,11 +6,8 @@ import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import org.springframework.core.io.ClassPathResource;
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -19,15 +16,19 @@ public class JsonTestDataManager {
     // Shared instance for "Spring-free" unit tests
     public static final JsonTestDataManager INSTANCE = new JsonTestDataManager();
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private static final String OVERRIDE_FILE = "lexicalDataOverrides.jsonl";
+
     private final Map<String, List<JsonNode>> cache = new HashMap<>();
     private final Map<POSParserKey, PartOfSpeechParser> parserRegistry = new EnumMap<>(POSParserKey.class);
+    private final WiktionaryLexicalEntryKeyExtractor keyExtractor;
+    private final JsonlResourceReader jsonlResourceReader = new JsonlResourceReader();
 
     private JsonTestDataManager() {
         // Explicitly wire the dependencies as Spring would
         EsseFormProvider esseFormProvider = new EsseFormProvider();
         LexicalTagResolver lexicalTagResolver = new LexicalTagResolver();
         ParserSupport parserSupport = new ParserSupport(lexicalTagResolver, ParseMode.STRICT);
+        keyExtractor = new WiktionaryLexicalEntryKeyExtractor(parserSupport);
         POSVerbParser verbParser = new POSVerbParser(new CompoundInflectionGenerator(esseFormProvider), parserSupport);
         POSNounParser nounParser = new POSNounParser(parserSupport);
         POSAdjectiveParser adjectiveParser = new POSAdjectiveParser(parserSupport);
@@ -188,13 +189,11 @@ public class JsonTestDataManager {
         if (cache.containsKey(filename)) return cache.get(filename);
 
         List<JsonNode> nodes = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(
-                new ClassPathResource(filename).getInputStream()))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                nodes.add(mapper.readTree(line));
-            }
-        }
+        LoadProperties loadProperties = new LoadProperties();
+        loadProperties.setDataFile(new ClassPathResource(filename));
+        loadProperties.setOverrideFile(new ClassPathResource(OVERRIDE_FILE));
+        new WiktionaryLexicalDataEntrySource(loadProperties, jsonlResourceReader, keyExtractor)
+                .readResolvedEntries(nodes::add);
         cache.put(filename, nodes);
         return nodes;
     }

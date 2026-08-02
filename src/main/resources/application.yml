@@ -5,6 +5,7 @@ spring:
 app:
   load:
     data-file: file:/opt/lexiconmeum/data/lexicalData.jsonl
+    override-file: classpath:lexicalDataOverrides.jsonl
     parse-mode: LENIENT
 
   text-search:

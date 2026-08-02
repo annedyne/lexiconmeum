@@ -1,15 +1,11 @@
 package com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.inflection;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.LexemeFixtureFactory;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveTerminationType;
-import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
-import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
-import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
 import com.annepolis.lexiconmeum.testsupport.TestSupport;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.JsonNode;
@@ -162,32 +158,16 @@ class AgreementTableMapperTest {
     }
 
     @Test
-    void thirdPersonPersonalPronounsHaveASingleAgreementColumn() throws IOException {
+    void thirdPersonPersonalPronounsHaveATripleAgreementColumn() throws IOException {
         Lexeme lexeme = testSupport.getJsonTestDataManager().getParsedPronounLexeme("sui", "testDataPronoun.jsonl");
 
-        Lexeme updatedLexeme = normalizeNullNumbersToPlural(lexeme);
-
-        AgreementTableDTO agreementTableDTO = agreementTableMapper.toInflectionTableDTO(updatedLexeme);
+        AgreementTableDTO agreementTableDTO = agreementTableMapper.toInflectionTableDTO(lexeme);
         assertThat(agreementTableDTO.getAgreements()).hasSize(3);
 
     }
 
-    private static Lexeme normalizeNullNumbersToPlural(Lexeme lexeme) {
-        LexemeBuilder builder = LexemeBuilder.fromLexeme(lexeme);
-        for (Inflection inflection : lexeme.getInflections()) {
-            if (inflection instanceof Agreement agreement && agreement.getNumber() == null) {
-                Agreement updated = agreement.toBuilder()
-                        .setNumber(GrammaticalNumber.PLURAL)
-                        .build();
-                builder.removeInflection(InflectionKey.of(agreement));
-                builder.addInflection(updated);
-            }
-        }
-        return builder.build();
-    }
-
     @Test
-    void firstAndSecondPersonPersonalPronounsd() throws IOException {
+    void firstAndSecondPersonPersonalPronouns() throws IOException {
         Lexeme lexeme = testSupport.getJsonTestDataManager().getParsedStagedPronounLexeme("ego", "testDataPronoun.jsonl");
         AgreementTableDTO agreementTableDTO = agreementTableMapper.toInflectionTableDTO(lexeme);
         assertThat(agreementTableDTO.getAgreements()).hasSize(1);

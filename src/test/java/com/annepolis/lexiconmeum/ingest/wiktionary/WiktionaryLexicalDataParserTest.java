@@ -17,10 +17,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import tools.jackson.databind.JsonNode;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -32,6 +29,7 @@ class WiktionaryLexicalDataParserTest {
 
     private WiktionaryLexicalDataParser parser;
     private WiktionaryStagingServiceStub stagingServiceStub;
+    private JsonlResourceReader jsonlResourceReader;
 
     // IF YOU ADD A VALID LEMMA NODE TO THE testDataRaw.jsonl ADD IT HERE
     static final String[] VALID_UNSTAGED_LEXEME_LIST = {"sum", "amo", "poculum", "brevis", "brevis", "brevis",
@@ -78,6 +76,7 @@ class WiktionaryLexicalDataParserTest {
 
         // Create test stub for staging service
         stagingServiceStub = new WiktionaryStagingServiceStub();
+        jsonlResourceReader = new JsonlResourceReader();
 
         // Create parser with stub
         parser = new WiktionaryLexicalDataParser(
@@ -117,14 +116,10 @@ class WiktionaryLexicalDataParserTest {
     }
 
     private void parseVerbLexemes() throws IOException {
-        Resource resource = new ClassPathResource("testDataVerb.jsonl");
-        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
+        parseResource("testDataVerb.jsonl", lexeme -> {});
 
-            parser.parseJsonl(reader, lexeme -> {});
-
-            // Get verbs from staging service
-            verbLexemes = stagingServiceStub.stagedLexemes;
-        }
+        // Get verbs from staging service
+        verbLexemes = stagingServiceStub.stagedLexemes;
     }
 
     public List<Lexeme> getAdjectiveLexemes() throws IOException {
@@ -135,13 +130,9 @@ class WiktionaryLexicalDataParserTest {
     }
 
     private void parseAdjectiveLexemes() throws IOException {
-        Resource resource = new ClassPathResource("testDataAdjective.jsonl");
-
-        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
-            adjectiveLexemes = new ArrayList<>();
-            parser.parseJsonl(reader, lexeme -> {});
-            adjectiveLexemes = stagingServiceStub.stagedLexemes;
-        }
+        adjectiveLexemes = new ArrayList<>();
+        parseResource("testDataAdjective.jsonl", lexeme -> {});
+        adjectiveLexemes = stagingServiceStub.stagedLexemes;
     }
 
     private List<Lexeme> nounLexemes;
@@ -154,16 +145,12 @@ class WiktionaryLexicalDataParserTest {
     }
 
     private void parseNounLexemes() throws IOException {
-        Resource resource = new ClassPathResource("testDataNoun.jsonl");
-
-        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
-            nounLexemes = new ArrayList<>();
-            parser.parseJsonl(reader, lexeme -> {
-                if (lexeme.getInflections().get(0) instanceof Declension) {
-                    nounLexemes.add(lexeme);
-                }
-            });
-        }
+        nounLexemes = new ArrayList<>();
+        parseResource("testDataNoun.jsonl", lexeme -> {
+            if (lexeme.getInflections().get(0) instanceof Declension) {
+                nounLexemes.add(lexeme);
+            }
+        });
     }
 
 
@@ -177,66 +164,54 @@ class WiktionaryLexicalDataParserTest {
     void JsonlFileParsesWithoutError() {
         Resource resource = new ClassPathResource("testDataRaw.jsonl");
         assertDoesNotThrow(() -> {
-            try (Reader reader = new InputStreamReader(resource.getInputStream())) {
-                BufferedReader br = new BufferedReader(reader);
-                parser.readJsonLine(br);
-            }
+            jsonlResourceReader.read(resource, node -> {});
         });
     }
 
     @Test
     void testLoadJsonFile() throws Exception {
 
-        Resource resource = new ClassPathResource("testDataRaw.jsonl");
-        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
-            List<Lexeme> validNonVerbLexemes = new ArrayList<>();
+        List<Lexeme> validNonVerbLexemes = new ArrayList<>();
 
-            parser.parseJsonl(reader, validNonVerbLexemes::add);
+        parseResource("testDataRaw.jsonl", validNonVerbLexemes::add);
 
-            int totalCount = stagingServiceStub.stagedLexemes.size() + stagingServiceStub.stagedParticiples.size() + validNonVerbLexemes.size();
-            assertEquals(VALID_UNSTAGED_LEXEME_LIST.length + VALID_STAGED_LEXEME_LIST.length + NON_LEXEME_STAGED_LIST.length, totalCount);
-        }
+        int totalCount = stagingServiceStub.stagedLexemes.size() + stagingServiceStub.stagedParticiples.size() + validNonVerbLexemes.size();
+        assertEquals(VALID_UNSTAGED_LEXEME_LIST.length + VALID_STAGED_LEXEME_LIST.length + NON_LEXEME_STAGED_LIST.length, totalCount);
     }
 
     @Test
     void verbsAreStagedParticiplesAreConsumed() throws Exception {
-        Resource resource = new ClassPathResource("testDataRaw.jsonl");
-        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
-            List<Lexeme> consumedLexemes = new ArrayList<>();
-            parser.parseJsonl(reader, consumedLexemes::add);
+        List<Lexeme> consumedLexemes = new ArrayList<>();
+        parseResource("testDataRaw.jsonl", consumedLexemes::add);
 
-            // Verify verb "amo" was staged
-            Lexeme amoStaged = stagingServiceStub.stagedLexemes.stream()
-                    .filter(l -> "amo".equals(l.getLemma()))
-                    .findFirst()
-                    .orElseThrow(() -> new AssertionError("'amo' not found in staging"));
+        // Verify verb "amo" was staged
+        Lexeme amoStaged = stagingServiceStub.stagedLexemes.stream()
+                .filter(l -> "amo".equals(l.getLemma()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("'amo' not found in staging"));
 
 
-            // Verify noun "amo" was consumed
-            Lexeme amoConsumed = consumedLexemes.stream()
-                    .filter(l -> "amo".equals(l.getLemma()))
-                    .findFirst()
-                    .orElseThrow(() -> new AssertionError("'amo' not found in consumed"));
+        // Verify noun "amo" was consumed
+        Lexeme amoConsumed = consumedLexemes.stream()
+                .filter(l -> "amo".equals(l.getLemma()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("'amo' not found in consumed"));
 
-            // test that these are different Lexemes with the same lemma
-            assertNotEquals(amoConsumed.getId(), amoStaged.getId());
-        }
+        // test that these are different Lexemes with the same lemma
+        assertNotEquals(amoConsumed.getId(), amoStaged.getId());
     }
 
     @Test
     void IsValidLemmaFiltersOutInvalidPulsoEntry() throws Exception {
-        Resource resource = new ClassPathResource("testDataRaw.jsonl");
-        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
-            List<Lexeme> allLexemes = new ArrayList<>();
-            parser.parseJsonl(reader, allLexemes::add);
-            allLexemes.addAll(stagingServiceStub.stagedLexemes);
+        List<Lexeme> allLexemes = new ArrayList<>();
+        parseResource("testDataRaw.jsonl", allLexemes::add);
+        allLexemes.addAll(stagingServiceStub.stagedLexemes);
 
-            long pulsoCount = allLexemes.stream()
-                    .filter(l -> l.getLemma().equals("pulso"))
-                    .count();
+        long pulsoCount = allLexemes.stream()
+                .filter(l -> l.getLemma().equals("pulso"))
+                .count();
 
-            assertEquals(1, pulsoCount, "Expected exactly one 'pulso' lemma");
-        }
+        assertEquals(1, pulsoCount, "Expected exactly one 'pulso' lemma");
     }
 
     @Test
@@ -344,22 +319,23 @@ class WiktionaryLexicalDataParserTest {
 
     @Test
     void verbEsseIsParsedAndStaged() throws IOException {
-        Resource resource = new ClassPathResource("testDataRaw.jsonl");
-        try (Reader reader = new InputStreamReader(resource.getInputStream())) {
-            List<Lexeme> consumedLexemes = new ArrayList<>();
-            parser.parseJsonl(reader, consumedLexemes::add);
+        List<Lexeme> consumedLexemes = new ArrayList<>();
+        parseResource("testDataRaw.jsonl", consumedLexemes::add);
 
-            // Verify verb "sum" was staged
-            Lexeme sumStaged = stagingServiceStub.stagedLexemes.stream()
-                    .filter(l -> "sum".equals(l.getLemma()) && PartOfSpeech.VERB == l.getPartOfSpeech())
-                    .findFirst()
-                    .orElseThrow(() -> new AssertionError("'sum' not found in staging"));
+        // Verify verb "sum" was staged
+        Lexeme sumStaged = stagingServiceStub.stagedLexemes.stream()
+                .filter(l -> "sum".equals(l.getLemma()) && PartOfSpeech.VERB == l.getPartOfSpeech())
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("'sum' not found in staging"));
 
-            assertEquals(PartOfSpeech.VERB, sumStaged.getPartOfSpeech());
-            String key = InflectionKey.joinConjugationParts(GrammaticalVoice.ACTIVE, GrammaticalMood.SUBJUNCTIVE, GrammaticalTense.PERFECT, GrammaticalPerson.FIRST, GrammaticalNumber.SINGULAR);
-            assertEquals("fuerim", sumStaged.getInflectionIndex().get(key).getForm());
+        assertEquals(PartOfSpeech.VERB, sumStaged.getPartOfSpeech());
+        String key = InflectionKey.joinConjugationParts(GrammaticalVoice.ACTIVE, GrammaticalMood.SUBJUNCTIVE, GrammaticalTense.PERFECT, GrammaticalPerson.FIRST, GrammaticalNumber.SINGULAR);
+        assertEquals("fuerim", sumStaged.getInflectionIndex().get(key).getForm());
 
-        }
+    }
+
+    private void parseResource(String filename, Consumer<Lexeme> lexemeConsumer) throws IOException {
+        jsonlResourceReader.read(new ClassPathResource(filename), node -> parser.processJson(node, lexemeConsumer));
     }
 
     // The reflexive pronoun 'sui' is tagged as a non-lemma "pronoun form"; it is flagged by
