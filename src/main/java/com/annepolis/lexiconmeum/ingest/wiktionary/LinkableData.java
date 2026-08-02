@@ -7,9 +7,17 @@ public interface LinkableData {
 
     String getLemma();
     String getLinkingLemma();
-    String getLinkingLemmaWithMacrons();
+
+    default String getLinkingLemmaWithMacrons() {
+        return getLinkingLemma();
+    }
+
     Lexeme link(Lexeme lexeme);
-    String getDataKey();
+
+    default String getDataKey() {
+        return getLemma();
+    }
+
     PartOfSpeech getParentLinkPartOfSpeech();
 
 }

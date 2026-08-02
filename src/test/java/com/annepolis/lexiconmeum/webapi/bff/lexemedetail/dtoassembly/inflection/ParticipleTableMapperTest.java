@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,14 +22,14 @@ class ParticipleTableMapperTest {
 
     private Lexeme testLexeme = null;
 
-    Lexeme getTestLexeme() throws IOException {
+    Lexeme getTestLexeme() {
         if(testLexeme == null){
             testLexeme = createTestLexemeWithParticiples();
         }
         return testLexeme;
     }
 
-    private Lexeme createTestLexemeWithParticiples() throws IOException {
+    private Lexeme createTestLexemeWithParticiples() {
         VerbDetails.Builder verbDetailsBuilder = new VerbDetails.Builder();
 
         // Load JSON root
@@ -105,7 +104,7 @@ class ParticipleTableMapperTest {
     }
 
     @Test
-    void participleDTOExistsForAllGenders() throws Exception {
+    void participleDTOExistsForAllGenders() {
 
         ParticipleTableMapper underTest = new ParticipleTableMapper();
         List<ParticipleTableDTO> dtos = underTest.toInflectionTableDTO(getTestLexeme());
@@ -120,7 +119,7 @@ class ParticipleTableMapperTest {
     }
 
     @Test
-    void eachParticipleDTOHasAllTenses() throws Exception {
+    void eachParticipleDTOHasAllTenses() {
         ParticipleTableMapper underTest = new ParticipleTableMapper();
         List<ParticipleTableDTO> dtos = underTest.toInflectionTableDTO(getTestLexeme());
 

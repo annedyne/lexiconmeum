@@ -6,13 +6,8 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import org.springframework.stereotype.Component;
-import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.Reader;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -26,13 +21,11 @@ class WiktionaryLexicalDataParser {
     private static final Marker PARSER_DELEGATION_ISSUE = MarkerManager.getMarker("PARSER_DELEGATION_ISSUE");
 
     static class LogMsg {
-        private static final String JSONL_FORMAT_ERROR = "Check that JSONL is correctly formatted and not 'prettified'";
         private static final String MISSING_NODES = "{} not found";
 
         private LogMsg() {} // Prevent instantiation
     }
     
-    private final ObjectMapper mapper = new ObjectMapper();
     private final Map<POSParserKey, PartOfSpeechParser> partOfSpeechParserRegistry;
     private final WiktionaryStagingService wiktionaryStagingService;
 
@@ -43,25 +36,6 @@ class WiktionaryLexicalDataParser {
     ) {
         this.partOfSpeechParserRegistry = partOfSpeechParserRegistry;
         this.wiktionaryStagingService = wiktionaryStagingService;
-    }
-
-    public void parseJsonl(Reader reader, Consumer<Lexeme> lexemeConsumer) throws IOException {
-        BufferedReader br = new BufferedReader(reader);
-        String line;
-        while ((line = readJsonLine(br)) != null) {
-            try {
-                JsonNode root = mapper.readTree(line);
-                processJson(root, lexemeConsumer);
-
-            }  catch(JacksonException jacksonException) {
-                logger.error(LogMsg.JSONL_FORMAT_ERROR, jacksonException);
-                throw jacksonException;
-            }
-        }
-    }
-
-    String readJsonLine(BufferedReader br) throws IOException {
-        return br.readLine();
     }
 
     void processJson(JsonNode root, Consumer<Lexeme> lexemeConsumer){
@@ -82,8 +56,24 @@ class WiktionaryLexicalDataParser {
         return partOfSpeechParser.parsePartOfSpeech(root,parserKey );
     }
 
-    private Optional<POSParserKey> deriveParserKeyFromRoot(JsonNode root) {
-        return extractHeadTemplateNameFromRoot(root).flatMap(POSParserKey::fromHeadTemplateName);
+    Optional<POSParserKey> deriveParserKeyFromRoot(JsonNode root) {
+        Optional<String> headTemplateName = extractHeadTemplateNameFromRoot(root);
+        return headTemplateName
+                .flatMap(POSParserKey::fromHeadTemplateName)
+                .or(() -> rescueFlaggedWords(root, headTemplateName.orElse("")));
+    }
+
+    // Rescue lemmas flagged by name that Wiktionary tags as a non-lemma head template,
+    // which otherwise resolves to no key and is skipped. Reflexive pronouns (e.g. 'sui')
+    // are the current case, gated on the "pronoun form" template so the noun/verb form
+    // entries on the same page stay skipped.
+    private Optional<POSParserKey> rescueFlaggedWords(JsonNode root, String headTemplateName) {
+        String word = root.path(WORD.get()).asText("");
+        if (ParserConstants.REFLEXIVE_PRONOUN_LEMMAS.contains(word)
+                && ParserConstants.PRONOUN_FORM_HEAD_TEMPLATE.equalsIgnoreCase(headTemplateName)) {
+            return Optional.of(POSParserKey.PRONOUN);
+        }
+        return Optional.empty();
     }
 
     public Optional<String> extractHeadTemplateNameFromRoot(JsonNode root) {

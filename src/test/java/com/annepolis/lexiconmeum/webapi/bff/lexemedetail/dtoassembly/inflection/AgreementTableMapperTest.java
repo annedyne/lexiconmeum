@@ -22,6 +22,7 @@ class AgreementTableMapperTest {
 
     private final AgreementTableMapper agreementTableMapper = new AgreementTableMapper();
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final TestSupport testSupport = TestSupport.getInstance();
 
     static final String NEUTER_FORM = "acre";
     static final String MASCULINE_FORM = "acris";
@@ -41,7 +42,7 @@ class AgreementTableMapperTest {
      */
 
     @Test
-    void threeTermination_threeForms_expandsToSingletons() throws Exception {
+    void threeTermination_threeForms_expandsToSingletons() {
         // Build a 3-termination Adjective Lexeme with three Nominative Singular Agreement entries, one for each gender
         Lexeme lexeme = LexemeFixtureFactory.generateSyntheticAdjectiveLexeme(
                 AdjectiveTerminationType.THREE_TERMINATION,
@@ -74,7 +75,7 @@ class AgreementTableMapperTest {
     }
 
     @Test
-    void threeTermination_oneForm_expandsToSingletons() throws Exception {
+    void threeTermination_oneForm_expandsToSingletons() {
         // !TWO_TERMINATION => take a single form (because same form for each gender)
         // and duplicate it for each gender
         // build a three-termination adjective with a single form for all three genders
@@ -93,18 +94,19 @@ class AgreementTableMapperTest {
     }
 
     @Test
-    void oneTermination_twoForms_expandsToTwoSets() throws IOException {
+    // Note that you can have a 'one-termination' when there are actually two termination types
+    // because the official 'termination type' only applies to nominative singular.
+    void oneTermination_twoGenderGroups_expandsToTwoSets() throws IOException {
         Lexeme lexeme = TestSupport.getInstance().getJsonTestDataManager()
                 .getParsedAdjectiveLexeme("caelebs", "testDataAdjective.jsonl");
 
         boolean isTwoOrOneTermination = true;
-        JsonNode root = objectMapper.readTree(objectMapper.writeValueAsString(agreementTableMapper.toInflectionTableDTO(lexeme.getInflections(), isTwoOrOneTermination)));
-        ArrayNode agreements = (ArrayNode) root.get(AGREEMENTS);
-        assertThat(agreements).hasSize(2);
+        AgreementTableDTO agreementTableDTO = agreementTableMapper.toInflectionTableDTO(lexeme.getInflections(), isTwoOrOneTermination);
+        assertThat(agreementTableDTO.getAgreements()).hasSize(2);
     }
 
     @Test
-    void noGender_defaultsToAllThreeGenders() throws Exception {
+    void noGender_defaultsToAllThreeGenders() {
         // Genderless agreements (e.g. personal pronoun 'ego') were dropped entirely.
         // They should now map to a single entry covering all three genders.
         Lexeme lexeme = LexemeFixtureFactory.generateSyntheticAdjectiveLexeme(
@@ -127,7 +129,7 @@ class AgreementTableMapperTest {
     }
 
     @Test
-    void NoTermination_oneForm_expandsToSingletons() throws Exception {
+    void NoTermination_oneForm_expandsToSingletons() {
         // !TWO_TERMINATION => take a single form (because same form for each gender)
         // and duplicate it for each gender
         // build a three-termination adjective with a single form for all three genders
@@ -140,9 +142,35 @@ class AgreementTableMapperTest {
                 )
         );
 
-        JsonNode root = objectMapper.readTree(objectMapper.writeValueAsString(agreementTableMapper.toInflectionTableDTO(lexeme)));
-        ArrayNode agreements = (ArrayNode) root.get(AGREEMENTS);
-        assertThat(agreements).hasSize(3);
+        AgreementTableDTO agreementTableDTO = agreementTableMapper.toInflectionTableDTO(lexeme);
+        assertThat(agreementTableDTO.getAgreements()).hasSize(3);
+    }
+
+    @Test
+    void firstAndSecondPersonPersonalPronounsHaveASingleAgreementColumn() throws IOException {
+        Lexeme lexeme = testSupport.getJsonTestDataManager().getParsedStagedPronounLexeme("ego", "testDataPronoun.jsonl");
+        AgreementTableDTO agreementTableDTO = agreementTableMapper.toInflectionTableDTO(lexeme);
+        assertThat(agreementTableDTO.getAgreements()).hasSize(1);
+
+        lexeme = testSupport.getJsonTestDataManager().getParsedStagedPronounLexeme("tu", "testDataPronoun.jsonl");
+        agreementTableDTO = agreementTableMapper.toInflectionTableDTO(lexeme);
+        assertThat(agreementTableDTO.getAgreements()).hasSize(1);
+    }
+
+    @Test
+    void thirdPersonPersonalPronounsHaveATripleAgreementColumn() throws IOException {
+        Lexeme lexeme = testSupport.getJsonTestDataManager().getParsedPronounLexeme("sui", "testDataPronoun.jsonl");
+
+        AgreementTableDTO agreementTableDTO = agreementTableMapper.toInflectionTableDTO(lexeme);
+        assertThat(agreementTableDTO.getAgreements()).hasSize(3);
+
+    }
+
+    @Test
+    void firstAndSecondPersonPersonalPronouns() throws IOException {
+        Lexeme lexeme = testSupport.getJsonTestDataManager().getParsedStagedPronounLexeme("ego", "testDataPronoun.jsonl");
+        AgreementTableDTO agreementTableDTO = agreementTableMapper.toInflectionTableDTO(lexeme);
+        assertThat(agreementTableDTO.getAgreements()).hasSize(1);
     }
 
 

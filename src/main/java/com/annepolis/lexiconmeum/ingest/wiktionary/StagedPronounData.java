@@ -34,23 +34,12 @@ public class StagedPronounData implements LinkableData {
     }
 
     @Override
-    public String getLinkingLemmaWithMacrons() {
-        // Parent personal-pronoun lemmas are unique, so the macronized form is not needed for matching.
-        return parentLemma;
-    }
-
-    @Override
     public Lexeme link(Lexeme parent) {
         // Add the child's plural agreements onto the parent. Parent forms are singular,
         // so keys differ by number and no existing parent form is overwritten.
         LexemeBuilder builder = LexemeBuilder.fromLexeme(parent);
         childInflections.forEach(builder::addInflection);
         return builder.build();
-    }
-
-    @Override
-    public String getDataKey() {
-        return childLemma;
     }
 
     @Override

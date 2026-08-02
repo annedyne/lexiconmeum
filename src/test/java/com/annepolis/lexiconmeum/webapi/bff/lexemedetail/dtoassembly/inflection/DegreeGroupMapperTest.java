@@ -29,7 +29,7 @@ class DegreeGroupMapperTest {
     static final String POSITIVE = "positive";
 
     @Test
-    void thirdDecl_twoTermination_groupsMandF() throws Exception {
+    void thirdDecl_twoTermination_groupsMandF()  {
         //build a two-termination adjective that has the same form for all three genders
         Lexeme lexeme = LexemeFixtureFactory.generateSyntheticAdjectiveLexeme(
                 AdjectiveTerminationType.TWO_TERMINATION,
@@ -47,7 +47,6 @@ class DegreeGroupMapperTest {
         assertThat(agreements).hasSize(2); // two columns - one for [M,F] and one for [N]
     }
 
-    // ... existing code ...
 
     @Test
     void toInflectionTableDTO_generatesAllThreeDegrees() {
