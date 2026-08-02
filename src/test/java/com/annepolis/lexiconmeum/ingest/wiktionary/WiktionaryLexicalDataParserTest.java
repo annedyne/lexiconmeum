@@ -16,6 +16,7 @@ import com.annepolis.lexiconmeum.testsupport.TestSupport;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.*;
@@ -76,7 +77,7 @@ class WiktionaryLexicalDataParserTest {
 
         // Create test stub for staging service
         stagingServiceStub = new WiktionaryStagingServiceStub();
-        jsonlResourceReader = new JsonlResourceReader();
+        jsonlResourceReader = new JsonlResourceReader(new ObjectMapper());
 
         // Create parser with stub
         parser = new WiktionaryLexicalDataParser(

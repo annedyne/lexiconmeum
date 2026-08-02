@@ -2,6 +2,7 @@ package com.annepolis.lexiconmeum.ingest.wiktionary;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import tools.jackson.core.JacksonException;
@@ -24,10 +25,7 @@ class JsonlResourceReader {
 
     private final ObjectMapper mapper;
 
-    JsonlResourceReader() {
-        this(new ObjectMapper());
-    }
-
+    @Autowired
     JsonlResourceReader(ObjectMapper mapper) {
         this.mapper = mapper;
     }

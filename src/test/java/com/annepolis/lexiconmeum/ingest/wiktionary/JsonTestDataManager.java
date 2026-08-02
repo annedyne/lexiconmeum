@@ -6,6 +6,7 @@ import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import org.springframework.core.io.ClassPathResource;
 import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.*;
@@ -21,7 +22,7 @@ public class JsonTestDataManager {
     private final Map<String, List<JsonNode>> cache = new HashMap<>();
     private final Map<POSParserKey, PartOfSpeechParser> parserRegistry = new EnumMap<>(POSParserKey.class);
     private final WiktionaryLexicalEntryKeyExtractor keyExtractor;
-    private final JsonlResourceReader jsonlResourceReader = new JsonlResourceReader();
+    private final JsonlResourceReader jsonlResourceReader = new JsonlResourceReader(new ObjectMapper());
 
     private JsonTestDataManager() {
         // Explicitly wire the dependencies as Spring would

@@ -6,6 +6,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class JsonlResourceReaderTest {
 
-    private final JsonlResourceReader reader = new JsonlResourceReader();
+    private final JsonlResourceReader reader = new JsonlResourceReader(new ObjectMapper());
 
     @Test
     void readIgnoresBlankLines() throws IOException {

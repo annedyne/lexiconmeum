@@ -53,7 +53,7 @@ public class TextSearchController {
     }
 
     private int getEffectiveLimit(Integer clientLimit){
-        return (clientLimit == null ? searchProperties.getDefaultLimit() :  Math.min(clientLimit, searchProperties.getResultLimitMax()));
+        return clientLimit == null ? searchProperties.getDefaultLimit() : Math.min(clientLimit, searchProperties.getResultLimitMax());
     }
 
 

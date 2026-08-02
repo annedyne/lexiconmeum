@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
@@ -71,7 +72,7 @@ class WiktionaryLexicalDataEntrySourceTest {
         LoadProperties loadProperties = new LoadProperties();
         loadProperties.setDataFile(dataFile);
         loadProperties.setOverrideFile(overrideFile);
-        return new WiktionaryLexicalDataEntrySource(loadProperties, new JsonlResourceReader(), keyExtractor);
+        return new WiktionaryLexicalDataEntrySource(loadProperties, new JsonlResourceReader(new ObjectMapper()), keyExtractor);
     }
 
     private static List<JsonNode> collect(WiktionaryLexicalDataEntrySource source) throws IOException {
