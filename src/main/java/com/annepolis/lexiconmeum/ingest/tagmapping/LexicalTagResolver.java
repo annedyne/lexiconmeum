@@ -25,7 +25,7 @@ public final class LexicalTagResolver {
                 });
     }
 
-    public Optional<java.util.function.Consumer<LexemeBuilder>> resolve(String tag) {
+    public Optional<Consumer<LexemeBuilder>> resolve(String tag) {
         // Try POS detail factory
         Optional<PartOfSpeechDetailFactory> posOpt = PartOfSpeechDetailFactory.fromTag(tag);
         if (posOpt.isPresent()) {

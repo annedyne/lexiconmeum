@@ -213,7 +213,7 @@ public class POSAdjectiveParser implements PartOfSpeechParser {
     }
 
     Optional<String> extractPositiveParentFromRoot(JsonNode root){
-        String positive = root.path(HEAD_TEMPLATES.get()).path(0).path(ARGS.get()).path(WiktionaryLexicalDataJsonKey.POSITIVE.get()).asString();
+        String positive = root.path(HEAD_TEMPLATES.get()).path(0).path(ARGS.get()).path(POSITIVE.get()).asString();
         return positive.isEmpty() ? Optional.empty() : Optional.of(positive);
     }
 
