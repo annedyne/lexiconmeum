@@ -8,9 +8,6 @@ import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.AdjectiveTerminationType;
 import com.annepolis.lexiconmeum.testsupport.TestSupport;
 import org.junit.jupiter.api.Test;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.node.ArrayNode;
 
 import java.io.IOException;
 import java.util.*;
@@ -21,17 +18,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AgreementTableMapperTest {
 
     private final AgreementTableMapper agreementTableMapper = new AgreementTableMapper();
-    private final ObjectMapper objectMapper = new ObjectMapper();
     private final TestSupport testSupport = TestSupport.getInstance();
 
     static final String NEUTER_FORM = "acre";
     static final String MASCULINE_FORM = "acris";
     static final String FEMININE_FORM = "acer";
-
-    //json keys
-    static final String AGREEMENTS = "agreements";
-    static final String INFLECTIONS = "inflections";
-    static final String GENDERS = "genders";
 
     /**
      * Wiktionary only provides distinct adjective inflection forms.
@@ -59,19 +50,17 @@ class AgreementTableMapperTest {
                 )
         );
 
-        // Picking up only the first DTO in the list which is the main (positive) degree
-        InflectionTableDTO dto = agreementTableMapper.toInflectionTableDTO(lexeme);
-        JsonNode root = objectMapper.readTree(objectMapper.writeValueAsString(dto));
-        ArrayNode agreements = (ArrayNode) root.get(AGREEMENTS);
+        AgreementTableDTO dto = agreementTableMapper.toInflectionTableDTO(lexeme);
+        List<AgreementEntryDTO> agreements = dto.getAgreements();
 
         assertThat(agreements).hasSize(3); // [M], [F], [N]
 
-        Map<Set<String>, String> gendersToForm =
-                JsonAsserts.gendersToFormAt(agreements, GrammaticalNumber.SINGULAR, GrammaticalCase.NOMINATIVE);
+        Map<Set<GrammaticalGender>, String> gendersToForm =
+                gendersToFormAt(agreements, GrammaticalNumber.SINGULAR, GrammaticalCase.NOMINATIVE);
         assertThat(gendersToForm)
-                .containsEntry(Set.of(MASCULINE.name()), MASCULINE_FORM)
-                .containsEntry(Set.of(FEMININE.name()), FEMININE_FORM)
-                .containsEntry(Set.of(NEUTER.name()), NEUTER_FORM);
+                .containsEntry(Set.of(MASCULINE), MASCULINE_FORM)
+                .containsEntry(Set.of(FEMININE), FEMININE_FORM)
+                .containsEntry(Set.of(NEUTER), NEUTER_FORM);
     }
 
     @Test
@@ -88,9 +77,8 @@ class AgreementTableMapperTest {
                 )
         );
 
-        JsonNode root = objectMapper.readTree(objectMapper.writeValueAsString(agreementTableMapper.toInflectionTableDTO(lexeme)));
-        ArrayNode agreements = (ArrayNode) root.get(AGREEMENTS);
-        assertThat(agreements).hasSize(3);
+        AgreementTableDTO dto = agreementTableMapper.toInflectionTableDTO(lexeme);
+        assertThat(dto.getAgreements()).hasSize(3);
     }
 
     @Test
@@ -118,14 +106,14 @@ class AgreementTableMapperTest {
                 )
         );
 
-        JsonNode root = objectMapper.readTree(objectMapper.writeValueAsString(agreementTableMapper.toInflectionTableDTO(lexeme)));
-        ArrayNode agreements = (ArrayNode) root.get(AGREEMENTS);
+        AgreementTableDTO dto = agreementTableMapper.toInflectionTableDTO(lexeme);
+        List<AgreementEntryDTO> agreements = dto.getAgreements();
 
         assertThat(agreements).hasSize(1);
-        Map<Set<String>, String> gendersToForm =
-                JsonAsserts.gendersToFormAt(agreements, GrammaticalNumber.SINGULAR, GrammaticalCase.NOMINATIVE);
+        Map<Set<GrammaticalGender>, String> gendersToForm =
+                gendersToFormAt(agreements, GrammaticalNumber.SINGULAR, GrammaticalCase.NOMINATIVE);
         assertThat(gendersToForm)
-                .containsEntry(Set.of(MASCULINE.name(), FEMININE.name(), NEUTER.name()), "egō̆");
+                .containsEntry(Set.of(MASCULINE, FEMININE, NEUTER), "egō̆");
     }
 
     @Test
@@ -162,7 +150,7 @@ class AgreementTableMapperTest {
         Lexeme lexeme = testSupport.getJsonTestDataManager().getParsedPronounLexeme("sui", "testDataPronoun.jsonl");
 
         AgreementTableDTO agreementTableDTO = agreementTableMapper.toInflectionTableDTO(lexeme);
-        assertThat(agreementTableDTO.getAgreements()).hasSize(3);
+        assertThat(agreementTableDTO.getAgreements()).hasSize(1);
 
     }
 
@@ -173,19 +161,16 @@ class AgreementTableMapperTest {
         assertThat(agreementTableDTO.getAgreements()).hasSize(1);
     }
 
-
-    static class JsonAsserts {
-        static Map<Set<String>, String> gendersToFormAt(ArrayNode agreements,
-                                                        GrammaticalNumber number,
-                                                        GrammaticalCase grammaticalCase) {
-            Map<Set<String>, String> out = new LinkedHashMap<>();
-            for (JsonNode node : agreements) {
-                Set<String> genders = new LinkedHashSet<>();
-                for (JsonNode g : node.get(GENDERS)) genders.add(g.asString());
-                String form = node.get(INFLECTIONS).get(number.name()).get(grammaticalCase.name()).asString();
-                out.put(genders, form);
-            }
-            return out;
+    // Groups agreement entries by their gender set, keyed by the form at the given number/case
+    private static Map<Set<GrammaticalGender>, String> gendersToFormAt(List<AgreementEntryDTO> agreements,
+                                                                         GrammaticalNumber number,
+                                                                         GrammaticalCase grammaticalCase) {
+        Map<Set<GrammaticalGender>, String> out = new LinkedHashMap<>();
+        for (AgreementEntryDTO entry : agreements) {
+            Set<GrammaticalGender> genders = new LinkedHashSet<>(entry.getGenders());
+            String form = entry.getInflections().get(number).get(grammaticalCase);
+            out.put(genders, form);
         }
+        return out;
     }
 }

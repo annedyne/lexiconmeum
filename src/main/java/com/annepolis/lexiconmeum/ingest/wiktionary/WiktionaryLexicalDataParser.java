@@ -57,23 +57,7 @@ class WiktionaryLexicalDataParser {
     }
 
     Optional<POSParserKey> deriveParserKeyFromRoot(JsonNode root) {
-        Optional<String> headTemplateName = extractHeadTemplateNameFromRoot(root);
-        return headTemplateName
-                .flatMap(POSParserKey::fromHeadTemplateName)
-                .or(() -> rescueFlaggedWords(root, headTemplateName.orElse("")));
-    }
-
-    // Rescue lemmas flagged by name that Wiktionary tags as a non-lemma head template,
-    // which otherwise resolves to no key and is skipped. Reflexive pronouns (e.g. 'sui')
-    // are the current case, gated on the "pronoun form" template so the noun/verb form
-    // entries on the same page stay skipped.
-    private Optional<POSParserKey> rescueFlaggedWords(JsonNode root, String headTemplateName) {
-        String word = root.path(WORD.get()).asText("");
-        if (ParserConstants.REFLEXIVE_PRONOUN_LEMMAS.contains(word)
-                && ParserConstants.PRONOUN_FORM_HEAD_TEMPLATE.equalsIgnoreCase(headTemplateName)) {
-            return Optional.of(POSParserKey.PRONOUN);
-        }
-        return Optional.empty();
+        return extractHeadTemplateNameFromRoot(root).flatMap(POSParserKey::fromHeadTemplateName);
     }
 
     public Optional<String> extractHeadTemplateNameFromRoot(JsonNode root) {
@@ -84,9 +68,9 @@ class WiktionaryLexicalDataParser {
         }
 
         JsonNode firstTemplate = headTemplates.get(0);
-        String name = firstTemplate.path(NAME.get()).asText("");
+        String name = firstTemplate.path(NAME.get()).asString("");
 
-        if(firstTemplate.path(NAME.get()).asText("").isEmpty()){
+        if(firstTemplate.path(NAME.get()).asString("").isEmpty()){
             logger.trace(PARSER_DELEGATION_ISSUE, LogMsg.MISSING_NODES, HEAD_TEMPLATES.name() + NAME.name());
             return Optional.empty();
         } else if ("head".equalsIgnoreCase(name)) {
