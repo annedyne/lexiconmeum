@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+
+    <!--
+      Mutable collections passed in and out of DTOs, builders, and model objects.
+      Defensive copying everywhere would add noise without buying safety here, since
+      these objects are assembled and consumed within a single request or ingest pass.
+    -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+    </Match>
+
+    <!--
+      Constructors that throw: private constructors guarding utility classes against
+      instantiation, and fail-fast on unreadable ingest input. Both are deliberate.
+    -->
+    <Match>
+        <Bug pattern="CT_CONSTRUCTOR_THROW"/>
+    </Match>
+
+    <!--
+      Pending decision: this contributor's supports() is hardcoded false, so the
+      injected parts of speech are never read. Remove the exclusion once the
+      contributor is either finished or deleted.
+    -->
+    <Match>
+        <Class name="com.annepolis.lexiconmeum.webapi.bff.lexemedetail.dtoassembly.section.SubtypeSectionContributor"/>
+        <Bug pattern="URF_UNREAD_FIELD"/>
+    </Match>
+
+</FindBugsFilter>
