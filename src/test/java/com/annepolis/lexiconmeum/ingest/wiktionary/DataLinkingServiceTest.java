@@ -13,15 +13,18 @@ import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.ParticipleDeclensionSet;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.VerbDetails;
+import com.annepolis.lexiconmeum.shared.model.inflection.Agreement;
 import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
 import com.annepolis.lexiconmeum.shared.model.inflection.Participle;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DataLinkingServiceTest {
     public Lexeme cachedLexeme;
@@ -182,6 +185,48 @@ class DataLinkingServiceTest {
         assertNull(inflections.get("PASSIVE|INDICATIVE|PERFECT|FIRST|PLURAL"));
         assertEquals("amātī sumus",
                 inflections.get("PASSIVE|INDICATIVE|PERFECT|FIRST|PLURAL|MASCULINE").getForm());
+    }
+
+    @Test
+    void pronounPluralFormsMergeIntoParent(){
+        DataLinkingService underTest = new DataLinkingService(
+                new CompoundInflectionGenerator(new EsseFormProvider()));
+
+        // Parent 'ego' seeded with a genderless singular form.
+        LexemeBuilder egoBuilder = new LexemeBuilder("ego", PartOfSpeech.PRONOUN, "1");
+        egoBuilder.addInflection(
+                genderlessAgreement("egō̆", GrammaticalCase.NOMINATIVE, GrammaticalNumber.SINGULAR));
+        Lexeme ego = egoBuilder.build();
+
+        StagedLexemeCache stagedLexemeCache = new StagedLexemeCache();
+        stagedLexemeCache.putLexeme(ego);
+
+        // Child 'nos' plural agreements staged for linking onto 'ego'.
+        List<Inflection> nosPluralForms = List.of(
+                genderlessAgreement("nōs", GrammaticalCase.NOMINATIVE, GrammaticalNumber.PLURAL),
+                genderlessAgreement("nōbīs", GrammaticalCase.DATIVE, GrammaticalNumber.PLURAL));
+        underTest.stageDataToLink(new StagedPronounData("nos", "ego", nosPluralForms));
+
+        underTest.finalizeLexicalDataLinking(this::setCachedLexeme, stagedLexemeCache);
+
+        List<Inflection> inflections = cachedLexeme.getInflections();
+        // Parent singular retained; both child plural forms merged.
+        assertEquals(3, inflections.size());
+        assertTrue(inflections.stream().anyMatch(i -> i.getForm().equals("egō̆")), "singular form lost");
+        assertTrue(inflections.stream().anyMatch(i -> i.getForm().equals("nōbīs")), "plural dative not merged");
+
+        Agreement mergedNominative = (Agreement) inflections.stream()
+                .filter(i -> i.getForm().equals("nōs"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("plural nominative not merged"));
+        assertEquals(GrammaticalNumber.PLURAL, mergedNominative.getNumber());
+    }
+
+    private static Agreement genderlessAgreement(String form, GrammaticalCase grammaticalCase, GrammaticalNumber number) {
+        return new Agreement.Builder(form)
+                .setGrammaticalCase(grammaticalCase)
+                .setNumber(number)
+                .build();
     }
 
     private static Participle nominative(String form, GrammaticalNumber number, GrammaticalGender gender) {

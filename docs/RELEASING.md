@@ -32,7 +32,9 @@ If the branching strategy changes, update this document alongside the workflow c
 
 Project version is defined in `pom.xml`.
 
-Release preparation uses a non-SNAPSHOT version. Ongoing development on `develop` should move back to the next `-SNAPSHOT` version after release.
+Release preparation uses a non-SNAPSHOT version. Ongoing development on `develop` should move to the next `-SNAPSHOT` version after release.
+
+The patch (third) number is reserved for hotfixes. So after releasing `X.Y.0`, the develop bump is a minor bump to `X.(Y+1).0-SNAPSHOT` (for example, release `0.14.0` is followed by `0.15.0-SNAPSHOT`), not `X.Y.1-SNAPSHOT`.
 
 ## Release checklist
 
@@ -72,13 +74,17 @@ bash git checkout master git pull origin master git tag -a v0.12.0 -m "Release 0
 
 
 ### 6. Bump `develop` to the next snapshot
-```bash 
-git checkout develop 
-git pull origin develop 
-mvn versions:set -DnewVersion=0.12.1-SNAPSHOT 
-git commit -am "Bump to 0.12.1-SNAPSHOT" 
+
+Use the next minor snapshot (patch is reserved for hotfixes). After a `0.12.0` release:
+```bash
+git checkout develop
+git pull origin develop
+mvn versions:set -DnewVersion=0.13.0-SNAPSHOT
+git commit -am "Bump to 0.13.0-SNAPSHOT"
 git push origin develop
 ```
+
+This SNAPSHOT bump is the one sanctioned direct push to `develop`; every other change reaches `develop` and `master` through pull requests.
 
 ## Deployment details
 

@@ -8,7 +8,7 @@ This roadmap outlines the next planned stages of work for the project.
 
 ### Dictionary and grammar coverage
 
-- [ ] Add support for remaining word-type gaps where needed
+- [x] Add support for remaining word-type gaps where needed
     - [x] nouns
     - [x] verbs
     - [x] adjectives
@@ -19,7 +19,7 @@ This roadmap outlines the next planned stages of work for the project.
 
 ### Verb and adjective detail completeness
 
-- [ ] Complete remaining verb support, including passive voice and any missing tense or mood combinations
+- [x] Complete remaining verb support, including passive voice and any missing tense or mood combinations
     - [x] Add participles to the detail API
     - [x] Add passive inflections to the detail API
 - [x] Include positive, comparative, and superlative adjective forms in a single detail response
@@ -27,7 +27,7 @@ This roadmap outlines the next planned stages of work for the project.
 ### Frontend polish
 
 - [x] Fix dropdown arrow-key navigation in the search field
-- [ ] Automatically clear error messages when input changes or retry succeeds
+- [x] Automatically clear error messages when input changes or retry succeeds
 
 ## Phase 1.5 — Frontend Deployment
 

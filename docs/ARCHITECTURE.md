@@ -83,6 +83,10 @@ This layer is responsible for:
 
 The source data is rich, but it is not already shaped for direct application use. The ingestion layer converts source records into normalized application models.
 
+### Data overrides
+
+Upstream Wiktionary entries are sometimes wrong or incomplete. An override file, keyed by lemma/part-of-speech/etymology, replaces matching entries before parsing, so the parser always works from already-resolved data and never knows whether an entry came from upstream data or an override. Overrides only replace existing entries; there is no mechanism to add entries upstream lacks.
+
 ## Staging and linking
 
 Some lexical relationships are not fully represented in a single source record. The backend uses a staging/linking step to resolve those relationships after parsing.
@@ -198,6 +202,7 @@ Runtime configuration lives in `src/main/resources`:
 - `application-dev.yml`
 - `log4j2.properties`
 - `log4j2-dev.properties`
+- `lexicalDataOverrides.jsonl` (data override input, see Data overrides above)
 
 Tests use:
 
