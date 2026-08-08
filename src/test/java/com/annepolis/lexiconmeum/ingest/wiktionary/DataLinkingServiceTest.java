@@ -3,13 +3,8 @@ package com.annepolis.lexiconmeum.ingest.wiktionary;
 import com.annepolis.lexiconmeum.ingest.tagmapping.EsseFormProvider;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalMood;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalPerson;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice;
+import com.annepolis.lexiconmeum.shared.model.grammar.*;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.MorphologicalSubtype;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.ParticipleDeclensionSet;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.VerbDetails;
@@ -22,9 +17,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class DataLinkingServiceTest {
     public Lexeme cachedLexeme;
@@ -185,6 +178,85 @@ class DataLinkingServiceTest {
         assertNull(inflections.get("PASSIVE|INDICATIVE|PERFECT|FIRST|PLURAL"));
         assertEquals("amātī sumus",
                 inflections.get("PASSIVE|INDICATIVE|PERFECT|FIRST|PLURAL|MASCULINE").getForm());
+    }
+
+    @Test
+    void enrichVerbWithGenderedCompoundFormsSkipsNonDeponentActiveParticiple(){
+        // Semi-deponent verbs (e.g. placeo) have a real synthetic active perfect
+        // (placui) plus a participle-based periphrastic alternative (placitus sum)
+        // that Wiktionary also tags 'active'. Since placeo is not DEPONENT, no
+        // standalone gendered ACTIVE entry should be generated from the participle.
+        DataLinkingService underTest = new DataLinkingService(
+                new CompoundInflectionGenerator(new EsseFormProvider()));
+
+        ParticipleDeclensionSet perfectActiveSet = new ParticipleDeclensionSet.Builder(
+                        GrammaticalVoice.ACTIVE, GrammaticalTense.PERFECT, "placitus")
+                .addInflection(nominative("placitus", GrammaticalNumber.SINGULAR, GrammaticalGender.MASCULINE))
+                .build();
+        VerbDetails verbDetails = new VerbDetails.Builder().addParticipleSet(perfectActiveSet).build();
+
+        LexemeBuilder lexemeBuilder = new LexemeBuilder("placeo", PartOfSpeech.VERB, "1");
+        lexemeBuilder.setPartOfSpeechDetails(verbDetails);
+        lexemeBuilder.addInflection(new Conjugation.Builder("placuī")
+                .setVoice(GrammaticalVoice.ACTIVE)
+                .setMood(GrammaticalMood.INDICATIVE)
+                .setTense(GrammaticalTense.PERFECT)
+                .setPerson(GrammaticalPerson.FIRST)
+                .setNumber(GrammaticalNumber.SINGULAR)
+                .build());
+        Lexeme placeo = lexemeBuilder.build();
+
+        Lexeme result = underTest.enrichVerbWithGenderedCompoundForms(placeo);
+
+        assertEquals(placeo, result);
+        assertNull(result.getInflectionIndex().get("ACTIVE|INDICATIVE|PERFECT|FIRST|SINGULAR|MASCULINE"));
+    }
+
+    @Test
+    void enrichVerbWithGenderedCompoundFormsGeneratesForDeponentActiveParticiple(){
+        // A true deponent's perfect system has no separate synthetic active form -
+        // the periphrastic, gendered form is the only paradigm, so it should be
+        // generated normally.
+        DataLinkingService underTest = new DataLinkingService(
+                new CompoundInflectionGenerator(new EsseFormProvider()));
+
+        ParticipleDeclensionSet perfectActiveSet = new ParticipleDeclensionSet.Builder(
+                        GrammaticalVoice.ACTIVE, GrammaticalTense.PERFECT, "hortatus")
+                .addInflection(nominative("hortatus", GrammaticalNumber.SINGULAR, GrammaticalGender.MASCULINE))
+                .build();
+
+        VerbDetails verbDetails = new VerbDetails.Builder()
+                .setMorphologicalSubtype(MorphologicalSubtype.DEPONENT)
+                .addParticipleSet(perfectActiveSet)
+                .build();
+
+        LexemeBuilder lexemeBuilder = new LexemeBuilder("hortor", PartOfSpeech.VERB, "1");
+        lexemeBuilder.setPartOfSpeechDetails(verbDetails);
+        Lexeme hortor = lexemeBuilder.build();
+
+        Lexeme result = underTest.enrichVerbWithGenderedCompoundForms(hortor);
+
+        assertEquals("hortatus sum",
+                result.getInflectionIndex().get("ACTIVE|INDICATIVE|PERFECT|FIRST|SINGULAR|MASCULINE").getForm());
+    }
+
+    @Test
+    void hasRealGenderedPerfectSystemGatesByVoiceAndSubtype(){
+        DataLinkingService underTest = new DataLinkingService(
+                new CompoundInflectionGenerator(new EsseFormProvider()));
+
+        ParticipleDeclensionSet passiveSet = new ParticipleDeclensionSet.Builder(
+                GrammaticalVoice.PASSIVE, GrammaticalTense.PERFECT, "amatus").build();
+        ParticipleDeclensionSet activeSet = new ParticipleDeclensionSet.Builder(
+                GrammaticalVoice.ACTIVE, GrammaticalTense.PERFECT, "placitus").build();
+
+        VerbDetails plainVerb = new VerbDetails.Builder().build();
+        VerbDetails deponentVerb = new VerbDetails.Builder().setMorphologicalSubtype(MorphologicalSubtype.DEPONENT).build();
+
+        assertTrue(underTest.hasRealGenderedPerfectSystem(passiveSet, plainVerb));
+        assertTrue(underTest.hasRealGenderedPerfectSystem(passiveSet, deponentVerb));
+        assertFalse(underTest.hasRealGenderedPerfectSystem(activeSet, plainVerb));
+        assertTrue(underTest.hasRealGenderedPerfectSystem(activeSet, deponentVerb));
     }
 
     @Test

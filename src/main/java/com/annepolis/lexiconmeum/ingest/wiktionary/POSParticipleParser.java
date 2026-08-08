@@ -179,9 +179,10 @@ public class POSParticipleParser implements PartOfSpeechParser {
 
         return builder.build();
     }
-
-    // Replace two separate tense tags with compound.
-    // Prevents single tags resolving to incorrect tenses
+    /* Normalizes existing participle sense tags to lexicon equivalent
+        - Replaces two separate tense tags with corresponding compound tense tag.
+        - Ex: presence of 'active' and 'perfect' tags = PERFECT_ACTIVE
+     */
     List<String> resolveParticipleTenseTags(List<String> senseTags) {
         List<String> tagListRef = List.copyOf(senseTags);
         String participle = GrammaticalParticipleTense.PARTICIPLE.name().toLowerCase();

@@ -3,6 +3,8 @@ package com.annepolis.lexiconmeum.ingest.wiktionary;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.MorphologicalSubtype;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.ParticipleDeclensionSet;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.VerbDetails;
@@ -137,23 +139,27 @@ public class DataLinkingService {
      */
     private void addGenderedCompoundForms(StagedLexemeCache stagedLexemeCache) {
         for (Lexeme lexeme : stagedLexemeCache.getStagedLexemes()) {
-            enrichVerbWithGenderedCompoundForms(lexeme, stagedLexemeCache);
+            Lexeme enriched = enrichVerbWithGenderedCompoundForms(lexeme);
+            stagedLexemeCache.replaceLexeme(lexeme, enriched);
         }
     }
 
-    private void enrichVerbWithGenderedCompoundForms(Lexeme lexeme, StagedLexemeCache stagedLexemeCache) {
+    // Returns the lexeme with gendered perfect-participle compound forms added,
+    // or the same lexeme unchanged if it isn't a verb or has no perfect participle
+    // set that needs them.
+    Lexeme enrichVerbWithGenderedCompoundForms(Lexeme lexeme) {
         if (!(lexeme.getPartOfSpeechDetails() instanceof VerbDetails verbDetails)) {
-            return;
+            return lexeme;
         }
 
         List<Conjugation> genderedForms = new ArrayList<>();
         for (ParticipleDeclensionSet participleSet : verbDetails.getParticiples().values()) {
-            if (participleSet.getTense() == GrammaticalTense.PERFECT) {
+            if (participleSet.getTense() == GrammaticalTense.PERFECT && hasRealGenderedPerfectSystem(participleSet, verbDetails)) {
                 genderedForms.addAll(compoundInflectionGenerator.generateAllGenderedCompoundForms(participleSet));
             }
         }
         if (genderedForms.isEmpty()) {
-            return;
+            return lexeme;
         }
 
         LexemeBuilder builder = LexemeBuilder.fromLexeme(lexeme);
@@ -168,7 +174,22 @@ public class DataLinkingService {
                     genderedForm.getNumber()));
             builder.addInflection(genderedForm);
         }
-        stagedLexemeCache.replaceLexeme(lexeme, builder.build());
+        return builder.build();
+    }
+
+    /**
+     * True only where a perfect participle's compound forms genuinely agree in gender:
+     * the passive perfect system (always periphrastic and gendered), or a true deponent's
+     * active perfect system (its only perfect paradigm, so also periphrastic and gendered).
+     * Everything else - plain actives, and semi-/optionally-deponent verbs like placeo whose
+     * perfect participle is tagged 'active' but which already have a genuine synthetic active
+     * perfect (placuī) - must not get a standalone gendered ACTIVE entry: the correct periphrastic
+     * alternative for those already reaches the synthetic form's alternativeForm via the normal
+     * same-key merge during the base verb parse.
+     */
+    boolean hasRealGenderedPerfectSystem(ParticipleDeclensionSet participleSet, VerbDetails verbDetails) {
+        return participleSet.getVoice() == GrammaticalVoice.PASSIVE
+                || verbDetails.getMorphologicalSubtype() == MorphologicalSubtype.DEPONENT;
     }
 
     private Optional<Lexeme> findMatchingLexeme(String parentLemma, LinkableData dataToLink, StagedLexemeCache stagedLexemeCache) {
