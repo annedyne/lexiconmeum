@@ -57,4 +57,20 @@ class ParticipleDeclensionSetTest {
         assertEquals(altForm, participle.getAlternativeForm());
 
     }
+
+    @Test
+    void forSupineBuildsNonGenderedSetWithDedicatedKey() {
+        Participle supine = new Participle.Builder("amātum")
+                .setGrammaticalCase(GrammaticalCase.ACCUSATIVE)
+                .build();
+
+        ParticipleDeclensionSet set = ParticipleDeclensionSet.Builder.forSupine("amātum")
+                .addInflection(supine)
+                .build();
+
+        assertEquals(GrammaticalParticipleTense.SUPINE, set.getParticipleTense());
+        assertEquals(GrammaticalTense.SUPINE, set.getTense());
+        assertEquals(InflectionKey.buildSupineParticipleSetKey(), set.getParticipleSetKey());
+        assertEquals(supine, set.getInflectionIndex().get(InflectionKey.of(supine)));
+    }
 }
