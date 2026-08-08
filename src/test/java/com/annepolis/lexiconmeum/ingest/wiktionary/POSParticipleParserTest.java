@@ -1,5 +1,6 @@
 package com.annepolis.lexiconmeum.ingest.wiktionary;
 
+import com.annepolis.lexiconmeum.ingest.tagmapping.EsseFormProvider;
 import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
@@ -25,7 +26,7 @@ class POSParticipleParserTest {
 
    @BeforeEach
    void setUp() {
-       underTest = new POSParticipleParser(PARSER_SUPPORT);
+       underTest = new POSParticipleParser(PARSER_SUPPORT, new CompoundInflectionGenerator(new EsseFormProvider()));
    }
 
     @Test

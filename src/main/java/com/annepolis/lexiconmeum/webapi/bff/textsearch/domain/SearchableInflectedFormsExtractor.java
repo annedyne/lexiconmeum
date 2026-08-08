@@ -27,6 +27,5 @@ public class SearchableInflectedFormsExtractor implements SearchableFormsExtract
 
         return Collections.unmodifiableSet(forms);
 
-
     }
 }

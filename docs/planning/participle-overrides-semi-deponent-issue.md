@@ -1,0 +1,13 @@
+I think the problem is that the deponent participle tense is getting added to the inflections as a gendered ACTIVE form. If there was an existing active gendered form the gendered form would get added to the alternativeForm key, but it doesn't, because generally an active form isn't gendered - so there is no gender in the existing form's key. And the front-end picks up the gendered form if it exists even if the ungendered form also exists. In any case, an active non-deponent verb should NOT have a gendered active form - except in the alternativeField.
+
+Now explain to me in English the approach you think you should take to avoid adding a gendered active perfect form to placeo.
+
+## Response
+
+Agreed — confirmed by tracing actual output. The alternativeForm pairing (placuī / placitus sum) is already correct and comes entirely from POSVerbParser's direct parse of placeo's own conjugation table (two same-keyed ungendered Conjugations colliding). DataLinkingService's gendered-compound step is the only thing adding the standalone gendered ACTIVE entries, and ConjugationTableMapper prefers a gendered bucket over an ungendered one whenever both exist in the same tense group — so those extra entries are what actually reach the front end.
+
+Approach: gate gendered compound-form generation in DataLinkingService by voice and morphological subtype, not by inspecting individual forms.
+- Passive-voice perfect participle sets: keep generating gendered compound forms unconditionally (this is the real, always-agreeing passive perfect system).
+- Active-voice perfect participle sets: only generate gendered compound forms when the verb's MorphologicalSubtype is DEPONENT (a true deponent's perfect system *is* the periphrastic, gendered one — there's no separate synthetic active to conflict with). For every other verb (plain actives, and semi-/optionally-deponent verbs like placeo), skip gendered generation for that participle set entirely — the existing per-form alternativeForm merge from the base parse already carries the periphrastic alternative correctly.
+
+This removes the bad data at the source instead of reconciling it after the fact, and needs no new subtype (semi-deponent verbs already have a null MorphologicalSubtype today, which is exactly the "not DEPONENT" bucket this gate skips). Superseding-generated-code from the earlier "isPeriphrasticForm" attempt should be reverted/removed since it no longer does anything once bad entries stop being generated. Worth a quick spot-check that MorphologicalSubtype.DEPONENT is actually being set for real deponents (sequor, hortor, etc.) before relying on it here.
