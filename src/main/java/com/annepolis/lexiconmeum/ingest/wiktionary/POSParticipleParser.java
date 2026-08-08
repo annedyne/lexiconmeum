@@ -23,9 +23,11 @@ import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataK
 public class POSParticipleParser implements PartOfSpeechParser {
 
     ParserSupport parserSupport;
+    private final CompoundInflectionGenerator compoundInflectionGenerator;
 
-    public POSParticipleParser(ParserSupport parserSupport){
+    public POSParticipleParser(ParserSupport parserSupport, CompoundInflectionGenerator compoundInflectionGenerator){
         this.parserSupport = parserSupport;
+        this.compoundInflectionGenerator = compoundInflectionGenerator;
     }
 
     static final Logger logger = LogManager.getLogger(POSParticipleParser.class);
@@ -108,7 +110,8 @@ public class POSParticipleParser implements PartOfSpeechParser {
                 .map(participleSet -> new StagedParticipleData(
                         parentLemma,
                         parentLemmaWithMacrons,
-                        participleSet
+                        participleSet,
+                        compoundInflectionGenerator
                 ));
     }
 
@@ -147,7 +150,8 @@ public class POSParticipleParser implements PartOfSpeechParser {
                 .map(participleSet -> new StagedParticipleData(
                         participleLemma,
                         participleLemma,
-                        participleSet
+                        participleSet,
+                        compoundInflectionGenerator
                 ));
     }
 

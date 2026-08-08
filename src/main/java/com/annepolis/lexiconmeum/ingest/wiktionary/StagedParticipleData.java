@@ -2,10 +2,16 @@ package com.annepolis.lexiconmeum.ingest.wiktionary;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.MorphologicalSubtype;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.ParticipleDeclensionSet;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.VerbDetails;
+import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
+
+import java.util.List;
 
 /**
  * Holds participle data that cannot yet be linked to its parent verb.
@@ -17,16 +23,19 @@ public class StagedParticipleData implements LinkableData{
     private final String parentLemma;
     private final String parentLemmaWithMacrons;
     private final ParticipleDeclensionSet participleDeclensionSet;
+    private final CompoundInflectionGenerator compoundInflectionGenerator;
 
     public StagedParticipleData(
             final String parentLemma,
             final String parentLemmaWithMacrons,
-            ParticipleDeclensionSet participleDeclensionSet
+            ParticipleDeclensionSet participleDeclensionSet,
+            CompoundInflectionGenerator compoundInflectionGenerator
     ){
 
         this.parentLemma = parentLemma;
         this.parentLemmaWithMacrons = parentLemmaWithMacrons;
         this.participleDeclensionSet = participleDeclensionSet;
+        this.compoundInflectionGenerator = compoundInflectionGenerator;
     }
 
     public String getParentLemma() {
@@ -81,9 +90,40 @@ public class StagedParticipleData implements LinkableData{
 
         verbDetailsBuilder.addParticipleSet(getParticipleDeclensionSet());
 
-        builder.setPartOfSpeechDetails(verbDetailsBuilder.build());
+        VerbDetails verbDetails = verbDetailsBuilder.build();
+        builder.setPartOfSpeechDetails(verbDetails);
+
+        updateVerbWithGenderedCompoundForms(builder, verbDetails);
 
         return builder.build();
+    }
+
+    /**
+     * Projects this participle set into the compound (participle + esse) forms of the
+     * perfect-system tenses, one per gender. The gendered forms supersede the ungendered
+     * baseline added when the parent verb itself was parsed, which reused the singular
+     * participle base for plurals.
+     */
+    private void updateVerbWithGenderedCompoundForms(LexemeBuilder builder, VerbDetails verbDetails) {
+        // if this is a perfect participle set and passive, OR it's active, but the verb is deponent,
+        // go ahead and update default periphrastic form with the appropriate gendered participle.
+        if (participleDeclensionSet.getTense() == GrammaticalTense.PERFECT
+                && (participleDeclensionSet.getVoice() == GrammaticalVoice.PASSIVE
+                || verbDetails.getMorphologicalSubtype() == MorphologicalSubtype.DEPONENT)) {
+
+            List<Conjugation> genderedForms =
+                    compoundInflectionGenerator.generateAllGenderedCompoundForms(participleDeclensionSet);
+
+            for (Conjugation genderedForm : genderedForms) {
+                builder.removeInflection(InflectionKey.joinConjugationParts(
+                        genderedForm.getVoice(),
+                        genderedForm.getMood(),
+                        genderedForm.getTense(),
+                        genderedForm.getPerson(),
+                        genderedForm.getNumber()));
+                builder.addInflection(genderedForm);
+            }
+        }
     }
 
     private VerbDetails.Builder getOrCreateVerbDetailsBuilder(Lexeme verb) {

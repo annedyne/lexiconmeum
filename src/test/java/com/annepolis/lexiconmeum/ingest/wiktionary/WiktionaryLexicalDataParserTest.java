@@ -56,7 +56,7 @@ class WiktionaryLexicalDataParserTest {
         POSVerbParser verbParser = new POSVerbParser(new CompoundInflectionGenerator(esseFormProvider), PARSER_SUPPORT);
         POSNounParser nounParser = new POSNounParser(PARSER_SUPPORT);
         POSAdjectiveParser adjectiveParser = new POSAdjectiveParser(PARSER_SUPPORT);
-        POSParticipleParser participleParser = new POSParticipleParser(PARSER_SUPPORT);
+        POSParticipleParser participleParser = new POSParticipleParser(PARSER_SUPPORT, new CompoundInflectionGenerator(esseFormProvider));
         POSNonInflectedFormParser nonInflectedFormParser = new POSNonInflectedFormParser(PARSER_SUPPORT);
 
         Map<POSParserKey, PartOfSpeechParser> posParsers = new EnumMap<>(POSParserKey.class);

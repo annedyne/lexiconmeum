@@ -1,15 +1,7 @@
 package com.annepolis.lexiconmeum.ingest.wiktionary;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
-import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice;
-import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.MorphologicalSubtype;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
-import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.ParticipleDeclensionSet;
-import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.VerbDetails;
-import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
-import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
@@ -39,12 +31,6 @@ public class DataLinkingService {
     // Some 'form_of' attributes point to that non-lemma form's main form, not the parent's lemma form
     // Map them here so they can be traced to the parent lemma.
     private final Map<String, List<String>> linkableDataLemmaToParentLemma = new ConcurrentHashMap<>();
-
-    private final CompoundInflectionGenerator compoundInflectionGenerator;
-
-    public DataLinkingService(CompoundInflectionGenerator compoundInflectionGenerator) {
-        this.compoundInflectionGenerator = compoundInflectionGenerator;
-    }
 
     /**
      * Stage a linkable for later attachment during finalization.
@@ -111,9 +97,6 @@ public class DataLinkingService {
             lexemesUpdated.incrementAndGet();
         });
 
-        // Now that participle forms are attached, expand compound tenses to all genders.
-        addGenderedCompoundForms(stagedLexemeCache);
-
         // Distribute to sinks
         for(Lexeme lexeme : stagedLexemeCache.getStagedLexemes()){
             ingestCallback.accept(lexeme);
@@ -129,67 +112,6 @@ public class DataLinkingService {
         logger.info("Lexical Data Linking finalization complete: {}", report.getSummary());
         clearStaged();
         return report;
-    }
-
-    /**
-     * For each verb with a perfect participle set, generate the feminine and neuter
-     * (and number-agreeing masculine) compound perfect-system forms and add them to
-     * the lexeme. Only possible here because the gendered participle forms are attached
-     * during linking above.
-     */
-    private void addGenderedCompoundForms(StagedLexemeCache stagedLexemeCache) {
-        for (Lexeme lexeme : stagedLexemeCache.getStagedLexemes()) {
-            Lexeme enriched = enrichVerbWithGenderedCompoundForms(lexeme);
-            stagedLexemeCache.replaceLexeme(lexeme, enriched);
-        }
-    }
-
-    // Returns the lexeme with gendered perfect-participle compound forms added,
-    // or the same lexeme unchanged if it isn't a verb or has no perfect participle
-    // set that needs them.
-    Lexeme enrichVerbWithGenderedCompoundForms(Lexeme lexeme) {
-        if (!(lexeme.getPartOfSpeechDetails() instanceof VerbDetails verbDetails)) {
-            return lexeme;
-        }
-
-        List<Conjugation> genderedForms = new ArrayList<>();
-        for (ParticipleDeclensionSet participleSet : verbDetails.getParticiples().values()) {
-            if (participleSet.getTense() == GrammaticalTense.PERFECT && hasRealGenderedPerfectSystem(participleSet, verbDetails)) {
-                genderedForms.addAll(compoundInflectionGenerator.generateAllGenderedCompoundForms(participleSet));
-            }
-        }
-        if (genderedForms.isEmpty()) {
-            return lexeme;
-        }
-
-        LexemeBuilder builder = LexemeBuilder.fromLexeme(lexeme);
-        for (Conjugation genderedForm : genderedForms) {
-            // Drop the ungendered baseline this gendered form supersedes; the
-            // parse-time baseline reused the singular participle base for plurals.
-            builder.removeInflection(InflectionKey.joinConjugationParts(
-                    genderedForm.getVoice(),
-                    genderedForm.getMood(),
-                    genderedForm.getTense(),
-                    genderedForm.getPerson(),
-                    genderedForm.getNumber()));
-            builder.addInflection(genderedForm);
-        }
-        return builder.build();
-    }
-
-    /**
-     * True only where a perfect participle's compound forms genuinely agree in gender:
-     * the passive perfect system (always periphrastic and gendered), or a true deponent's
-     * active perfect system (its only perfect paradigm, so also periphrastic and gendered).
-     * Everything else - plain actives, and semi-/optionally-deponent verbs like placeo whose
-     * perfect participle is tagged 'active' but which already have a genuine synthetic active
-     * perfect (placuī) - must not get a standalone gendered ACTIVE entry: the correct periphrastic
-     * alternative for those already reaches the synthetic form's alternativeForm via the normal
-     * same-key merge during the base verb parse.
-     */
-    boolean hasRealGenderedPerfectSystem(ParticipleDeclensionSet participleSet, VerbDetails verbDetails) {
-        return participleSet.getVoice() == GrammaticalVoice.PASSIVE
-                || verbDetails.getMorphologicalSubtype() == MorphologicalSubtype.DEPONENT;
     }
 
     private Optional<Lexeme> findMatchingLexeme(String parentLemma, LinkableData dataToLink, StagedLexemeCache stagedLexemeCache) {
