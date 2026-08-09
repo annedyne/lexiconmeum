@@ -6,9 +6,13 @@ import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.grammar.*;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.ParticipleDeclensionSet;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.VerbDetails;
 import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
+import com.annepolis.lexiconmeum.shared.model.inflection.Participle;
+import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -20,6 +24,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.FORMS;
+import static com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey.buildSupineParticipleSetKey;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class VerbParserTest {
@@ -81,6 +86,49 @@ class VerbParserTest {
 
     static String generateForm ( String participle,  String esseForm ) {
         return participle + " " + esseForm;
+    }
+
+    @org.junit.jupiter.api.Test
+    void addInflectionsRetainsBothSupineCasesAndAlternatives() throws IOException {
+        JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("sequor", PartOfSpeech.VERB, "testDataVerb.jsonl");
+        POSVerbParser parser = new POSVerbParser(new CompoundInflectionGenerator(new EsseFormProvider()), PARSER_SUPPORT);
+        LexemeBuilder lexemeBuilder = new LexemeBuilder("sequor", PartOfSpeech.VERB, "1");
+
+        parser.addInflections(lexemeBuilder, root.path(FORMS.get()));
+        ParticipleDeclensionSet set = ((VerbDetails) lexemeBuilder.getPartOfSpeechDetails())
+                .getParticiples()
+                .get(buildSupineParticipleSetKey());
+
+        assertEquals(GrammaticalParticipleTense.SUPINE, set.getParticipleTense());
+        assertEquals("SUPINE", set.getParticipleSetKey());
+
+        Participle accusative = findByCase(set, GrammaticalCase.ACCUSATIVE);
+        assertEquals("secūtum", accusative.getForm());
+        assertEquals("sequūtum", accusative.getAlternativeForm());
+
+        Participle ablative = findByCase(set, GrammaticalCase.ABLATIVE);
+        assertEquals("secūtū", ablative.getForm());
+        assertEquals("sequūtū", ablative.getAlternativeForm());
+    }
+
+    @org.junit.jupiter.api.Test
+    void parsedVerbAttachesSupineSetWithoutStaging() throws IOException {
+        Lexeme lexeme = JsonTestDataManager.INSTANCE.getParsedVerbLexeme("sequor", "testDataVerb.jsonl");
+
+        VerbDetails details = (VerbDetails) lexeme.getPartOfSpeechDetails();
+        assertEquals(1, details.getParticiples().size());
+        assertEquals(
+                GrammaticalParticipleTense.SUPINE,
+                details.getParticiples().get(buildSupineParticipleSetKey()).getParticipleTense()
+        );
+    }
+
+    private static Participle findByCase(ParticipleDeclensionSet set, GrammaticalCase grammaticalCase) {
+        return set.getInflectionIndex().values().stream()
+                .map(Participle.class::cast)
+                .filter(participle -> participle.getGrammaticalCase() == grammaticalCase)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Missing " + grammaticalCase + " supine"));
     }
 
     static class ConjugationTestCase {

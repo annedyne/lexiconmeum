@@ -4,8 +4,11 @@ import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.grammar.*;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.ParticipleDeclensionSet;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.VerbDetails;
 import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
+import com.annepolis.lexiconmeum.shared.model.inflection.Participle;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,6 +29,8 @@ public class POSVerbParser implements PartOfSpeechParser {
     private static final Set<String> TAG_BLACKLIST = Set.of(
             "sigmatic"
     );
+
+    private static final String SUPINE_TAG = "supine";
 
     private static final Set<String> COMPOUND_TENSE_KEY_LIST = Set.of(
             "ACTIVE|INDICATIVE|PERFECT",
@@ -74,12 +79,19 @@ public class POSVerbParser implements PartOfSpeechParser {
     }
 
     public void addInflections(LexemeBuilder lexemeBuilder, JsonNode formsNode) {
+        List<Participle> supines = new ArrayList<>();
+
         for (JsonNode formNode : formsNode) {
             try {
                 if (parserSupport.isValidFormNode(formNode, PartOfSpeech.VERB.getInflectionTypeLower())) {
                    
                     String formValue = formNode.path(FORM.get()).asString();
                     List<String> tags = collectTags(formNode);
+
+                    if (isSupine(tags)) {
+                        supines.add(buildParticiple(formValue, tags));
+                        continue;
+                    }
 
                     Optional<Conjugation> optionalConjugation = buildConjugation(formValue, tags);
                     addInflection(lexemeBuilder, optionalConjugation);
@@ -92,6 +104,43 @@ public class POSVerbParser implements PartOfSpeechParser {
                 logger.trace(ParserSupport.LogMsg.SKIPPING_INVALID_FORM, ex.getMessage());
             }
         }
+
+        addSupineSet(lexemeBuilder, buildSupineSet(supines, lexemeBuilder.getLemma()));
+    }
+
+    Optional<ParticipleDeclensionSet> buildSupineSet(List<Participle> supines, String verbLemma) {
+        if (supines.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(ParticipleDeclensionSet.Builder.forSupine(verbLemma)
+                .addInflections(supines)
+                .build());
+    }
+
+    private void addSupineSet(LexemeBuilder lexemeBuilder, Optional<ParticipleDeclensionSet> supineSet) {
+        if (supineSet.isEmpty()) {
+            return;
+        }
+
+        VerbDetails.Builder detailsBuilder = getVerbDetailsBuilder(lexemeBuilder);
+        detailsBuilder.addParticipleSet(supineSet.get());
+        lexemeBuilder.setPartOfSpeechDetails(detailsBuilder.build());
+    }
+
+    private VerbDetails.Builder getVerbDetailsBuilder(LexemeBuilder lexemeBuilder) {
+        if (lexemeBuilder.getPartOfSpeechDetails() instanceof VerbDetails details) {
+            return details.toBuilder();
+        }
+        return new VerbDetails.Builder();
+    }
+
+    private Participle buildParticiple(String formValue, List<String> tags) {
+        Participle.Builder builder = new Participle.Builder(normalizeFormValue(formValue));
+        for (String tag : tags) {
+            parserSupport.applyToInflection(builder, tag, logger);
+        }
+        return builder.build();
     }
 
 
@@ -161,6 +210,10 @@ public class POSVerbParser implements PartOfSpeechParser {
             }
         }
         return false;
+    }
+
+    private boolean isSupine(List<String> tags) {
+        return tags.contains(SUPINE_TAG);
     }
 
     private List<String> collectTags(JsonNode formNode) {
