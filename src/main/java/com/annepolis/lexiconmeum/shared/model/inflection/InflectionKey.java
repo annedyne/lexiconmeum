@@ -171,6 +171,10 @@ public final class InflectionKey {
         return buildKeyPart(voice, true) + buildKeyPart(tense);
     }
 
+    public static String buildSupineParticipleSetKey() {
+        return GrammaticalParticipleTense.SUPINE.name();
+    }
+
 
     /**
      * Builds a unique key for a participle's inflectional properties.

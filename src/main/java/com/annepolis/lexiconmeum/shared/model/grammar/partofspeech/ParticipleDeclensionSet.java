@@ -35,6 +35,9 @@ public class ParticipleDeclensionSet {
     }
 
     public String getParticipleSetKey(){
+        if (participleTense == GrammaticalParticipleTense.SUPINE) {
+            return InflectionKey.buildSupineParticipleSetKey();
+        }
         return InflectionKey.buildParticipleSetKey(voice, tense);
     }
 
@@ -72,6 +75,17 @@ public class ParticipleDeclensionSet {
                 @NonNull String tenseLemma
         ){
             this.voice = voice;
+            this.tense = tense;
+            this.tenseLemma = tenseLemma;
+        }
+
+        /** Creates a non-gendered supine set without assigning a grammatical voice. */
+        public static Builder forSupine(@NonNull String tenseLemma) {
+            return new Builder(GrammaticalTense.SUPINE, tenseLemma);
+        }
+
+        private Builder(GrammaticalTense tense, String tenseLemma) {
+            this.voice = null;
             this.tense = tense;
             this.tenseLemma = tenseLemma;
         }

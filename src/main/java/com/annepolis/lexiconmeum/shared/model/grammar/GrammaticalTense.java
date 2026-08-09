@@ -8,7 +8,9 @@ public enum GrammaticalTense {
     PERFECT("perfect","Present Perfect"),
     PLUPERFECT("Pluperfect","Past Perfect"),
     FUTURE("Future", "Simple Future"),
-    FUTURE_PERFECT("Future Perfect","Future Perfect");
+    FUTURE_PERFECT("Future Perfect","Future Perfect"),
+    SUPINE("Supine", "Supine"),
+    GERUND("Gerund", "Gerund");
 
 
 

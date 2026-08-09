@@ -32,7 +32,7 @@ Prefer the Maven wrapper over a system Maven install.
 
 ## Architecture Pointers
 
-- Architecture and module responsibilities: `ARCHITECTURE.md`
+- Architecture and module responsibilities: `docs/ARCHITECTURE.md`
 - Public context, endpoint examples, deployment notes: `README.md`
 - Planned direction: `ROADMAP.md`
 
@@ -47,6 +47,13 @@ Add focused tests when behavior changes.
 - Narrow refactor: closest existing tests, plus `./mvnw test` when practical
 
 Do not add tests for documentation-only changes unless explicitly asked.
+
+## Git Workflow
+
+- `develop` is the default branch.
+- Create feature branches from `develop`; feature-branch PRs target `develop` only.
+- Only release branches may open PRs against `master`.
+- Merging to `master` deploys to production.
 
 ## Data And Fixtures
 
