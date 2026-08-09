@@ -10,7 +10,8 @@ public enum GrammaticalParticipleTense {
     PERFECT_PASSIVE("Perfect Passive Participle", "Perfect Passive Participle"),
     FUTURE_ACTIVE("Future Active Participle", "Future Active Participle"),
     FUTURE_PASSIVE("Gerundive", "Future Passive Participle"),
-    SUPINE("Supine", "Supine");
+    SUPINE("Supine", "Supine"),
+    GERUND("Gerund", "Gerund");
 
     private final String displayName;
     private final String alternativeName;
@@ -50,7 +51,10 @@ public enum GrammaticalParticipleTense {
     public static GrammaticalParticipleTense fromVoiceAndTense(GrammaticalVoice voice, GrammaticalTense tense) {
         if (tense == GrammaticalTense.SUPINE) {
             return SUPINE;
-        } else if (voice == GrammaticalVoice.ACTIVE && tense == GrammaticalTense.PRESENT) {
+        } else if (tense == GrammaticalTense.GERUND) {
+            return GERUND;
+        }
+        else if (voice == GrammaticalVoice.ACTIVE && tense == GrammaticalTense.PRESENT) {
             return PRESENT_ACTIVE;
         } else if (voice == GrammaticalVoice.ACTIVE && tense == GrammaticalTense.FUTURE) {
             return FUTURE_ACTIVE;

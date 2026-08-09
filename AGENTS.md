@@ -32,7 +32,7 @@ Prefer the Maven wrapper over a system Maven install.
 
 ## Architecture Pointers
 
-- Architecture and module responsibilities: `ARCHITECTURE.md`
+- Architecture and module responsibilities: `docs/ARCHITECTURE.md`
 - Public context, endpoint examples, deployment notes: `README.md`
 - Planned direction: `ROADMAP.md`
 

@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -125,13 +126,16 @@ class ParticipleTableMapperTest {
 
         // Get the expected tenses (excluding PARTICIPLE which is a base enum value)
         List<GrammaticalParticipleTense> expectedTenses = Arrays.stream(GrammaticalParticipleTense.values())
-                .filter(p -> p != GrammaticalParticipleTense.PARTICIPLE)
+                .filter(p -> p != GrammaticalParticipleTense.PARTICIPLE
+                        && p != GrammaticalParticipleTense.SUPINE
+                        && p != GrammaticalParticipleTense.PERFECT_ACTIVE
+                        && p != GrammaticalParticipleTense.GERUND)
                 .toList();
 
         for (ParticipleTableDTO dto : dtos) {
             List<ParticipleTableDTO.ParticipleTenseDTO> tenses = dto.getTenses();
 
-            assertEquals(expectedTenses.size()-1, tenses.size(),
+            assertEquals(expectedTenses.size(), tenses.size(),
                     "Gender " + dto.getGender() + " should have all tenses");
 
             // Verify each expected tense is present
@@ -144,6 +148,48 @@ class ParticipleTableMapperTest {
                             " is missing tense: " + expectedTense.getDisplayName());
                 }
             }
+        }
+    }
+
+    @Test
+    void supineIsMappedInEachGenderedParticipleTable() {
+        Participle.Builder accusativeBuilder = new Participle.Builder("amātum")
+                .setGrammaticalCase(GrammaticalCase.ACCUSATIVE);
+        Participle.Builder ablativeBuilder = new Participle.Builder("amātū")
+                .setGrammaticalCase(GrammaticalCase.ABLATIVE);
+        for (GrammaticalGender gender : GrammaticalGender.values()) {
+            accusativeBuilder.addGender(gender);
+            ablativeBuilder.addGender(gender);
+        }
+
+        VerbDetails details = ((VerbDetails) getTestLexeme().getPartOfSpeechDetails()).toBuilder()
+                .addParticipleSet(ParticipleDeclensionSet.Builder.forSupine("amātum")
+                        .addInflection(accusativeBuilder.build())
+                        .addInflection(ablativeBuilder.build())
+                        .build())
+                .build();
+        Lexeme lexeme = LexemeBuilder.fromLexeme(getTestLexeme())
+                .setPartOfSpeechDetails(details)
+                .build();
+
+        List<ParticipleTableDTO> tables = new ParticipleTableMapper().toInflectionTableDTO(lexeme);
+        for (ParticipleTableDTO table : tables) {
+            ParticipleTableDTO.ParticipleTenseDTO supine = table.getTenses().get(table.getTenses().size() - 1);
+
+            assertEquals("Supine", supine.getDefaultName());
+            assertEquals(
+                    Map.of(
+                            GrammaticalNumber.SINGULAR, Map.of(
+                                    GrammaticalCase.ACCUSATIVE, "amātum",
+                                    GrammaticalCase.ABLATIVE, "amātū"
+                            ),
+                            GrammaticalNumber.PLURAL, Map.of(
+                                    GrammaticalCase.ACCUSATIVE, "amātum",
+                                    GrammaticalCase.ABLATIVE, "amātū"
+                            )
+                    ),
+                    supine.getDeclensions()
+            );
         }
     }
 }

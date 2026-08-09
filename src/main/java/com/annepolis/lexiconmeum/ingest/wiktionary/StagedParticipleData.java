@@ -100,9 +100,8 @@ public class StagedParticipleData implements LinkableData{
 
     /**
      * Projects this participle set into the compound (participle + esse) forms of the
-     * perfect-system tenses, one per gender. The gendered forms supersede the ungendered
-     * baseline added when the parent verb itself was parsed, which reused the singular
-     * participle base for plurals.
+     * perfect-system tenses, one per gender. The gendered forms supersede the single
+     * default form added from the main lemma entry of the lexeme
      */
     private void updateVerbWithGenderedCompoundForms(LexemeBuilder builder, VerbDetails verbDetails) {
         // if this is a perfect participle set and passive, OR it's active, but the verb is deponent,

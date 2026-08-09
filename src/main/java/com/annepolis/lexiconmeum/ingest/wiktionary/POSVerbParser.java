@@ -2,7 +2,10 @@ package com.annepolis.lexiconmeum.ingest.wiktionary;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
-import com.annepolis.lexiconmeum.shared.model.grammar.*;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalParticipleTense;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.ParticipleDeclensionSet;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.VerbDetails;
@@ -21,16 +24,16 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.*;
+import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataKeyWord.SIGMATIC;
+import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataKeyWord.SUPINE;
 
 @Component
 public class POSVerbParser implements PartOfSpeechParser {
     static final Logger logger = LogManager.getLogger(POSVerbParser.class);
 
     private static final Set<String> TAG_BLACKLIST = Set.of(
-            "sigmatic"
+            SIGMATIC.get()
     );
-
-    private static final String SUPINE_TAG = "supine";
 
     private static final Set<String> COMPOUND_TENSE_KEY_LIST = Set.of(
             "ACTIVE|INDICATIVE|PERFECT",
@@ -79,7 +82,7 @@ public class POSVerbParser implements PartOfSpeechParser {
     }
 
     public void addInflections(LexemeBuilder lexemeBuilder, JsonNode formsNode) {
-        List<Participle> supines = new ArrayList<>();
+        List<Participle> supineInflections = new ArrayList<>();
 
         for (JsonNode formNode : formsNode) {
             try {
@@ -89,7 +92,7 @@ public class POSVerbParser implements PartOfSpeechParser {
                     List<String> tags = collectTags(formNode);
 
                     if (isSupine(tags)) {
-                        supines.add(buildParticiple(formValue, tags));
+                        supineInflections.add(buildSupineInflection(formValue, tags));
                         continue;
                     }
 
@@ -105,44 +108,8 @@ public class POSVerbParser implements PartOfSpeechParser {
             }
         }
 
-        addSupineSet(lexemeBuilder, buildSupineSet(supines, lexemeBuilder.getLemma()));
+        addParticipleDeclensionSet(lexemeBuilder, supineInflections);
     }
-
-    Optional<ParticipleDeclensionSet> buildSupineSet(List<Participle> supines, String verbLemma) {
-        if (supines.isEmpty()) {
-            return Optional.empty();
-        }
-
-        return Optional.of(ParticipleDeclensionSet.Builder.forSupine(verbLemma)
-                .addInflections(supines)
-                .build());
-    }
-
-    private void addSupineSet(LexemeBuilder lexemeBuilder, Optional<ParticipleDeclensionSet> supineSet) {
-        if (supineSet.isEmpty()) {
-            return;
-        }
-
-        VerbDetails.Builder detailsBuilder = getVerbDetailsBuilder(lexemeBuilder);
-        detailsBuilder.addParticipleSet(supineSet.get());
-        lexemeBuilder.setPartOfSpeechDetails(detailsBuilder.build());
-    }
-
-    private VerbDetails.Builder getVerbDetailsBuilder(LexemeBuilder lexemeBuilder) {
-        if (lexemeBuilder.getPartOfSpeechDetails() instanceof VerbDetails details) {
-            return details.toBuilder();
-        }
-        return new VerbDetails.Builder();
-    }
-
-    private Participle buildParticiple(String formValue, List<String> tags) {
-        Participle.Builder builder = new Participle.Builder(normalizeFormValue(formValue));
-        for (String tag : tags) {
-            parserSupport.applyToInflection(builder, tag, logger);
-        }
-        return builder.build();
-    }
-
 
     private void addInflection(LexemeBuilder lexemeBuilder, Optional<Conjugation> optionalConjugation){
         if(optionalConjugation.isPresent()) {
@@ -212,10 +179,6 @@ public class POSVerbParser implements PartOfSpeechParser {
         return false;
     }
 
-    private boolean isSupine(List<String> tags) {
-        return tags.contains(SUPINE_TAG);
-    }
-
     private List<String> collectTags(JsonNode formNode) {
         List<String> tags = new ArrayList<>();
         for (JsonNode tag : formNode.path(TAGS.get())) {
@@ -251,5 +214,44 @@ public class POSVerbParser implements PartOfSpeechParser {
                 tags.add(GrammaticalParticipleTense.PRESENT_ACTIVE.name().toLowerCase());
             }
         }
+    }
+
+
+    // --------------------------------------- SUPINE METHODS ---------------------------------- //
+
+    private boolean isSupine(List<String> tags) {
+        return tags.contains(SUPINE.get());
+    }
+
+    private Participle buildSupineInflection(String formValue, List<String> tags){
+        // supine inflections apply to all genders but Wiktionary doesn't add gender tags to supine forms
+        for(GrammaticalGender gender : GrammaticalGender.values()){
+            tags.add(gender.getTag());
+        }
+
+        return buildParticiple(formValue, tags);
+    }
+
+    private Participle buildParticiple(String formValue, List<String> tags) {
+        Participle.Builder builder = new Participle.Builder(normalizeFormValue(formValue));
+        for (String tag : tags) {
+            parserSupport.applyToInflection(builder, tag, logger);
+        }
+        return builder.build();
+    }
+
+    private void addParticipleDeclensionSet(LexemeBuilder lexemeBuilder, List<Participle> supineInflections) {
+        ParticipleDeclensionSet supineSet = ParticipleDeclensionSet.Builder.forSupine(lexemeBuilder.getLemma())
+                .addInflections(supineInflections)
+                .build();
+
+        lexemeBuilder.setPartOfSpeechDetails(getVerbDetailsBuilder(lexemeBuilder).addParticipleSet(supineSet).build());
+    }
+
+    private VerbDetails.Builder getVerbDetailsBuilder(LexemeBuilder lexemeBuilder) {
+        if (lexemeBuilder.getPartOfSpeechDetails() instanceof VerbDetails details) {
+            return details.toBuilder();
+        }
+        return new VerbDetails.Builder();
     }
 }

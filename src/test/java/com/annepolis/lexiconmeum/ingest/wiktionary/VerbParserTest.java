@@ -3,6 +3,7 @@ package com.annepolis.lexiconmeum.ingest.wiktionary;
 
 import com.annepolis.lexiconmeum.ingest.tagmapping.EsseFormProvider;
 import com.annepolis.lexiconmeum.ingest.tagmapping.LexicalTagResolver;
+import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.grammar.*;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
@@ -12,8 +13,8 @@ import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
 import com.annepolis.lexiconmeum.shared.model.inflection.Participle;
-import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import tools.jackson.databind.JsonNode;
@@ -88,7 +89,7 @@ class VerbParserTest {
         return participle + " " + esseForm;
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     void addInflectionsRetainsBothSupineCasesAndAlternatives() throws IOException {
         JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("sequor", PartOfSpeech.VERB, "testDataVerb.jsonl");
         POSVerbParser parser = new POSVerbParser(new CompoundInflectionGenerator(new EsseFormProvider()), PARSER_SUPPORT);
@@ -111,7 +112,7 @@ class VerbParserTest {
         assertEquals("sequūtū", ablative.getAlternativeForm());
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     void parsedVerbAttachesSupineSetWithoutStaging() throws IOException {
         Lexeme lexeme = JsonTestDataManager.INSTANCE.getParsedVerbLexeme("sequor", "testDataVerb.jsonl");
 
