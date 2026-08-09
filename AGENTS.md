@@ -48,6 +48,13 @@ Add focused tests when behavior changes.
 
 Do not add tests for documentation-only changes unless explicitly asked.
 
+## Git Workflow
+
+- `develop` is the default branch.
+- Create feature branches from `develop`; feature-branch PRs target `develop` only.
+- Only release branches may open PRs against `master`.
+- Merging to `master` deploys to production.
+
 ## Data And Fixtures
 
 The JSONL files under `src/main/resources` and `src/test/resources` are lexical data inputs and fixtures. Keep changes to them intentional and small. When changing parser behavior, prefer adding or editing the smallest relevant test fixture instead of broad data churn.
