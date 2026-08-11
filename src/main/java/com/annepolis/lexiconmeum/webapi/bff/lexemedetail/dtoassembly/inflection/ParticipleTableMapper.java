@@ -81,7 +81,7 @@ public class ParticipleTableMapper {
     private ParticipleTableDTO.ParticipleTenseDTO getTenseDTOWithGender(ParticipleDeclensionSet participleSet, List<Participle> participles) {
         // Create a declension table for this gender/tense combination
         DeclensionTableDTO declensionTable = isVerbalNoun(participleSet.getTense()) ?
-                createSupineDeclensionTable(participles) :
+                createVerbalNounDeclensionTable(participles) :
                 createDeclensionTable(participles);
 
         // Create tense DTO for the given gen
@@ -92,11 +92,11 @@ public class ParticipleTableMapper {
         return tenseDTO;
     }
 
-    private Boolean isVerbalNoun(GrammaticalTense tense){
-        return tense.equals(GrammaticalTense.SUPINE);
+    private boolean isVerbalNoun(GrammaticalTense tense){
+        return tense == GrammaticalTense.SUPINE || tense == GrammaticalTense.GERUND;
     }
 
-    private DeclensionTableDTO createSupineDeclensionTable(List<Participle> participles) {
+    private DeclensionTableDTO createVerbalNounDeclensionTable(List<Participle> participles) {
 
         DeclensionTableDTO declensionTable = new DeclensionTableDTO();
         Map<GrammaticalNumber, Map<GrammaticalCase, String>> table = new EnumMap<>(GrammaticalNumber.class);
@@ -106,7 +106,7 @@ public class ParticipleTableMapper {
             GrammaticalCase grammaticalCase = participle.getGrammaticalCase();
             String form = participle.getForm();
 
-            // Supine forms apply to both
+            // Verbal-noun forms apply to both number rows in the shared table shape.
             table.computeIfAbsent(GrammaticalNumber.SINGULAR, k -> new EnumMap<>(GrammaticalCase.class))
                     .put(grammaticalCase, form);
             table.computeIfAbsent(GrammaticalNumber.PLURAL, k -> new EnumMap<>(GrammaticalCase.class))

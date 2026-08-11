@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.FORMS;
-import static com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey.buildSupineParticipleSetKey;
+import static com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey.buildVerbalNounParticipleSetKey;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class VerbParserTest {
@@ -67,7 +67,7 @@ class VerbParserTest {
                         String esseForm = ESSE_FORM_PROVIDER.getForm(mood, tense, number, person);
                         if(esseForm != null) {
                             String expectedForm = generateForm("secūtus", esseForm);
-                            String key = InflectionKey.joinConjugationParts(
+                            String key = InflectionKey.buildConjugationKey(
                                     GrammaticalVoice.ACTIVE,
                                     mood,
                                     tense,
@@ -98,7 +98,7 @@ class VerbParserTest {
         parser.addInflections(lexemeBuilder, root.path(FORMS.get()));
         ParticipleDeclensionSet set = ((VerbDetails) lexemeBuilder.getPartOfSpeechDetails())
                 .getParticiples()
-                .get(buildSupineParticipleSetKey());
+                .get(buildVerbalNounParticipleSetKey(GrammaticalTense.SUPINE));
 
         assertEquals(GrammaticalParticipleTense.SUPINE, set.getParticipleTense());
         assertEquals("SUPINE", set.getParticipleSetKey());
@@ -113,14 +113,40 @@ class VerbParserTest {
     }
 
     @Test
-    void parsedVerbAttachesSupineSetWithoutStaging() throws IOException {
+    void addInflectionsRetainsAllGerundCases() throws IOException {
+        JsonNode root = JsonTestDataManager.INSTANCE.getRealNode("sequor", PartOfSpeech.VERB, "testDataVerb.jsonl");
+        POSVerbParser parser = new POSVerbParser(new CompoundInflectionGenerator(new EsseFormProvider()), PARSER_SUPPORT);
+        LexemeBuilder lexemeBuilder = new LexemeBuilder("sequor", PartOfSpeech.VERB, "1");
+
+        parser.addInflections(lexemeBuilder, root.path(FORMS.get()));
+        ParticipleDeclensionSet set = ((VerbDetails) lexemeBuilder.getPartOfSpeechDetails())
+                .getParticiples()
+                .get(buildVerbalNounParticipleSetKey(GrammaticalTense.GERUND));
+
+        assertEquals(GrammaticalParticipleTense.GERUND, set.getParticipleTense());
+        assertEquals("sequendī", findByCase(set, GrammaticalCase.GENITIVE).getForm());
+        assertEquals("sequendō", findByCase(set, GrammaticalCase.DATIVE).getForm());
+        assertEquals("sequendum", findByCase(set, GrammaticalCase.ACCUSATIVE).getForm());
+        assertEquals("sequendō", findByCase(set, GrammaticalCase.ABLATIVE).getForm());
+    }
+
+    @Test
+    void parsedVerbAttachesVerbalNounSetsWithoutStaging() throws IOException {
         Lexeme lexeme = JsonTestDataManager.INSTANCE.getParsedVerbLexeme("sequor", "testDataVerb.jsonl");
 
         VerbDetails details = (VerbDetails) lexeme.getPartOfSpeechDetails();
-        assertEquals(1, details.getParticiples().size());
+        assertEquals(2, details.getParticiples().size());
         assertEquals(
                 GrammaticalParticipleTense.SUPINE,
-                details.getParticiples().get(buildSupineParticipleSetKey()).getParticipleTense()
+                details.getParticiples()
+                        .get(buildVerbalNounParticipleSetKey(GrammaticalTense.SUPINE))
+                        .getParticipleTense()
+        );
+        assertEquals(
+                GrammaticalParticipleTense.GERUND,
+                details.getParticiples()
+                        .get(buildVerbalNounParticipleSetKey(GrammaticalTense.GERUND))
+                        .getParticipleTense()
         );
     }
 
@@ -129,7 +155,7 @@ class VerbParserTest {
                 .map(Participle.class::cast)
                 .filter(participle -> participle.getGrammaticalCase() == grammaticalCase)
                 .findFirst()
-                .orElseThrow(() -> new AssertionError("Missing " + grammaticalCase + " supine"));
+                .orElseThrow(() -> new AssertionError("Missing verbal noun case: " + grammaticalCase));
     }
 
     static class ConjugationTestCase {

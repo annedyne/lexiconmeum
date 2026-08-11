@@ -163,7 +163,7 @@ class ParticipleTableMapperTest {
         }
 
         VerbDetails details = ((VerbDetails) getTestLexeme().getPartOfSpeechDetails()).toBuilder()
-                .addParticipleSet(ParticipleDeclensionSet.Builder.forSupine("amātum")
+                .addParticipleSet(ParticipleDeclensionSet.Builder.forVerbalNoun(GrammaticalTense.SUPINE, "amātum")
                         .addInflection(accusativeBuilder.build())
                         .addInflection(ablativeBuilder.build())
                         .build())
@@ -189,6 +189,61 @@ class ParticipleTableMapperTest {
                             )
                     ),
                     supine.getDeclensions()
+            );
+        }
+    }
+
+    @Test
+    void gerundIsMappedInEachGenderedParticipleTable() {
+        Participle.Builder genitiveBuilder = new Participle.Builder("amandī")
+                .setGrammaticalCase(GrammaticalCase.GENITIVE);
+        Participle.Builder dativeBuilder = new Participle.Builder("amandō")
+                .setGrammaticalCase(GrammaticalCase.DATIVE);
+        Participle.Builder accusativeBuilder = new Participle.Builder("amandum")
+                .setGrammaticalCase(GrammaticalCase.ACCUSATIVE);
+        Participle.Builder ablativeBuilder = new Participle.Builder("amandō")
+                .setGrammaticalCase(GrammaticalCase.ABLATIVE);
+        for (GrammaticalGender gender : GrammaticalGender.values()) {
+            genitiveBuilder.addGender(gender);
+            dativeBuilder.addGender(gender);
+            accusativeBuilder.addGender(gender);
+            ablativeBuilder.addGender(gender);
+        }
+
+        VerbDetails details = ((VerbDetails) getTestLexeme().getPartOfSpeechDetails()).toBuilder()
+                .addParticipleSet(ParticipleDeclensionSet.Builder
+                        .forVerbalNoun(GrammaticalTense.GERUND, "amandum")
+                        .addInflection(genitiveBuilder.build())
+                        .addInflection(dativeBuilder.build())
+                        .addInflection(accusativeBuilder.build())
+                        .addInflection(ablativeBuilder.build())
+                        .build())
+                .build();
+        Lexeme lexeme = LexemeBuilder.fromLexeme(getTestLexeme())
+                .setPartOfSpeechDetails(details)
+                .build();
+
+        List<ParticipleTableDTO> tables = new ParticipleTableMapper().toInflectionTableDTO(lexeme);
+        for (ParticipleTableDTO table : tables) {
+            ParticipleTableDTO.ParticipleTenseDTO gerund = table.getTenses().get(table.getTenses().size() - 1);
+
+            assertEquals("Gerund", gerund.getDefaultName());
+            assertEquals(
+                    Map.of(
+                            GrammaticalNumber.SINGULAR, Map.of(
+                                    GrammaticalCase.GENITIVE, "amandī",
+                                    GrammaticalCase.DATIVE, "amandō",
+                                    GrammaticalCase.ACCUSATIVE, "amandum",
+                                    GrammaticalCase.ABLATIVE, "amandō"
+                            ),
+                            GrammaticalNumber.PLURAL, Map.of(
+                                    GrammaticalCase.GENITIVE, "amandī",
+                                    GrammaticalCase.DATIVE, "amandō",
+                                    GrammaticalCase.ACCUSATIVE, "amandum",
+                                    GrammaticalCase.ABLATIVE, "amandō"
+                            )
+                    ),
+                    gerund.getDeclensions()
             );
         }
     }

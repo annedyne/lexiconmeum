@@ -53,6 +53,11 @@ class GrammaticalParticipleTenseTest {
                 GrammaticalParticipleTense.SUPINE,
                 GrammaticalParticipleTense.fromVoiceAndTense(null, GrammaticalTense.SUPINE)
         );
+
+        assertEquals(
+                GrammaticalParticipleTense.GERUND,
+                GrammaticalParticipleTense.fromVoiceAndTense(null, GrammaticalTense.GERUND)
+        );
     }
 
     @Test

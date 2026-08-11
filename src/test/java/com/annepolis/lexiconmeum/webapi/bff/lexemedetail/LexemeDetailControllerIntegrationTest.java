@@ -198,6 +198,30 @@ class LexemeDetailControllerIntegrationTest {
     }
 
     @Test
+    void gerundFormsAppearInDetailResponse() {
+        UUID lexemeId = new LexemeBuilder("sequor", PartOfSpeech.VERB, "1").build().getId();
+
+        String url = UriComponentsBuilder
+                .fromUriString(getFullBaseUrl())
+                .path(ApiRoutes.LEXEME_DETAIL)
+                .queryParam("type", "VERB")
+                .buildAndExpand(lexemeId)
+                .toUriString();
+
+        ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
+        String body = response.getBody();
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(body);
+        assertTrue(body.contains("\"defaultName\":\"Gerund\""));
+        assertTrue(body.contains("\"GENITIVE\":\"sequendī\""));
+        assertTrue(body.contains("\"DATIVE\":\"sequendō\""));
+        assertTrue(body.contains("\"ACCUSATIVE\":\"sequendum\""));
+        assertTrue(body.contains("\"ABLATIVE\":\"sequendō\""));
+        assertFalse(body.contains("\"gender\":null"));
+    }
+
+    @Test
     void testTypeMismatchReturnsConflict() {
         LexemeBuilder lexemeBuilder = new LexemeBuilder("poculum", PartOfSpeech.NOUN, "1");
         UUID lexemeId = lexemeBuilder.build().getId();
