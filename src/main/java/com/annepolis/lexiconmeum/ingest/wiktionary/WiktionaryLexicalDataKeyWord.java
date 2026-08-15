@@ -2,6 +2,9 @@ package com.annepolis.lexiconmeum.ingest.wiktionary;
 
 public enum WiktionaryLexicalDataKeyWord {
     PARTICIPLE("participle"),
+    GERUND("gerund"),
+    SUPINE("supine"),
+    SIGMATIC("sigmatic"),
     FORM_OF("form_of");
 
     private final String keyWord;

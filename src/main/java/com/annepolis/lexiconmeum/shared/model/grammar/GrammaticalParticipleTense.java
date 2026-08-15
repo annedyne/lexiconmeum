@@ -9,7 +9,9 @@ public enum GrammaticalParticipleTense {
     PERFECT_ACTIVE("Perfect Passive Participle", "Perfect Active Participle"),
     PERFECT_PASSIVE("Perfect Passive Participle", "Perfect Passive Participle"),
     FUTURE_ACTIVE("Future Active Participle", "Future Active Participle"),
-    FUTURE_PASSIVE("Gerundive", "Future Passive Participle");
+    FUTURE_PASSIVE("Gerundive", "Future Passive Participle"),
+    SUPINE("Supine", "Supine"),
+    GERUND("Gerund", "Gerund");
 
     private final String displayName;
     private final String alternativeName;
@@ -47,7 +49,12 @@ public enum GrammaticalParticipleTense {
      * @throws IllegalArgumentException if the combination is not valid for participles
      */
     public static GrammaticalParticipleTense fromVoiceAndTense(GrammaticalVoice voice, GrammaticalTense tense) {
-        if (voice == GrammaticalVoice.ACTIVE && tense == GrammaticalTense.PRESENT) {
+        if (tense == GrammaticalTense.SUPINE) {
+            return SUPINE;
+        } else if (tense == GrammaticalTense.GERUND) {
+            return GERUND;
+        }
+        else if (voice == GrammaticalVoice.ACTIVE && tense == GrammaticalTense.PRESENT) {
             return PRESENT_ACTIVE;
         } else if (voice == GrammaticalVoice.ACTIVE && tense == GrammaticalTense.FUTURE) {
             return FUTURE_ACTIVE;

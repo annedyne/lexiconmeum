@@ -25,7 +25,7 @@ public final class InflectionKey {
         }
     }
     public static String buildConjugationKey(Conjugation conjugation) {
-        return joinConjugationParts(
+        return buildKey(
                 conjugation.getVoice(),
                 conjugation.getMood(),
                 conjugation.getTense(),
@@ -35,43 +35,18 @@ public final class InflectionKey {
                 );
     }
 
-    public static String joinConjugationParts(
+    public static String buildConjugationKey(
             GrammaticalVoice voice,
             GrammaticalMood mood,
             GrammaticalTense tense,
             GrammaticalPerson person,
             GrammaticalNumber number
     ){
-        return joinConjugationParts(voice, mood, tense, person, number, null);
-    }
-
-    public static String joinConjugationParts(
-            GrammaticalVoice voice,
-            GrammaticalMood mood,
-            GrammaticalTense tense,
-            GrammaticalPerson person,
-            GrammaticalNumber number,
-            GrammaticalGender gender
-    ){
-        return buildKeyPart(voice, true)
-        + buildKeyPart(mood)
-        + buildKeyPart(tense)
-        + buildKeyPart(person)
-        + buildKeyPart(number)
-        + buildKeyPart(gender);
-    }
-
-    private static String buildKeyPart(Enum<?>  part){
-        return buildKeyPart(part, false);
-    }
-
-    private static String buildKeyPart(Enum<?>  part, boolean firstOne){
-        String delimiter = firstOne ? "" : KEY_DELIMITER;
-       return part != null ? delimiter + part.name() : "";
+        return buildKey(voice, mood, tense, person, number);
     }
 
     public String buildFirstPrincipalPartKey() {
-        return buildConjugationPrincipalPartKey(
+        return buildKey(
                 GrammaticalVoice.ACTIVE,
                 GrammaticalMood.INDICATIVE,
                 GrammaticalTense.PRESENT,
@@ -81,17 +56,15 @@ public final class InflectionKey {
     }
 
     public String buildSecondPrincipalPartKey() {
-        return buildConjugationPrincipalPartKey(
+        return buildKey(
                 GrammaticalVoice.ACTIVE,
                 GrammaticalMood.INFINITIVE,
-                GrammaticalTense.PRESENT,
-                null,
-                null
+                GrammaticalTense.PRESENT
         );
     }
 
     public String buildThirdPrincipalPartKey() {
-        return buildConjugationPrincipalPartKey(
+        return buildKey(
                 GrammaticalVoice.ACTIVE,
                 GrammaticalMood.INDICATIVE,
                 GrammaticalTense.PERFECT,
@@ -101,7 +74,7 @@ public final class InflectionKey {
     }
 
     public String buildFourthPrincipalPartKey() {
-        return buildConjugationPrincipalPartKey(
+        return buildKey(
                 GrammaticalVoice.PASSIVE,
                 GrammaticalMood.INDICATIVE,
                 GrammaticalTense.PERFECT,
@@ -110,35 +83,23 @@ public final class InflectionKey {
         );
     }
 
-    private static String buildConjugationPrincipalPartKey(
-            GrammaticalVoice voice,
-            GrammaticalMood mood,
-            GrammaticalTense tense,
-            GrammaticalPerson person,
-            GrammaticalNumber number
-    ) {
-        return joinConjugationParts( voice, mood, tense, person, number );
-    }
 
     public static String buildDeclensionKey(Declension declension) {
-        return joinDeclensionParts(declension.getGrammaticalCase(), declension.getNumber());
+        return buildKey(declension.getGrammaticalCase(), declension.getNumber());
     }
 
     public String buildFirstDeclensionPrincipalPartKey(){
-        return joinDeclensionParts(GrammaticalCase.NOMINATIVE, GrammaticalNumber.SINGULAR);
+        return buildKey(GrammaticalCase.NOMINATIVE, GrammaticalNumber.SINGULAR);
     }
 
     public String buildSecondDeclensionPrincipalPartKey(){
-        return joinDeclensionParts(GrammaticalCase.GENITIVE, GrammaticalNumber.SINGULAR);
+        return buildKey(GrammaticalCase.GENITIVE, GrammaticalNumber.SINGULAR);
     }
-    public static String joinDeclensionParts(
-            GrammaticalCase grammaticalCase, GrammaticalNumber number ) {
 
-        return buildKeyPart(grammaticalCase, true)
-                + buildKeyPart(number);
-    }
 
     public static String buildAgreementKey(Agreement agreement) {
+
+
         return joinAgreementParts(
                 agreement.getGrammaticalCase(),
                 agreement.getNumber(),
@@ -148,14 +109,15 @@ public final class InflectionKey {
 
     public static String joinAgreementParts(
             GrammaticalCase grammaticalCase, GrammaticalNumber number, Set<GrammaticalGender> genders, GrammaticalDegree degree ) {
-        String genderPart = genders.stream()
+        java.util.List<Enum<?>> parts = new java.util.ArrayList<>();
+        parts.add(grammaticalCase);
+        parts.add(number);
+        genders.stream()
                 .sorted()
-                .map(g -> buildKeyPart(g))
-                .collect(Collectors.joining());
-        return buildKeyPart(grammaticalCase, true)
-                + buildKeyPart(number)
-                + genderPart
-                + buildKeyPart(degree);
+                .forEach(parts::add);
+        parts.add(degree);
+
+        return buildKey(parts.toArray(Enum<?>[]::new));
     }
 
     /**
@@ -168,7 +130,18 @@ public final class InflectionKey {
      * @return the constructed key as a concatenated string of the voice and tense
      */
     public static String buildParticipleSetKey(GrammaticalVoice voice, GrammaticalTense tense) {
-        return buildKeyPart(voice, true) + buildKeyPart(tense);
+        return buildKey(voice, tense);
+    }
+
+    public static String buildVerbalNounParticipleSetKey(GrammaticalTense tense) {
+        return buildKey(tense);
+    }
+
+    private static String buildKey(Enum<?>... parts) {
+        return java.util.Arrays.stream(parts)
+                .filter(java.util.Objects::nonNull)
+                .map(Enum::name)
+                .collect(Collectors.joining(KEY_DELIMITER));
     }
 
 

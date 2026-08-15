@@ -57,4 +57,38 @@ class ParticipleDeclensionSetTest {
         assertEquals(altForm, participle.getAlternativeForm());
 
     }
+
+    @Test
+    void forVerbalNounBuildsSupineWithDedicatedKey() {
+        Participle supine = new Participle.Builder("amātum")
+                .setGrammaticalCase(GrammaticalCase.ACCUSATIVE)
+                .build();
+
+        ParticipleDeclensionSet set = ParticipleDeclensionSet.Builder
+                .forVerbalNoun(GrammaticalTense.SUPINE, "amātum")
+                .addInflection(supine)
+                .build();
+
+        assertEquals(GrammaticalParticipleTense.SUPINE, set.getParticipleTense());
+        assertEquals(GrammaticalTense.SUPINE, set.getTense());
+        assertEquals(InflectionKey.buildVerbalNounParticipleSetKey(GrammaticalTense.SUPINE), set.getParticipleSetKey());
+        assertEquals(supine, set.getInflectionIndex().get(InflectionKey.of(supine)));
+    }
+
+    @Test
+    void forVerbalNounBuildsGerundWithDedicatedKey() {
+        Participle gerund = new Participle.Builder("amandī")
+                .setGrammaticalCase(GrammaticalCase.GENITIVE)
+                .build();
+
+        ParticipleDeclensionSet set = ParticipleDeclensionSet.Builder
+                .forVerbalNoun(GrammaticalTense.GERUND, "amandum")
+                .addInflection(gerund)
+                .build();
+
+        assertEquals(GrammaticalParticipleTense.GERUND, set.getParticipleTense());
+        assertEquals(GrammaticalTense.GERUND, set.getTense());
+        assertEquals(InflectionKey.buildVerbalNounParticipleSetKey(GrammaticalTense.GERUND), set.getParticipleSetKey());
+        assertEquals(gerund, set.getInflectionIndex().get(InflectionKey.of(gerund)));
+    }
 }

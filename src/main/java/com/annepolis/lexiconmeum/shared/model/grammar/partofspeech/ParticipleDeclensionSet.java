@@ -35,6 +35,9 @@ public class ParticipleDeclensionSet {
     }
 
     public String getParticipleSetKey(){
+        if (voice == null) {
+            return InflectionKey.buildVerbalNounParticipleSetKey(tense);
+        }
         return InflectionKey.buildParticipleSetKey(voice, tense);
     }
 
@@ -72,6 +75,17 @@ public class ParticipleDeclensionSet {
                 @NonNull String tenseLemma
         ){
             this.voice = voice;
+            this.tense = tense;
+            this.tenseLemma = tenseLemma;
+        }
+
+        /** Creates a verbal-noun set without assigning a grammatical voice. */
+        public static Builder forVerbalNoun(@NonNull GrammaticalTense tense, @NonNull String tenseLemma) {
+            return new Builder(tense, tenseLemma);
+        }
+
+        private Builder(GrammaticalTense tense, String tenseLemma) {
+            this.voice = null;
             this.tense = tense;
             this.tenseLemma = tenseLemma;
         }

@@ -2,10 +2,16 @@ package com.annepolis.lexiconmeum.ingest.wiktionary;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
-import com.annepolis.lexiconmeum.shared.model.grammar.*;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalParticipleTense;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalVoice;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.ParticipleDeclensionSet;
+import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.VerbDetails;
 import com.annepolis.lexiconmeum.shared.model.inflection.Conjugation;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
+import com.annepolis.lexiconmeum.shared.model.inflection.Participle;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,18 +19,23 @@ import org.springframework.stereotype.Component;
 import tools.jackson.databind.JsonNode;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.*;
+import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataKeyWord.GERUND;
+import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataKeyWord.SIGMATIC;
+import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataKeyWord.SUPINE;
 
 @Component
 public class POSVerbParser implements PartOfSpeechParser {
     static final Logger logger = LogManager.getLogger(POSVerbParser.class);
 
     private static final Set<String> TAG_BLACKLIST = Set.of(
-            "sigmatic"
+            SIGMATIC.get()
     );
 
     private static final Set<String> COMPOUND_TENSE_KEY_LIST = Set.of(
@@ -74,12 +85,22 @@ public class POSVerbParser implements PartOfSpeechParser {
     }
 
     public void addInflections(LexemeBuilder lexemeBuilder, JsonNode formsNode) {
+        Map<GrammaticalTense, List<Participle>> verbalNounInflections = new EnumMap<>(GrammaticalTense.class);
+        verbalNounInflections.put(GrammaticalTense.SUPINE, new ArrayList<>());
+
         for (JsonNode formNode : formsNode) {
             try {
                 if (parserSupport.isValidFormNode(formNode, PartOfSpeech.VERB.getInflectionTypeLower())) {
                    
                     String formValue = formNode.path(FORM.get()).asString();
                     List<String> tags = collectTags(formNode);
+
+                    if (isVerbalNoun(tags)) {
+                        GrammaticalTense verbalNounTense = getVerbalNounTense(tags);
+                        verbalNounInflections.computeIfAbsent(verbalNounTense, tense -> new ArrayList<>())
+                                .add(buildVerbalNounInflection(formValue, tags));
+                        continue;
+                    }
 
                     Optional<Conjugation> optionalConjugation = buildConjugation(formValue, tags);
                     addInflection(lexemeBuilder, optionalConjugation);
@@ -92,8 +113,9 @@ public class POSVerbParser implements PartOfSpeechParser {
                 logger.trace(ParserSupport.LogMsg.SKIPPING_INVALID_FORM, ex.getMessage());
             }
         }
-    }
 
+        addVerbalNounDeclensionSets(lexemeBuilder, verbalNounInflections);
+    }
 
     private void addInflection(LexemeBuilder lexemeBuilder, Optional<Conjugation> optionalConjugation){
         if(optionalConjugation.isPresent()) {
@@ -198,5 +220,56 @@ public class POSVerbParser implements PartOfSpeechParser {
                 tags.add(GrammaticalParticipleTense.PRESENT_ACTIVE.name().toLowerCase());
             }
         }
+    }
+
+
+    // --------------------------------------- VERBAL NOUN METHODS ---------------------------------- //
+
+    private boolean isVerbalNoun(List<String> tags) {
+        return tags.contains(SUPINE.get()) || tags.contains(GERUND.get());
+    }
+
+    private GrammaticalTense getVerbalNounTense(List<String> tags) {
+        return tags.contains(SUPINE.get()) ? GrammaticalTense.SUPINE : GrammaticalTense.GERUND;
+    }
+
+    private Participle buildVerbalNounInflection(String formValue, List<String> tags){
+        // Verbal nouns apply to all genders but Wiktionary doesn't add gender tags to their forms.
+        for(GrammaticalGender gender : GrammaticalGender.values()){
+            tags.add(gender.getTag());
+        }
+
+        return buildParticiple(formValue, tags);
+    }
+
+    private Participle buildParticiple(String formValue, List<String> tags) {
+        Participle.Builder builder = new Participle.Builder(normalizeFormValue(formValue));
+        for (String tag : tags) {
+            parserSupport.applyToInflection(builder, tag, logger);
+        }
+        return builder.build();
+    }
+
+    private void addVerbalNounDeclensionSets(
+            LexemeBuilder lexemeBuilder,
+            Map<GrammaticalTense, List<Participle>> verbalNounInflections
+    ) {
+        VerbDetails.Builder verbDetailsBuilder = getVerbDetailsBuilder(lexemeBuilder);
+        for (Map.Entry<GrammaticalTense, List<Participle>> entry : verbalNounInflections.entrySet()) {
+            ParticipleDeclensionSet verbalNounSet = ParticipleDeclensionSet.Builder
+                    .forVerbalNoun(entry.getKey(), lexemeBuilder.getLemma())
+                    .addInflections(entry.getValue())
+                    .build();
+            verbDetailsBuilder.addParticipleSet(verbalNounSet);
+        }
+
+        lexemeBuilder.setPartOfSpeechDetails(verbDetailsBuilder.build());
+    }
+
+    private VerbDetails.Builder getVerbDetailsBuilder(LexemeBuilder lexemeBuilder) {
+        if (lexemeBuilder.getPartOfSpeechDetails() instanceof VerbDetails details) {
+            return details.toBuilder();
+        }
+        return new VerbDetails.Builder();
     }
 }

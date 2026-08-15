@@ -4,6 +4,7 @@ import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalCase;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalGender;
 import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalNumber;
+import com.annepolis.lexiconmeum.shared.model.grammar.GrammaticalTense;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.ParticipleDeclensionSet;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.VerbDetails;
 import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
@@ -43,6 +44,7 @@ public class ParticipleTableMapper {
             dto.setTenses(entry.getValue());
             participles.add(dto);
         }
+
         return participles;
     }
 
@@ -78,7 +80,9 @@ public class ParticipleTableMapper {
     // Create a new
     private ParticipleTableDTO.ParticipleTenseDTO getTenseDTOWithGender(ParticipleDeclensionSet participleSet, List<Participle> participles) {
         // Create a declension table for this gender/tense combination
-        DeclensionTableDTO declensionTable = createDeclensionTable(participles);
+        DeclensionTableDTO declensionTable = isVerbalNoun(participleSet.getTense()) ?
+                createVerbalNounDeclensionTable(participles) :
+                createDeclensionTable(participles);
 
         // Create tense DTO for the given gen
         ParticipleTableDTO.ParticipleTenseDTO tenseDTO = new ParticipleTableDTO.ParticipleTenseDTO();
@@ -86,6 +90,31 @@ public class ParticipleTableMapper {
         tenseDTO.setAltName(participleSet.getParticipleTense().getAlternativeName());
         tenseDTO.setDeclensions(declensionTable);
         return tenseDTO;
+    }
+
+    private boolean isVerbalNoun(GrammaticalTense tense){
+        return tense == GrammaticalTense.SUPINE || tense == GrammaticalTense.GERUND;
+    }
+
+    private DeclensionTableDTO createVerbalNounDeclensionTable(List<Participle> participles) {
+
+        DeclensionTableDTO declensionTable = new DeclensionTableDTO();
+        Map<GrammaticalNumber, Map<GrammaticalCase, String>> table = new EnumMap<>(GrammaticalNumber.class);
+
+        for (Participle participle : participles) {
+
+            GrammaticalCase grammaticalCase = participle.getGrammaticalCase();
+            String form = participle.getForm();
+
+            // Verbal-noun forms apply to both number rows in the shared table shape.
+            table.computeIfAbsent(GrammaticalNumber.SINGULAR, k -> new EnumMap<>(GrammaticalCase.class))
+                    .put(grammaticalCase, form);
+            table.computeIfAbsent(GrammaticalNumber.PLURAL, k -> new EnumMap<>(GrammaticalCase.class))
+                    .put(grammaticalCase, form);
+        }
+
+        declensionTable.setInflectionTable(table);
+        return declensionTable;
     }
 
     private DeclensionTableDTO createDeclensionTable(List<Participle> participles) {
@@ -113,7 +142,6 @@ public class ParticipleTableMapper {
         for (Inflection inflection : inflections) {
             if(inflection instanceof Participle participle ) {
                 Set<GrammaticalGender> genders = participle.getGenders();
-
 
                 // Handle multiple genders - if an inflection has multiple genders,
                 // it applies to all of them

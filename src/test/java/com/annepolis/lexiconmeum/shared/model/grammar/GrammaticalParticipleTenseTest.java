@@ -48,6 +48,16 @@ class GrammaticalParticipleTenseTest {
                 GrammaticalParticipleTense.PERFECT_ACTIVE,
                 GrammaticalParticipleTense.fromVoiceAndTense(GrammaticalVoice.ACTIVE, GrammaticalTense.PERFECT)
         );
+
+        assertEquals(
+                GrammaticalParticipleTense.SUPINE,
+                GrammaticalParticipleTense.fromVoiceAndTense(null, GrammaticalTense.SUPINE)
+        );
+
+        assertEquals(
+                GrammaticalParticipleTense.GERUND,
+                GrammaticalParticipleTense.fromVoiceAndTense(null, GrammaticalTense.GERUND)
+        );
     }
 
     @Test

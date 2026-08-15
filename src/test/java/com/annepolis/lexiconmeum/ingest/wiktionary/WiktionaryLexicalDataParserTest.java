@@ -7,12 +7,12 @@ import com.annepolis.lexiconmeum.shared.model.LexemeFixtureFactory;
 import com.annepolis.lexiconmeum.shared.model.grammar.*;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.shared.model.inflection.*;
+import com.annepolis.lexiconmeum.testsupport.TestSupport;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import com.annepolis.lexiconmeum.testsupport.TestSupport;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import tools.jackson.databind.JsonNode;
@@ -56,7 +56,7 @@ class WiktionaryLexicalDataParserTest {
         POSVerbParser verbParser = new POSVerbParser(new CompoundInflectionGenerator(esseFormProvider), PARSER_SUPPORT);
         POSNounParser nounParser = new POSNounParser(PARSER_SUPPORT);
         POSAdjectiveParser adjectiveParser = new POSAdjectiveParser(PARSER_SUPPORT);
-        POSParticipleParser participleParser = new POSParticipleParser(PARSER_SUPPORT);
+        POSParticipleParser participleParser = new POSParticipleParser(PARSER_SUPPORT, new CompoundInflectionGenerator(esseFormProvider));
         POSNonInflectedFormParser nonInflectedFormParser = new POSNonInflectedFormParser(PARSER_SUPPORT);
 
         Map<POSParserKey, PartOfSpeechParser> posParsers = new EnumMap<>(POSParserKey.class);
@@ -330,7 +330,7 @@ class WiktionaryLexicalDataParserTest {
                 .orElseThrow(() -> new AssertionError("'sum' not found in staging"));
 
         assertEquals(PartOfSpeech.VERB, sumStaged.getPartOfSpeech());
-        String key = InflectionKey.joinConjugationParts(GrammaticalVoice.ACTIVE, GrammaticalMood.SUBJUNCTIVE, GrammaticalTense.PERFECT, GrammaticalPerson.FIRST, GrammaticalNumber.SINGULAR);
+        String key = InflectionKey.buildConjugationKey(GrammaticalVoice.ACTIVE, GrammaticalMood.SUBJUNCTIVE, GrammaticalTense.PERFECT, GrammaticalPerson.FIRST, GrammaticalNumber.SINGULAR);
         assertEquals("fuerim", sumStaged.getInflectionIndex().get(key).getForm());
 
     }
