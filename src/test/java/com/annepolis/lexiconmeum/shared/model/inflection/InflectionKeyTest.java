@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
+import static com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey.buildParticipleSetKey;
+import static com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey.buildVerbalNounParticipleSetKey;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class InflectionKeyTest {
@@ -63,6 +65,17 @@ class InflectionKeyTest {
     }
 
     @Test
+    void buildsValidVerbalNounKey(){
+        assertEquals(GrammaticalTense.SUPINE.name(), buildVerbalNounParticipleSetKey(GrammaticalTense.SUPINE));
+    }
+
+    @Test
+    void buildsValidParticipleKey(){
+        assertEquals("ACTIVE|FUTURE", buildParticipleSetKey(GrammaticalVoice.ACTIVE, GrammaticalTense.FUTURE));
+
+    }
+
+    @Test
     void buildsValidFirstPrincipalPartKey(){
         InflectionKey builder = new InflectionKey();
         String key = builder.buildFirstPrincipalPartKey();
@@ -81,5 +94,18 @@ class InflectionKeyTest {
         InflectionKey builder = new InflectionKey();
         String key = builder.buildThirdPrincipalPartKey();
         assertEquals("ACTIVE|INDICATIVE|PERFECT|FIRST|SINGULAR", key);
+    }
+
+    @Test
+    void buildsAgreementKey(){
+        Agreement.Builder  builder = new Agreement.Builder("test")
+                .addGender(GrammaticalGender.MASCULINE)
+                .addGender(GrammaticalGender.FEMININE)
+                .setDegree(GrammaticalDegree.POSITIVE)
+                .setNumber(GrammaticalNumber.SINGULAR)
+                .setGrammaticalCase(GrammaticalCase.ABLATIVE);
+
+        String key = InflectionKey.buildAgreementKey(builder.build());
+        assertEquals("ABLATIVE|SINGULAR|MASCULINE|FEMININE|POSITIVE", key);
     }
 }

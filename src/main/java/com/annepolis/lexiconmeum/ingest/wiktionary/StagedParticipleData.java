@@ -114,7 +114,7 @@ public class StagedParticipleData implements LinkableData{
                     compoundInflectionGenerator.generateAllGenderedCompoundForms(participleDeclensionSet);
 
             for (Conjugation genderedForm : genderedForms) {
-                builder.removeInflection(InflectionKey.joinConjugationParts(
+                builder.removeInflection(InflectionKey.buildConjugationKey(
                         genderedForm.getVoice(),
                         genderedForm.getMood(),
                         genderedForm.getTense(),

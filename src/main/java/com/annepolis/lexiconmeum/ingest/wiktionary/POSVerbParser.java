@@ -19,11 +19,14 @@ import org.springframework.stereotype.Component;
 import tools.jackson.databind.JsonNode;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataJsonKey.*;
+import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataKeyWord.GERUND;
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataKeyWord.SIGMATIC;
 import static com.annepolis.lexiconmeum.ingest.wiktionary.WiktionaryLexicalDataKeyWord.SUPINE;
 
@@ -82,7 +85,8 @@ public class POSVerbParser implements PartOfSpeechParser {
     }
 
     public void addInflections(LexemeBuilder lexemeBuilder, JsonNode formsNode) {
-        List<Participle> supineInflections = new ArrayList<>();
+        Map<GrammaticalTense, List<Participle>> verbalNounInflections = new EnumMap<>(GrammaticalTense.class);
+        verbalNounInflections.put(GrammaticalTense.SUPINE, new ArrayList<>());
 
         for (JsonNode formNode : formsNode) {
             try {
@@ -91,8 +95,10 @@ public class POSVerbParser implements PartOfSpeechParser {
                     String formValue = formNode.path(FORM.get()).asString();
                     List<String> tags = collectTags(formNode);
 
-                    if (isSupine(tags)) {
-                        supineInflections.add(buildSupineInflection(formValue, tags));
+                    if (isVerbalNoun(tags)) {
+                        GrammaticalTense verbalNounTense = getVerbalNounTense(tags);
+                        verbalNounInflections.computeIfAbsent(verbalNounTense, tense -> new ArrayList<>())
+                                .add(buildVerbalNounInflection(formValue, tags));
                         continue;
                     }
 
@@ -108,7 +114,7 @@ public class POSVerbParser implements PartOfSpeechParser {
             }
         }
 
-        addParticipleDeclensionSet(lexemeBuilder, supineInflections);
+        addVerbalNounDeclensionSets(lexemeBuilder, verbalNounInflections);
     }
 
     private void addInflection(LexemeBuilder lexemeBuilder, Optional<Conjugation> optionalConjugation){
@@ -217,14 +223,18 @@ public class POSVerbParser implements PartOfSpeechParser {
     }
 
 
-    // --------------------------------------- SUPINE METHODS ---------------------------------- //
+    // --------------------------------------- VERBAL NOUN METHODS ---------------------------------- //
 
-    private boolean isSupine(List<String> tags) {
-        return tags.contains(SUPINE.get());
+    private boolean isVerbalNoun(List<String> tags) {
+        return tags.contains(SUPINE.get()) || tags.contains(GERUND.get());
     }
 
-    private Participle buildSupineInflection(String formValue, List<String> tags){
-        // supine inflections apply to all genders but Wiktionary doesn't add gender tags to supine forms
+    private GrammaticalTense getVerbalNounTense(List<String> tags) {
+        return tags.contains(SUPINE.get()) ? GrammaticalTense.SUPINE : GrammaticalTense.GERUND;
+    }
+
+    private Participle buildVerbalNounInflection(String formValue, List<String> tags){
+        // Verbal nouns apply to all genders but Wiktionary doesn't add gender tags to their forms.
         for(GrammaticalGender gender : GrammaticalGender.values()){
             tags.add(gender.getTag());
         }
@@ -240,12 +250,20 @@ public class POSVerbParser implements PartOfSpeechParser {
         return builder.build();
     }
 
-    private void addParticipleDeclensionSet(LexemeBuilder lexemeBuilder, List<Participle> supineInflections) {
-        ParticipleDeclensionSet supineSet = ParticipleDeclensionSet.Builder.forSupine(lexemeBuilder.getLemma())
-                .addInflections(supineInflections)
-                .build();
+    private void addVerbalNounDeclensionSets(
+            LexemeBuilder lexemeBuilder,
+            Map<GrammaticalTense, List<Participle>> verbalNounInflections
+    ) {
+        VerbDetails.Builder verbDetailsBuilder = getVerbDetailsBuilder(lexemeBuilder);
+        for (Map.Entry<GrammaticalTense, List<Participle>> entry : verbalNounInflections.entrySet()) {
+            ParticipleDeclensionSet verbalNounSet = ParticipleDeclensionSet.Builder
+                    .forVerbalNoun(entry.getKey(), lexemeBuilder.getLemma())
+                    .addInflections(entry.getValue())
+                    .build();
+            verbDetailsBuilder.addParticipleSet(verbalNounSet);
+        }
 
-        lexemeBuilder.setPartOfSpeechDetails(getVerbDetailsBuilder(lexemeBuilder).addParticipleSet(supineSet).build());
+        lexemeBuilder.setPartOfSpeechDetails(verbDetailsBuilder.build());
     }
 
     private VerbDetails.Builder getVerbDetailsBuilder(LexemeBuilder lexemeBuilder) {
