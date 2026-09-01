@@ -16,14 +16,27 @@ api:
   base-path: /api/v1
 
 springdoc:
-  swagger-ui:
-    path: /api/v1/swagger-ui
   api-docs:
-    path: /api/v1/api-docs
+    enabled: false
+  swagger-ui:
+    enabled: false
 
 server:
   forward-headers-strategy: native
   port: 8085
+
+# Expose Actuator health api on separate loop-back port
+management:
+  server:
+    port: 8086
+    address: 127.0.0.1
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
 
 logging:
   level:
