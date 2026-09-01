@@ -287,8 +287,8 @@ class LexemeDetailControllerIntegrationTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(400, error.status());
         assertEquals("Bad Request", error.error());
-        assertTrue(error.message().contains("Invalid value 'NOT_A_REAL_TYPE'"));
-        assertTrue(error.message().contains("for 'type'"));
+        assertTrue(error.message().contains("Invalid value for parameter 'type'"));
+        assertFalse(error.message().contains("NOT_A_REAL_TYPE"));
         assertEquals(path + ApiRoutes.LEXEME_DETAIL.replace("{id}", lexemeId.toString()), error.path());
         assertNull(error.lexemeId());
     }
