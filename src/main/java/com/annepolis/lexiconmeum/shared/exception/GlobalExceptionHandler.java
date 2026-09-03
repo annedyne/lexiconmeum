@@ -37,8 +37,8 @@ public class GlobalExceptionHandler {
         if( expectedType == null){
             expectedType = Object.class;
         }
-        String message = "Invalid value '%s' for '%s'. Expected %s."
-                .formatted(ex.getValue(), ex.getName(), expectedType.getSimpleName());
+        String message = "Invalid value for parameter '%s'. Expected %s."
+                .formatted(ex.getName(), expectedType.getSimpleName());
 
         return buildErrorResponse(HttpStatus.BAD_REQUEST, message, request, null);
     }

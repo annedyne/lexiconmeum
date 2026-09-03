@@ -127,4 +127,3 @@ GET /api/v1/lexemes/autocomplete/prefix?prefix=am&limit=5
 - Keep release and deployment instructions here rather than in `README.md`
 - Update this document when branch names, server paths, or deployment steps change
 - If deployment moves away from `master`, revise both this file and `.github/workflows/deploy.yml`
-
