@@ -48,20 +48,15 @@ git checkout develop
 git pull origin develop
 ```
 
-### 2. Create the release branch
+### 2. Create the release branch and set the release version
 ```bash
 git checkout -b release/0.12.0
-git push origin release/0.12.0
-```
-
-### 3. Set the release version
-```bash
 mvn versions:set-property -Dproperty=revision -DnewVersion=0.12.0
 git commit -am "Prepare release 0.12.0"
-git push origin release/0.12.0
+git push -u origin release/0.12.0
 ```
 
-### 4. Open the release PR
+### 3. Open the release PR
 
 Open a pull request from:
 ```bash 
@@ -75,7 +70,7 @@ Recommended PR content:
 - deployment notes
 - known issues, if any
 
-### 5. Merge and tag the release
+### 4. Merge and tag the release
 
 After the PR is merged. Pushing the tag triggers the deploy workflow:
 ```bash
@@ -85,7 +80,7 @@ git tag -a v0.12.0 -m "Release 0.12.0"
 git push origin v0.12.0
 ```
 
-### 6. Bump `develop` to the next snapshot
+### 5. Bump `develop` to the next snapshot
 
 Use the next minor snapshot (patch is reserved for hotfixes). After a `0.12.0` release:
 ```bash
