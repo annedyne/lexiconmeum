@@ -1,10 +1,14 @@
 name: Deploy LexiconMeum Backend
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: "Version to build, without the leading v (e.g. 0.17.0)"
+        required: true
   push:
-    branches:
-      - master
+    tags:
+      - 'v*'
 
 jobs:
   deploy:
@@ -12,10 +16,38 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # A tag can be pushed onto any commit; only ship what is already on master.
+      - name: Verify tag is on master
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          git fetch --no-tags origin master
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" FETCH_HEAD; then
+            echo "Tag $GITHUB_REF_NAME is not on master. Refusing to deploy." >&2
+            exit 1
+          fi
+
+      # Tag pushes carry the version in the tag name; manual runs supply it as an input.
+      - name: Derive version
+        id: ver
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            REVISION="${{ inputs.revision }}"
+          else
+            REVISION="${GITHUB_REF_NAME#v}"
+          fi
+          if [ -z "$REVISION" ]; then
+            echo "Could not determine version to build." >&2
+            exit 1
+          fi
+          echo "Building version $REVISION"
+          echo "revision=$REVISION" >> $GITHUB_OUTPUT
 
       - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.5.3
+        uses: webfactory/ssh-agent@v0.10.0
         with:
           ssh-private-key: ${{ secrets.DEPLOY_KEY }}
 
@@ -25,7 +57,7 @@ jobs:
 
       - name: Build JAR with Maven
         run: |
-          mvn -B clean package -DskipTests
+          mvn -B clean package -DskipTests -Drevision=${{ steps.ver.outputs.revision }}
 
       - name: Get JAR path
         id: jar
