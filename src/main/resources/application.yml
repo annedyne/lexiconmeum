@@ -4,9 +4,9 @@ spring:
 
 app:
   load:
-    data-file: file:/opt/lexiconmeum/data/lexicalData.jsonl
-    override-file: classpath:lexicalDataOverrides.jsonl
-    parse-mode: LENIENT
+    data-file: ${APP_DATA_FILE:file:/opt/lexiconmeum/data/lexicalData.jsonl}
+    override-file: ${APP_OVERRIDE_FILE:classpath:lexicalDataOverrides.jsonl}
+    parse-mode: ${APP_PARSE_MODE:LENIENT}
 
   text-search:
     default-limit: 500
