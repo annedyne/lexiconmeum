@@ -14,3 +14,8 @@ app:
   load:
     data-file: ${APP_DATA_FILE:file:/opt/lexiconmeum/data/lexicalData.jsonl}
     parse-mode: LENIENT
+
+# Disable graceful shutdown locally so IDE stop terminates immediately,
+# even if a request is in flight during debugging.
+server:
+  shutdown: immediate

@@ -1,6 +1,10 @@
 spring:
   application:
     name: lexiconmeum
+  lifecycle:
+    # Max time to drain in-flight requests on shutdown.
+    # Must stay well under systemd TimeoutStopSec (90s) to avoid SIGKILL mid-drain.
+    timeout-per-shutdown-phase: 30s
 
 app:
   load:
@@ -24,6 +28,8 @@ springdoc:
 server:
   forward-headers-strategy: native
   port: 8085
+  # Stop accepting new connections, then let active requests finish before exit.
+  shutdown: graceful
 
 # Expose Actuator health api on separate loop-back port
 management:
