@@ -35,11 +35,14 @@ server:
 management:
   server:
     port: 8086
-    address: 127.0.0.1
+    # Host-specific. Defaults to loopback; on the VPS this is overridden to the
+    # k3s node internal IP (via MANAGEMENT_SERVER_ADDRESS in the systemd env
+    # file) so the in-cluster Prometheus pod can scrape /actuator/prometheus.
+    address: ${MANAGEMENT_SERVER_ADDRESS:127.0.0.1}
   endpoints:
     web:
       exposure:
-        include: health
+        include: health,prometheus
   endpoint:
     health:
       show-details: never
