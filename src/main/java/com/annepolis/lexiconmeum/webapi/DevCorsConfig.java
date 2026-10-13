@@ -25,7 +25,10 @@ public class DevCorsConfig {
             @Override
             public void addCorsMappings(@NonNull CorsRegistry registry) {
                 registry.addMapping("/api/**")
-                        .allowedOrigins("http://localhost:3000", "http://localhost:8081", "http://localhost:8080",
+                        .allowedOrigins("http://localhost:3000",
+                                "http://localhost:5173",
+                                "http://localhost:8080",
+                                "http://localhost:8081",
                                 "http://127.0.0.1:8080")
                         .allowCredentials(true)
                         .allowedMethods("GET", "OPTIONS");

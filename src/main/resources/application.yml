@@ -1,12 +1,16 @@
 spring:
   application:
     name: lexiconmeum
+  lifecycle:
+    # Max time to drain in-flight requests on shutdown.
+    # Must stay well under systemd TimeoutStopSec (90s) to avoid SIGKILL mid-drain.
+    timeout-per-shutdown-phase: 30s
 
 app:
   load:
-    data-file: file:/opt/lexiconmeum/data/lexicalData.jsonl
-    override-file: classpath:lexicalDataOverrides.jsonl
-    parse-mode: LENIENT
+    data-file: ${APP_DATA_FILE:file:/opt/lexiconmeum/data/lexicalData.jsonl}
+    override-file: ${APP_OVERRIDE_FILE:classpath:lexicalDataOverrides.jsonl}
+    parse-mode: ${APP_PARSE_MODE:LENIENT}
 
   text-search:
     default-limit: 500
@@ -24,16 +28,21 @@ springdoc:
 server:
   forward-headers-strategy: native
   port: 8085
+  # Stop accepting new connections, then let active requests finish before exit.
+  shutdown: graceful
 
 # Expose Actuator health api on separate loop-back port
 management:
   server:
     port: 8086
-    address: 127.0.0.1
+    # Host-specific. Defaults to loopback; on the VPS this is overridden to the
+    # k3s node internal IP (via MANAGEMENT_SERVER_ADDRESS in the systemd env
+    # file) so the in-cluster Prometheus pod can scrape /actuator/prometheus.
+    address: ${MANAGEMENT_SERVER_ADDRESS:127.0.0.1}
   endpoints:
     web:
       exposure:
-        include: health
+        include: health,prometheus
   endpoint:
     health:
       show-details: never
