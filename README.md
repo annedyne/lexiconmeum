@@ -63,6 +63,25 @@ The architecture separates source-data ingestion from API response assembly:
 
 See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for a more detailed walkthrough.
 
+## Deployment and operations
+
+The app runs as a systemd service behind nginx on a single VPS. GitHub Actions builds and deploys it.
+
+In place:
+
+- **Crash recovery and self-healing:** systemd restarts the process if it dies. An external watchdog polls `/actuator/health` and restarts the app if it stays unhealthy.
+- **Graceful shutdown:** on stop, in-flight requests get up to 30s to finish.
+- **Capacity planning:** the JVM heap is capped and swap is configured, leaving guaranteed headroom for other workloads.
+- **Metrics:** Micrometer exposes Prometheus metrics on a separate management port. Its bind address is set per environment.
+- **k3s:** a single-node cluster runs alongside the app. Kubelet reservations and eviction thresholds stop cluster workloads from starving the app.
+
+In progress:
+
+- Prometheus and Grafana on k3s, installed via Helm from declarative config. Prometheus scrapes the app as an out-of-cluster target.
+- Alerting on app health, error rates, and memory pressure.
+
+Ops configuration lives in a separate infrastructure repository. The app repo stays environment-agnostic, and the stack can be reinstalled on a new host from version-controlled config.
+
 ## Run locally
 
 ### Prerequisites

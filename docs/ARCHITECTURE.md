@@ -181,6 +181,18 @@ It also means:
 - scale is limited by process memory
 - persistence and refresh behavior are more constrained than in a database-backed design
 
+## Operational endpoints and observability
+
+Health and metrics are served on a separate management port.
+
+- **`/actuator/health`**: health signal for the host watchdog.
+- **`/actuator/prometheus`**: Micrometer metrics for Prometheus scraping.
+
+The management bind address is configurable via `${MANAGEMENT_SERVER_ADDRESS}`
+(default loopback).
+
+Graceful shutdown is enabled.
+
 ## Module map
 
 Quick lookup by responsibility:
