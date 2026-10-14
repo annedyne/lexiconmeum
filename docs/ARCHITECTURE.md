@@ -181,6 +181,31 @@ It also means:
 - scale is limited by process memory
 - persistence and refresh behavior are more constrained than in a database-backed design
 
+## Operational endpoints and observability
+
+Alongside the public API, the service exposes an operational surface for health
+checks and metrics. This runs on a **separate management port (8086)**, distinct
+from the application port, so operational traffic can be firewalled and routed
+independently of public API traffic.
+
+Exposed endpoints:
+
+- **`/actuator/health`** — liveness/readiness signal used by the host watchdog
+  and process supervision.
+- **`/actuator/prometheus`** — metrics in Prometheus exposition format, provided
+  by Micrometer, for scraping by a Prometheus instance.
+
+The management port's bind address is configurable via
+`${MANAGEMENT_SERVER_ADDRESS}` and defaults to loopback (`127.0.0.1`). In
+deployment it can be rebound to a reachable node address so an in-cluster
+metrics scraper can reach it, without hardcoding a host-specific address into
+committed config. Access is expected to be restricted at the network/firewall
+layer rather than by the application.
+
+The service also enables **graceful shutdown**: on stop it stops accepting new
+connections and drains in-flight requests within a bounded window before
+exiting (overridden to immediate termination in the `local`/`dev` profiles).
+
 ## Module map
 
 Quick lookup by responsibility:
@@ -202,6 +227,14 @@ Runtime configuration lives in `src/main/resources`:
 - `application-dev.yml`
 - `log4j2.properties`
 - `log4j2-dev.properties`
+
+Management/observability settings (management port, exposed Actuator endpoints,
+bind address, graceful-shutdown timeout) also live in `application.yml`; see
+*Operational endpoints and observability* above. The host-specific management
+bind address is supplied by the environment at deploy time, not committed.
+
+Other configuration files:
+
 - `lexicalDataOverrides.jsonl` (data override input, see Data overrides above)
 
 Tests use:
@@ -231,3 +264,4 @@ The overview flowchart in this document is the primary architecture diagram. It 
 - avoid coupling frontend response shapes to source-data quirks
 - favor small, local parser and mapper changes over broad abstractions
 - keep API changes intentional because the frontend depends on response shape
+- keep operational endpoints (health, metrics) on the separate management port and restricted at the network layer
