@@ -38,7 +38,7 @@ This lets the deploy workflow build a given version with `-Drevision=<version>` 
 
 Release preparation uses a non-SNAPSHOT version. Ongoing development on `develop` should move to the next `-SNAPSHOT` version after release.
 
-The patch (third) number is reserved for hotfixes. So after releasing `X.Y.0`, the develop bump is a minor bump to `X.(Y+1).0-SNAPSHOT` (for example, release `0.14.0` is followed by `0.15.0-SNAPSHOT`), not `X.Y.1-SNAPSHOT`.
+The patch (third) number is reserved for hotfixes. So after releasing `X.Y.0`, the develop bump is a minor bump to `X.(Y+1).0-SNAPSHOT` (for example, release `0.1.0` is followed by `0.2.0-SNAPSHOT`), not `X.Y.1-SNAPSHOT`.
 
 ## Release checklist
 
@@ -50,17 +50,17 @@ git pull origin develop
 
 ### 2. Create the release branch and set the release version
 ```bash
-git checkout -b release/0.12.0
-mvn versions:set-property -Dproperty=revision -DnewVersion=0.12.0
-git commit -am "Prepare release 0.12.0"
-git push -u origin release/0.12.0
+git checkout -b release/0.1.0
+mvn versions:set-property -Dproperty=revision -DnewVersion=0.1.0
+git commit -am "Prepare release 0.1.0"
+git push -u origin release/0.1.0
 ```
 
 ### 3. Open the release PR
 
 Open a pull request from:
 ```bash 
-release/0.12.0 -> master
+release/0.1.0 -> master
 ```
 
 Recommended PR content:
@@ -76,18 +76,31 @@ After the PR is merged. Pushing the tag triggers the deploy workflow:
 ```bash
 git checkout master
 git pull origin master
-git tag -a v0.12.0 -m "Release 0.12.0"
-git push origin v0.12.0
+git tag -a v0.1.0 -m "Release 0.1.0"
+git push origin v0.1.0
 ```
 
-### 5. Bump `develop` to the next snapshot
+### 5. Back-merge `master` into `develop`
 
-Use the next minor snapshot (patch is reserved for hotfixes). After a `0.12.0` release:
+Bring the release commits back into `develop` so the next release PR doesn't conflict on `<revision>`:
 ```bash
 git checkout develop
 git pull origin develop
-mvn versions:set-property -Dproperty=revision -DnewVersion=0.13.0-SNAPSHOT
-git commit -am "Bump to 0.13.0-SNAPSHOT"
+git checkout -b chore/back-merge-master-0.1.0
+git merge --no-ff origin/master -m "Merge master into develop after release 0.1.0"
+git push -u origin chore/back-merge-master-0.1.0
+```
+
+Open a PR to `develop` and merge it with a **merge commit** (not squash or rebase), or the ancestry is lost and the conflict returns.
+
+### 6. Bump `develop` to the next snapshot
+
+Use the next minor snapshot (patch is reserved for hotfixes). After a `0.1.0` release:
+```bash
+git checkout develop
+git pull origin develop
+mvn versions:set-property -Dproperty=revision -DnewVersion=0.2.0-SNAPSHOT
+git commit -am "Bump to 0.2.0-SNAPSHOT"
 git push origin develop
 ```
 
