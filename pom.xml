@@ -142,14 +142,12 @@
                 <artifactId>micrometer-registry-prometheus</artifactId>
             </dependency>
 
+            <!-- Log4j2 as the logging backend. Brings log4j-core plus the SLF4J and
+                 JUL bridges, so libraries that log via SLF4J or java.util.logging
+                 (e.g. Tomcat) end up in Log4j2 too. Our own code uses the Log4j API. -->
             <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-api</artifactId>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-core</artifactId>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-log4j2</artifactId>
             </dependency>
 
             <dependency>
