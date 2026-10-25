@@ -46,6 +46,15 @@ management:
   endpoint:
     health:
       show-details: never
+  metrics:
+    distribution:
+      # Publish histogram buckets so Grafana can compute p95/p99 latency.
+      percentiles-histogram:
+        "[http.server.requests]": true
+      # Extra buckets at the dashboard's latency thresholds (search 50/150ms,
+      # detail 200/500ms) so "% of requests under X" is exact.
+      slo:
+        "[http.server.requests]": 50ms,150ms,200ms,500ms
 
 logging:
   level:
