@@ -40,6 +40,27 @@ Release preparation uses a non-SNAPSHOT version. Ongoing development on `develop
 
 The patch (third) number is reserved for hotfixes. So after releasing `X.Y.0`, the develop bump is a minor bump to `X.(Y+1).0-SNAPSHOT` (for example, release `0.1.0` is followed by `0.2.0-SNAPSHOT`), not `X.Y.1-SNAPSHOT`.
 
+## Release script
+
+`scripts/release.sh` automates the checklist below (also available as `make release`):
+
+```bash
+scripts/release.sh [--from STEP] [NEXT_VERSION]
+make release [NEXT=0.22.0] [FROM=tag]
+```
+
+- The release version is always the `revision` in `origin/develop`'s `pom.xml`, minus `-SNAPSHOT`.
+- `NEXT_VERSION` is the next development version as `X.Y.Z`; the script appends `-SNAPSHOT`. If omitted, it prompts for it at the bump step.
+- Steps, in order: `branch` → `release-pr` → `tag` → `back-merge` → `bump` (checklist steps 2–6).
+- At each PR it opens (via `gh`), it pauses with a y/n prompt until you have merged it. Answering `n` or a failure exits with the `--from` command to resume.
+- Before making changes it checks for a clean working tree, an authenticated `gh`, a `-SNAPSHOT` revision, and that the release branch and tag do not already exist.
+- The release PR body comes from GitHub's generated release notes since the previous tag; after tagging, it creates a GitHub Release with `--generate-notes`.
+- Release and back-merge PRs are labelled `skip-changelog`, which `.github/release.yml` excludes from generated notes.
+- After the back-merge PR merges, it verifies `master` is an ancestor of `develop` (catches squash/rebase merges).
+- It does not watch the deploy workflow; run the [post-deploy checks](#post-deploy-checks) yourself.
+
+The manual checklist below documents what the script does and is the fallback if it cannot be used.
+
 ## Release checklist
 
 ### 1. Sync `develop`
@@ -146,4 +167,5 @@ GET /api/v1/lexemes/autocomplete/prefix?prefix=am&limit=5
 
 - Keep release and deployment instructions here rather than in `README.md`
 - Update this document when branch names, server paths, or deployment steps change
+- Keep `scripts/release.sh` in sync with the release checklist
 - If deployment moves away from `v*` tags on `master`, revise both this file and `.github/workflows/deploy.yml`
