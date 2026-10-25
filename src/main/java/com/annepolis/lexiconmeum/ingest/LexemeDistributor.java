@@ -3,8 +3,8 @@ package com.annepolis.lexiconmeum.ingest;
 import com.annepolis.lexiconmeum.ingest.wiktionary.DataLinkingService;
 import com.annepolis.lexiconmeum.shared.LexemeSink;
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -36,7 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Service
 public class LexemeDistributor implements IngestLexemeUseCase {
-    private static final Logger logger = LoggerFactory.getLogger(LexemeDistributor.class);
+    private static final Logger logger = LogManager.getLogger(LexemeDistributor.class);
     
     private final List<LexemeSink> sinks;
 
