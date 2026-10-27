@@ -1,7 +1,6 @@
 package com.annepolis.lexiconmeum.webapi.bff.lexemedetail;
 
 import com.annepolis.lexiconmeum.ingest.wiktionary.JsonTestDataManager;
-import com.annepolis.lexiconmeum.shared.exception.ErrorResponse;
 import com.annepolis.lexiconmeum.shared.model.LexemeBuilder;
 import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 import com.annepolis.lexiconmeum.webapi.ApiRoutes;
@@ -13,15 +12,20 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.UUID;
 
+import static com.annepolis.lexiconmeum.webapi.ApiResponseKeys.*;
+import static com.annepolis.lexiconmeum.webapi.ApiRoutes.LEXEME_ID_PARAM;
+import static com.annepolis.lexiconmeum.webapi.ApiRoutes.TYPE_PARAM;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -48,8 +52,12 @@ class LexemeDetailControllerIntegrationTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private ErrorResponse readErrorResponse(ResponseEntity<String> response) {
-        return objectMapper.readValue(response.getBody(), ErrorResponse.class);
+    private JsonNode readProblemDetail(ResponseEntity<String> response) {
+        MediaType contentType = response.getHeaders().getContentType();
+        assertNotNull(contentType, "Error response should have a Content-Type");
+        assertTrue(MediaType.APPLICATION_PROBLEM_JSON.isCompatibleWith(contentType),
+                "Error response should be application/problem+json but was " + contentType);
+        return objectMapper.readTree(response.getBody());
     }
 
     @Test
@@ -60,7 +68,7 @@ class LexemeDetailControllerIntegrationTest {
         String url = UriComponentsBuilder
                 .fromUriString(getFullBaseUrl())
                 .path(ApiRoutes.LEXEMES)
-                .queryParam("lexemeId", lexemeId.toString())
+                .queryParam(LEXEME_ID_PARAM, lexemeId.toString())
                 .toUriString();
 
         ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
@@ -79,7 +87,7 @@ class LexemeDetailControllerIntegrationTest {
         String url = UriComponentsBuilder
                 .fromUriString(getFullBaseUrl())
                 .path(ApiRoutes.LEXEMES)
-                .queryParam("lexemeId", lexemeId.toString())
+                .queryParam(LEXEME_ID_PARAM, lexemeId.toString())
                 .toUriString();
 
         ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
@@ -139,7 +147,7 @@ class LexemeDetailControllerIntegrationTest {
         String url = UriComponentsBuilder
                 .fromUriString(getFullBaseUrl())
                 .path(ApiRoutes.LEXEME_DETAIL)
-                .queryParam("type", "VERB")
+                .queryParam(TYPE_PARAM, PartOfSpeech.VERB.name())
                 .buildAndExpand(lexemeId)
                 .toUriString();
 
@@ -159,7 +167,7 @@ class LexemeDetailControllerIntegrationTest {
         String url = UriComponentsBuilder
                 .fromUriString(getFullBaseUrl())
                 .path(ApiRoutes.LEXEME_DETAIL)
-                .queryParam("type", "VERB")
+                .queryParam(TYPE_PARAM, PartOfSpeech.VERB.name())
                 .buildAndExpand(lexemeId)
                 .toUriString();
 
@@ -181,7 +189,7 @@ class LexemeDetailControllerIntegrationTest {
         String url = UriComponentsBuilder
                 .fromUriString(getFullBaseUrl())
                 .path(ApiRoutes.LEXEME_DETAIL)
-                .queryParam("type", "VERB")
+                .queryParam(TYPE_PARAM, PartOfSpeech.VERB.name())
                 .buildAndExpand(lexemeId)
                 .toUriString();
 
@@ -204,7 +212,7 @@ class LexemeDetailControllerIntegrationTest {
         String url = UriComponentsBuilder
                 .fromUriString(getFullBaseUrl())
                 .path(ApiRoutes.LEXEME_DETAIL)
-                .queryParam("type", "VERB")
+                .queryParam(TYPE_PARAM, PartOfSpeech.VERB.name())
                 .buildAndExpand(lexemeId)
                 .toUriString();
 
@@ -229,19 +237,20 @@ class LexemeDetailControllerIntegrationTest {
         String url = UriComponentsBuilder
                 .fromUriString(getFullBaseUrl())
                 .path(ApiRoutes.LEXEME_DETAIL)
-                .queryParam("type", "VERB")
+                .queryParam(TYPE_PARAM, PartOfSpeech.VERB.name())
                 .buildAndExpand(lexemeId)
                 .toUriString();
 
         ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
-        ErrorResponse error = readErrorResponse(response);
+        JsonNode error = readProblemDetail(response);
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals(409, error.status());
-        assertEquals("Conflict", error.error());
-        assertEquals("Type mismatch for lexeme 7842cc92-0202-3bd0-92e0-6df4d9dcfa30: Expected VERB but got NOUN", error.message());
-        assertEquals(path + ApiRoutes.LEXEME_DETAIL.replace("{id}", lexemeId.toString()), error.path());
-        assertEquals(lexemeId.toString(), error.lexemeId());    }
+        assertEquals(HttpStatus.CONFLICT.value(), error.path(PROBLEM_STATUS).asInt());
+        assertEquals(HttpStatus.CONFLICT.getReasonPhrase(), error.path(PROBLEM_TITLE).asString());
+        assertEquals("Type mismatch for lexeme 7842cc92-0202-3bd0-92e0-6df4d9dcfa30: Expected VERB but got NOUN", error.path(PROBLEM_DETAIL).asString());
+        assertEquals(path + ApiRoutes.LEXEME_DETAIL.replace("{id}", lexemeId.toString()), error.path(PROBLEM_INSTANCE).asString());
+        assertEquals(lexemeId.toString(), error.path(LEXEME_ID).asString());
+    }
 
     @Test
     void testMissingLexemeReturnsNotFound() {
@@ -261,36 +270,37 @@ class LexemeDetailControllerIntegrationTest {
         assertTrue(body.contains("Lexeme not found"), "Body should contain the error message");
         assertTrue(body.contains(nonExistentId.toString()), "Body should contain the element ID");
 
-        ErrorResponse error = readErrorResponse(response);
-        assertEquals(404, error.status());
-        assertEquals("Not Found", error.error());
-        assertEquals("Lexeme not found", error.message());
-        assertEquals(path + ApiRoutes.LEXEME_DETAIL.replace("{id}", nonExistentId.toString()), error.path());
-        assertEquals(nonExistentId.toString(), error.lexemeId());
+        JsonNode error = readProblemDetail(response);
+        assertEquals(HttpStatus.NOT_FOUND.value(), error.path(PROBLEM_STATUS).asInt());
+        assertEquals(HttpStatus.NOT_FOUND.getReasonPhrase(), error.path(PROBLEM_TITLE).asString());
+        assertEquals("Lexeme not found", error.path(PROBLEM_DETAIL).asString());
+        assertEquals(path + ApiRoutes.LEXEME_DETAIL.replace("{id}", nonExistentId.toString()), error.path(PROBLEM_INSTANCE).asString());
+        assertEquals(nonExistentId.toString(), error.path(LEXEME_ID).asString());
     }
 
     @Test
     void testInvalidTypeParameterReturnsBadRequest() {
         LexemeBuilder lexemeBuilder = new LexemeBuilder("amo", PartOfSpeech.VERB, "1");
         UUID lexemeId = lexemeBuilder.build().getId();
+        String rejectedType = "NOT_A_REAL_TYPE";
 
         String url = UriComponentsBuilder
                 .fromUriString(getFullBaseUrl())
                 .path(ApiRoutes.LEXEME_DETAIL)
-                .queryParam("type", "NOT_A_REAL_TYPE")
+                .queryParam(TYPE_PARAM, rejectedType)
                 .buildAndExpand(lexemeId)
                 .toUriString();
 
         ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
-        ErrorResponse error = readErrorResponse(response);
+        JsonNode error = readProblemDetail(response);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals(400, error.status());
-        assertEquals("Bad Request", error.error());
-        assertTrue(error.message().contains("Invalid value for parameter 'type'"));
-        assertFalse(error.message().contains("NOT_A_REAL_TYPE"));
-        assertEquals(path + ApiRoutes.LEXEME_DETAIL.replace("{id}", lexemeId.toString()), error.path());
-        assertNull(error.lexemeId());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), error.path(PROBLEM_STATUS).asInt());
+        assertEquals(HttpStatus.BAD_REQUEST.getReasonPhrase(), error.path(PROBLEM_TITLE).asString());
+        assertTrue(error.path(PROBLEM_DETAIL).asString().contains("Invalid value for parameter 'type'"));
+        assertFalse(response.getBody().contains(rejectedType), "Body must not echo the rejected value");
+        assertEquals(path + ApiRoutes.LEXEME_DETAIL.replace("{id}", lexemeId.toString()), error.path(PROBLEM_INSTANCE).asString());
+        assertFalse(error.has(LEXEME_ID));
     }
 
     @Test
@@ -301,33 +311,35 @@ class LexemeDetailControllerIntegrationTest {
                 .toUriString();
 
         ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
-        ErrorResponse error = readErrorResponse(response);
+        JsonNode error = readProblemDetail(response);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals(400, error.status());
-        assertEquals("Bad Request", error.error());
-        assertEquals("Missing required parameter 'lexemeId'.", error.message());
-        assertEquals(path + ApiRoutes.LEXEMES, error.path());
-        assertNull(error.lexemeId());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), error.path(PROBLEM_STATUS).asInt());
+        assertEquals(HttpStatus.BAD_REQUEST.getReasonPhrase(), error.path(PROBLEM_TITLE).asString());
+        assertEquals("Missing required parameter 'lexemeId'.", error.path(PROBLEM_DETAIL).asString());
+        assertEquals(path + ApiRoutes.LEXEMES, error.path(PROBLEM_INSTANCE).asString());
+        assertFalse(error.has(LEXEME_ID));
     }
 
 
     @Test
     void testInvalidLexemeIdFormatReturnsBadRequest() {
+        String rejectedId = "not-a-uuid";
         String url = UriComponentsBuilder
                 .fromUriString(getFullBaseUrl())
                 .path(ApiRoutes.LEXEMES)
-                .queryParam("lexemeId", "not-a-uuid")
+                .queryParam(LEXEME_ID_PARAM, rejectedId)
                 .toUriString();
 
         ResponseEntity<String> response = restClient.get().uri(url).retrieve().toEntity(String.class);
-        ErrorResponse error = readErrorResponse(response);
+        JsonNode error = readProblemDetail(response);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals(400, error.status());
-        assertEquals("Bad Request", error.error());
-        assertNotNull(error.message());
-        assertEquals(path + ApiRoutes.LEXEMES, error.path());
-        assertNull(error.lexemeId());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), error.path(PROBLEM_STATUS).asInt());
+        assertEquals(HttpStatus.BAD_REQUEST.getReasonPhrase(), error.path(PROBLEM_TITLE).asString());
+        assertTrue(error.hasNonNull(PROBLEM_DETAIL));
+        assertFalse(response.getBody().contains(rejectedId), "Body must not echo the rejected value");
+        assertEquals(path + ApiRoutes.LEXEMES, error.path(PROBLEM_INSTANCE).asString());
+        assertFalse(error.has(LEXEME_ID));
     }
 }
