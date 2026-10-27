@@ -12,4 +12,8 @@ public class ApiRoutes {
     public static final String SUFFIX = LEXEMES + AUTOCOMPLETE + "/suffix";
 
     public static final String LEXEME_DETAIL = LEXEMES + "/{id}/detail";
+
+    // Query parameter names
+    public static final String LEXEME_ID_PARAM = "lexemeId";
+    public static final String TYPE_PARAM = "type";
 }
