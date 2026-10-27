@@ -18,6 +18,8 @@ import java.util.UUID;
 
 import static com.annepolis.lexiconmeum.webapi.ApiRoutes.LEXEMES;
 import static com.annepolis.lexiconmeum.webapi.ApiRoutes.LEXEME_DETAIL;
+import static com.annepolis.lexiconmeum.webapi.ApiRoutes.LEXEME_ID_PARAM;
+import static com.annepolis.lexiconmeum.webapi.ApiRoutes.TYPE_PARAM;
 
 @RestController
 @RequestMapping("${api.base-path}")
@@ -43,7 +45,7 @@ class LexemeDetailController {
     @GetMapping(LEXEME_DETAIL)
     ResponseEntity<LexemeDetailResponse> getLexemeDetail(
         @PathVariable UUID id,
-        @RequestParam(name = "type", required = false) PartOfSpeech expectedType
+        @RequestParam(name = TYPE_PARAM, required = false) PartOfSpeech expectedType
 ) {
     Lexeme lexeme = findLexeme(id);
 
@@ -60,7 +62,7 @@ class LexemeDetailController {
         summary = "Get raw lexeme model by ID",
         description = "Returns the raw lexeme domain model as JSON. This endpoint is primarily intended for inspection, debugging, and comparison with the curated lexeme detail response, rather than for direct presentation in clients."
 )
-    Lexeme getLexeme(@RequestParam UUID lexemeId){
+    Lexeme getLexeme(@RequestParam(name = LEXEME_ID_PARAM) UUID lexemeId){
         logger.debug("fetching lexeme: {}", lexemeId);
         Lexeme lexeme = findLexeme(lexemeId);
 
