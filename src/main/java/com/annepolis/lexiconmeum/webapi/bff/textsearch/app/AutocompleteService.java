@@ -1,8 +1,11 @@
 package com.annepolis.lexiconmeum.webapi.bff.textsearch.app;
 
 import com.annepolis.lexiconmeum.shared.LexemeReader;
+import com.annepolis.lexiconmeum.shared.model.Lexeme;
 import com.annepolis.lexiconmeum.webapi.bff.textsearch.domain.FormMatch;
 import com.annepolis.lexiconmeum.webapi.bff.textsearch.index.AutocompleteIndex;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Comparator;
@@ -10,6 +13,8 @@ import java.util.List;
 import java.util.Optional;
 
 public class AutocompleteService implements AutocompleteUseCase {
+
+    static final Logger logger = LogManager.getLogger(AutocompleteService.class);
 
     private final AutocompleteIndex index;
     private final SuggestionMapper suggestionMapper;
@@ -48,11 +53,17 @@ public class AutocompleteService implements AutocompleteUseCase {
                         && match.lexemeId() != null)
                 .sorted(Comparator.comparing(match -> match.form().toLowerCase()))
                 .map(match -> lexemeReader.getLexemeIfPresent(match.lexemeId())
-                        .map(lexeme ->
-                            suggestionMapper.toResponse(match.form(), match.lexemeId(), lexeme.getPartOfSpeech(),
-                                    suggestionParentExtractor.getSuggestionParent(lexeme))
-                        ))
+                        .flatMap(lexeme -> toSuggestionResponse(match, lexeme)))
                 .flatMap(Optional::stream)
                 .toList();
+    }
+
+    private Optional<SuggestionResponse> toSuggestionResponse(FormMatch match, Lexeme lexeme) {
+        Optional<String> parent = suggestionParentExtractor.getSuggestionParent(lexeme);
+        if (parent.isEmpty()) {
+            logger.debug("Skipping suggestion '{}': no suggestion parent for {}", match.form(), lexeme);
+        }
+        return parent.map(p ->
+                suggestionMapper.toResponse(match.form(), match.lexemeId(), lexeme.getPartOfSpeech(), p));
     }
 }
