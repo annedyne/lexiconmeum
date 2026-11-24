@@ -2,8 +2,10 @@ package com.annepolis.lexiconmeum.webapi.bff.textsearch.app;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
 
+import java.util.Optional;
+
 public interface SuggestionParentExtractor {
 
-    String getSuggestionParent(Lexeme lexeme);
+    Optional<String> getSuggestionParent(Lexeme lexeme);
 
 }

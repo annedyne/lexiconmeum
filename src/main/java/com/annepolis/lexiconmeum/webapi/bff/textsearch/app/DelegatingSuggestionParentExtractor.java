@@ -5,6 +5,7 @@ import com.annepolis.lexiconmeum.shared.model.grammar.partofspeech.PartOfSpeech;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 public class DelegatingSuggestionParentExtractor implements SuggestionParentExtractor {
 
@@ -14,7 +15,7 @@ public class DelegatingSuggestionParentExtractor implements SuggestionParentExtr
         this.suggestionParentExtractors = Map.copyOf(suggestionParentExtractorMap);
     }
     @Override
-    public String getSuggestionParent(Lexeme lexeme) {
+    public Optional<String> getSuggestionParent(Lexeme lexeme) {
         Objects.requireNonNull(lexeme, "lexeme must not be null");
         PartOfSpeech partOfSpeech =
                 Objects.requireNonNull(lexeme.getPartOfSpeech(), "lexeme.partOfSpeech must not be null");

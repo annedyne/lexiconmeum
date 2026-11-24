@@ -1,8 +1,11 @@
 package com.annepolis.lexiconmeum.webapi.bff.textsearch.app;
 
 import com.annepolis.lexiconmeum.shared.model.Lexeme;
+import com.annepolis.lexiconmeum.shared.model.inflection.Inflection;
 import com.annepolis.lexiconmeum.shared.model.inflection.InflectionKey;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @Component
 public class VerbSuggestionParentExtractor implements SuggestionParentExtractor {
@@ -13,8 +16,9 @@ public class VerbSuggestionParentExtractor implements SuggestionParentExtractor 
     }
 
     @Override
-    public String getSuggestionParent(Lexeme lexeme) {
+    public Optional<String> getSuggestionParent(Lexeme lexeme) {
         String key = inflectionKey.buildSecondPrincipalPartKey();
-        return lexeme.getInflectionIndex().get(key).getForm();
+        return Optional.ofNullable(lexeme.getInflectionIndex().get(key))
+                .map(Inflection::getForm);
     }
 }
